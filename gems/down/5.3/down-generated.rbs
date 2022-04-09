@@ -219,11 +219,11 @@ module Down
   # Provides streaming downloads implemented with HTTP.rb.
   class Http < Backend
     # Initializes the backend with common defaults.
-    def initialize: (**untyped options) { () -> untyped } -> void
+    def initialize: (**untyped options) ?{ () -> untyped } -> void
 
     # Downlods the remote file to disk. Accepts HTTP.rb options via a hash or a
     # block, and some additional options as well.
-    def download: (untyped url, ?max_size: untyped? max_size, ?progress_proc: untyped? progress_proc, ?content_length_proc: untyped? content_length_proc, ?destination: untyped? destination, ?extension: untyped? extension, **untyped options) { () -> untyped } -> untyped
+    def download: (untyped url, ?max_size: untyped? max_size, ?progress_proc: untyped? progress_proc, ?content_length_proc: untyped? content_length_proc, ?destination: untyped? destination, ?extension: untyped? extension, **untyped options) ?{ () -> untyped } -> untyped
 
     # Starts retrieving the remote file and returns an IO-like object which
     # downloads the response body on-demand. Accepts HTTP.rb options via a hash
