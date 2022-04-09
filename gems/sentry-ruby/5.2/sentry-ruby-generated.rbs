@@ -12,6 +12,14 @@ module Sentry
   # @!visibility private
   def self.exception_locals_tp: () -> untyped
 
+  # @!attribute [rw] background_worker
+  #   @return [BackgroundWorker]
+  attr_accessor self.background_worker: untyped
+
+  # @!attribute [r] session_flusher
+  #   @return [SessionFlusher]
+  attr_reader self.session_flusher: untyped
+
   # @!visibility private
   def self.register_patch: () { () -> untyped } -> untyped
 
@@ -37,6 +45,32 @@ module Sentry
   # @!method configuration
   #   @!macro configuration
   def self.configuration: () -> (nil | untyped)
+
+  # @!method send_event
+  #   @!macro send_event
+  def self.send_event: (*untyped args) -> (nil | untyped)
+
+  # @!method set_tags
+  #   @!macro set_tags
+  def self.set_tags: (*untyped args) -> (nil | untyped)
+
+  # @!method set_extras
+  #   @!macro set_extras
+  def self.set_extras: (*untyped args) -> (nil | untyped)
+
+  # @!method set_user
+  #   @!macro set_user
+  def self.set_user: (*untyped args) -> (nil | untyped)
+
+  # @!method set_context
+  #   @!macro set_context
+  def self.set_context: (*untyped args) -> (nil | untyped)
+
+  # Initializes the SDK with given configuration.
+  #
+  # @yieldparam config [Configuration]
+  # @return [void]
+  def self.init: () { (untyped) -> untyped } -> untyped
 
   # Returns true if the SDK is initialized.
   #
@@ -84,6 +118,41 @@ module Sentry
   # @return [void]
   def self.clone_hub_to_current_thread: () -> untyped
 
+  # Takes a block and yields the current active scope.
+  #
+  # @example
+  #   Sentry.configure_scope do |scope|
+  #     scope.set_tags(foo: "bar")
+  #   end
+  #
+  #   Sentry.capture_message("test message") # this event will have tags { foo: "bar" }
+  #
+  # @yieldparam scope [Scope]
+  # @return [void]
+  def self.configure_scope: () { () -> untyped } -> (nil | untyped)
+
+  # Takes a block and yields a temporary scope.
+  # The temporary scope will inherit all the attributes from the current active scope and replace it to be the active
+  # scope inside the block.
+  #
+  # @example
+  #   Sentry.configure_scope do |scope|
+  #     scope.set_tags(foo: "bar")
+  #   end
+  #
+  #   Sentry.capture_message("test message") # this event will have tags { foo: "bar" }
+  #
+  #   Sentry.with_scope do |temp_scope|
+  #     temp_scope.set_tags(foo: "baz")
+  #     Sentry.capture_message("test message 2") # this event will have tags { foo: "baz" }
+  #   end
+  #
+  #   Sentry.capture_message("test message 3") # this event will have tags { foo: "bar" }
+  #
+  # @yieldparam scope [Scope]
+  # @return [void]
+  def self.with_scope: () { () -> untyped } -> (nil | untyped)
+
   # Wrap a given block with session tracking.
   # Aggregate sessions in minutely buckets will be recorded
   # around this block and flushed every minute.
@@ -100,6 +169,23 @@ module Sentry
   #   end
   # @return [void]
   def self.with_session_tracking: () { () -> untyped } -> untyped
+
+  # Takes an exception and reports it to Sentry via the currently active hub.
+  #
+  # @yieldparam scope [Scope]
+  # @return [Event, nil]
+  def self.capture_exception: (untyped exception, **untyped options) { () -> untyped } -> (nil | untyped)
+
+  # Takes a message string and reports it to Sentry via the currently active hub.
+  #
+  # @yieldparam scope [Scope]
+  # @return [Event, nil]
+  def self.capture_message: (untyped message, **untyped options) { () -> untyped } -> (nil | untyped)
+
+  # Takes an instance of Sentry::Event and dispatches it to the currently active hub.
+  #
+  # @return [Event, nil]
+  def self.capture_event: (untyped event) -> (nil | untyped)
 
   # Takes or initializes a new Sentry::Transaction and makes a sampling decision for it.
   #
@@ -127,6 +213,32 @@ module Sentry
 
   # @!visibility private
   def self.utc_now: () -> untyped
+end
+
+module Sentry
+  class BackgroundWorker
+    include LoggingHelper
+
+    attr_reader max_queue: untyped
+
+    attr_reader number_of_threads: untyped
+
+    # @deprecated Use Sentry.logger to retrieve the current logger instead.
+    attr_reader logger: untyped
+
+    attr_accessor shutdown_timeout: untyped
+
+    def initialize: (untyped configuration) -> void
+
+    # if you want to monkey-patch this method, please override `_perform` instead
+    def perform: () { () -> untyped } -> untyped
+
+    def shutdown: () -> untyped
+
+    private
+
+    def _perform: () { () -> untyped } -> untyped
+  end
 end
 
 module Sentry
@@ -349,6 +461,259 @@ end
 
 module Sentry
   class Configuration
+    include CustomInspection
+
+    include LoggingHelper
+
+    # Directories to be recognized as part of your app. e.g. if you
+    # have an `engines` dir at the root of your project, you may want
+    # to set this to something like /(app|config|engines|lib)/
+    #
+    # @return [Regexp, nil]
+    attr_accessor app_dirs_pattern: untyped
+
+    # Provide an object that responds to `call` to send events asynchronously.
+    # E.g.: lambda { |event| Thread.new { Sentry.send_event(event) } }
+    #
+    # @deprecated It will be removed in the next major release. Please read https://github.com/getsentry/sentry-ruby/issues/1522 for more information
+    # @return [Proc, nil]
+    attr_reader async: untyped
+
+    # to send events in a non-blocking way, sentry-ruby has its own background worker
+    # by default, the worker holds a thread pool that has [the number of processors] threads
+    # but you can configure it with this configuration option
+    # E.g.: config.background_worker_threads = 5
+    #
+    # if you want to send events synchronously, set the value to 0
+    # E.g.: config.background_worker_threads = 0
+    # @return [Integer]
+    attr_accessor background_worker_threads: untyped
+
+    # a proc/lambda that takes an array of stack traces
+    # it'll be used to silence (reduce) backtrace of the exception
+    #
+    # @example
+    #   config.backtrace_cleanup_callback = lambda do |backtrace|
+    #     Rails.backtrace_cleaner.clean(backtrace)
+    #   end
+    #
+    # @return [Proc, nil]
+    attr_accessor backtrace_cleanup_callback: untyped
+
+    # Optional Proc, called before adding the breadcrumb to the current scope
+    # @example
+    #   config.before = lambda do |breadcrumb, hint|
+    #     breadcrumb.message = 'a'
+    #     breadcrumb
+    #   end
+    # @return [Proc]
+    attr_reader before_breadcrumb: untyped
+
+    # Optional Proc, called before sending an event to the server
+    # @example
+    #   config.before_send = lambda do |event, hint|
+    #     # skip ZeroDivisionError exceptions
+    #     # note: hint[:exception] would be a String if you use async callback
+    #     if hint[:exception].is_a?(ZeroDivisionError)
+    #       nil
+    #     else
+    #       event
+    #     end
+    #   end
+    # @return [Proc]
+    attr_reader before_send: untyped
+
+    # An array of breadcrumbs loggers to be used. Available options are:
+    # - :sentry_logger
+    # - :http_logger
+    # - :redis_logger
+    #
+    # And if you also use sentry-rails:
+    # - :active_support_logger
+    # - :monotonic_active_support_logger
+    #
+    # @return [Array<Symbol>]
+    attr_reader breadcrumbs_logger: untyped
+
+    # Whether to capture local variables from the raised exception's frame. Default is false.
+    # @return [Boolean]
+    attr_accessor capture_exception_frame_locals: untyped
+
+    # Max number of breadcrumbs a breadcrumb buffer can hold
+    # @return [Integer]
+    attr_accessor max_breadcrumbs: untyped
+
+    # Number of lines of code context to capture, or nil for none
+    # @return [Integer, nil]
+    attr_accessor context_lines: untyped
+
+    # RACK_ENV by default.
+    # @return [String]
+    attr_reader environment: untyped
+
+    # Whether the SDK should run in the debugging mode. Default is false.
+    # If set to true, SDK errors will be logged with backtrace
+    # @return [Boolean]
+    attr_accessor debug: untyped
+
+    # the dsn value, whether it's set via `config.dsn=` or `ENV["SENTRY_DSN"]`
+    # @return [String]
+    attr_reader dsn: untyped
+
+    # Whitelist of enabled_environments that will send notifications to Sentry. Array of Strings.
+    # @return [Array<String>]
+    attr_accessor enabled_environments: untyped
+
+    # Logger 'progname's to exclude from breadcrumbs
+    # @return [Array<String>]
+    attr_accessor exclude_loggers: untyped
+
+    # Array of exception classes that should never be sent. See IGNORE_DEFAULT.
+    # You should probably append to this rather than overwrite it.
+    # @return [Array<String>]
+    attr_accessor excluded_exceptions: untyped
+
+    # Boolean to check nested exceptions when deciding if to exclude. Defaults to true
+    # @return [Boolean]
+    attr_accessor inspect_exception_causes_for_exclusion: untyped
+
+    alias inspect_exception_causes_for_exclusion? inspect_exception_causes_for_exclusion
+
+    # You may provide your own LineCache for matching paths with source files.
+    # This may be useful if you need to get source code from places other than the disk.
+    # @see LineCache
+    # @return [LineCache]
+    attr_accessor linecache: untyped
+
+    # Logger used by Sentry. In Rails, this is the Rails logger, otherwise
+    # Sentry provides its own Sentry::Logger.
+    # @return [Logger]
+    attr_accessor logger: untyped
+
+    # Project directory root for in_app detection. Could be Rails root, etc.
+    # Set automatically for Rails.
+    # @return [String]
+    attr_accessor project_root: untyped
+
+    # Insert sentry-trace to outgoing requests' headers
+    # @return [Boolean]
+    attr_accessor propagate_traces: untyped
+
+    # Array of rack env parameters to be included in the event sent to sentry.
+    # @return [Array<String>]
+    attr_accessor rack_env_whitelist: untyped
+
+    # Release tag to be passed with every event sent to Sentry.
+    # We automatically try to set this to a git SHA or Capistrano release.
+    # @return [String]
+    attr_accessor release: untyped
+
+    # The sampling factor to apply to events. A value of 0.0 will not send
+    # any events, and a value of 1.0 will send 100% of events.
+    # @return [Float]
+    attr_accessor sample_rate: untyped
+
+    # Include module versions in reports - boolean.
+    # @return [Boolean]
+    attr_accessor send_modules: untyped
+
+    # When send_default_pii's value is false (default), sensitive information like
+    # - user ip
+    # - user cookie
+    # - request body
+    # - query string
+    # will not be sent to Sentry.
+    # @return [Boolean]
+    attr_accessor send_default_pii: untyped
+
+    # Allow to skip Sentry emails within rake tasks
+    # @return [Boolean]
+    attr_accessor skip_rake_integration: untyped
+
+    # IP ranges for trusted proxies that will be skipped when calculating IP address.
+    attr_accessor trusted_proxies: untyped
+
+    # @return [String]
+    attr_accessor server_name: untyped
+
+    # Return a Transport::Configuration object for transport-related configurations.
+    # @return [Transport]
+    attr_reader transport: untyped
+
+    # Take a float between 0.0 and 1.0 as the sample rate for tracing events (transactions).
+    # @return [Float]
+    attr_accessor traces_sample_rate: untyped
+
+    # Take a Proc that controls the sample rate for every tracing event, e.g.
+    # @example
+    #   config.traces_sampler =  lambda do |tracing_context|
+    #     # tracing_context[:transaction_context] contains the information about the transaction
+    #     # tracing_context[:parent_sampled] contains the transaction's parent's sample decision
+    #     true # return value can be a boolean or a float between 0.0 and 1.0
+    #   end
+    # @return [Proc]
+    attr_accessor traces_sampler: untyped
+
+    # Send diagnostic client reports about dropped events, true by default
+    # tries to attach to an existing envelope max once every 30s
+    # @return [Boolean]
+    attr_accessor send_client_reports: untyped
+
+    # Track sessions in request/response cycles automatically
+    # @return [Boolean]
+    attr_accessor auto_session_tracking: untyped
+
+    # these are not config options
+    # @!visibility private
+    attr_reader errors: untyped
+
+    # these are not config options
+    # @!visibility private
+    attr_reader gem_specs: untyped
+
+    # Most of these errors generate 4XX responses. In general, Sentry clients
+    # only automatically report 5xx responses.
+    IGNORE_DEFAULT: untyped
+
+    RACK_ENV_WHITELIST_DEFAULT: untyped
+
+    HEROKU_DYNO_METADATA_MESSAGE: untyped
+
+    LOG_PREFIX: untyped
+
+    MODULE_SEPARATOR: untyped
+
+    SKIP_INSPECTION_ATTRIBUTES: ::Array[untyped]
+
+    def initialize: () -> void
+
+    def dsn=: (untyped value) -> untyped
+
+    alias server= dsn=
+
+    def async=: (untyped value) -> untyped
+
+    def breadcrumbs_logger=: (untyped logger) -> untyped
+
+    def before_send=: (untyped value) -> untyped
+
+    def before_breadcrumb=: (untyped value) -> untyped
+
+    def environment=: (untyped environment) -> untyped
+
+    def sending_allowed?: () -> untyped
+
+    def sample_allowed?: () -> (::TrueClass | untyped)
+
+    def exception_class_allowed?: (untyped exc) -> untyped
+
+    def enabled_in_current_env?: () -> untyped
+
+    def tracing_enabled?: () -> untyped
+
+    # @return [String, nil]
+    def csp_report_uri: () -> untyped
+
     # @api private
     def stacktrace_builder: () -> untyped
 
@@ -930,6 +1295,9 @@ end
 module Sentry
   module Rack
     class CaptureExceptions
+      def initialize: (untyped app) -> void
+
+      def call: (untyped env) -> untyped
 
       private
 
@@ -1189,6 +1557,17 @@ end
 
 module Sentry
   class SessionFlusher
+    include LoggingHelper
+
+    FLUSH_INTERVAL: ::Integer
+
+    def initialize: (untyped configuration, untyped client) -> void
+
+    def flush: () -> (nil | untyped)
+
+    def add_session: (untyped session) -> (nil | untyped)
+
+    def kill: () -> untyped
 
     private
 
@@ -1561,10 +1940,28 @@ module Sentry
 end
 
 module Sentry
+  module CustomInspection
+    def inspect: () -> ::String
+  end
+end
+
+module Sentry
   module Utils
     module ExceptionCauseChain
       def self.exception_to_array: (untyped exception) -> untyped
     end
+  end
+end
+
+module Sentry
+  module LoggingHelper
+    def log_error: (untyped message, untyped exception, ?debug: bool debug) -> untyped
+
+    def log_info: (untyped message) -> untyped
+
+    def log_debug: (untyped message) -> untyped
+
+    def log_warn: (untyped message) -> untyped
   end
 end
 
