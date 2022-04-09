@@ -559,37 +559,6 @@ module AASM
   end
 end
 
-Minitest: untyped
-
-module Minitest::Assertions
-  def assert_event_allowed: (untyped object, untyped event, ?::Hash[untyped, untyped] options) -> untyped
-
-  def refute_event_allowed: (untyped object, untyped event, ?::Hash[untyped, untyped] options) -> untyped
-end
-
-module Minitest::Assertions
-  def assert_transition_to_allowed: (untyped object, untyped to_state, ?::Hash[untyped, untyped] options) -> untyped
-
-  def refute_transition_to_allowed: (untyped object, untyped to_state, ?::Hash[untyped, untyped] options) -> untyped
-end
-
-module Minitest::Assertions
-  def assert_have_state: (untyped object, untyped state, ?::Hash[untyped, untyped] options) -> untyped
-
-  def refute_have_state: (untyped object, untyped state, ?::Hash[untyped, untyped] options) -> untyped
-end
-
-module Minitest::Assertions
-  def assert_transitions_from: (untyped object, untyped from_state, *untyped args) -> untyped
-
-  def refute_transitions_from: (untyped object, untyped from_state, *untyped args) -> untyped
-
-  def _transitions_from?: (untyped object, untyped from_state, untyped args, untyped options) -> untyped
-end
-
-module Minitest::Expectations
-end
-
 module AASM
   module Persistence
     def self.load_persistence: (untyped base) -> untyped
