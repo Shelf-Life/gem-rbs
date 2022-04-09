@@ -31,8 +31,6 @@ class Date
   # <tt>m</tt>, day <tt>d</tt> and Day of Calendar Reform <tt>sg</tt> to Date.
   def self.json_create: (untyped object) -> untyped
 
-  alias start sg
-
   # Returns a hash, that will be turned into a JSON object and represent this
   # object.
   def as_json: () -> ::Hash[untyped | ::String, untyped]
@@ -47,8 +45,6 @@ class DateTime
   # day <tt>d</tt>, hour <tt>H</tt>, minute <tt>M</tt>, second <tt>S</tt>,
   # offset <tt>of</tt> and Day of Calendar Reform <tt>sg</tt> to DateTime.
   def self.json_create: (untyped object) -> untyped
-
-  alias start sg
 
   # Returns a hash, that will be turned into a JSON object and represent this
   # object.
