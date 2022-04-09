@@ -228,13 +228,13 @@ module Down
     # Starts retrieving the remote file and returns an IO-like object which
     # downloads the response body on-demand. Accepts HTTP.rb options via a hash
     # or a block.
-    def open: (untyped url, ?rewindable: bool rewindable, **untyped options) { () -> untyped } -> untyped
+    def open: (untyped url, ?rewindable: bool rewindable, **untyped options) ?{ () -> untyped } -> untyped
 
     private
 
-    def request: (untyped url, ?method: untyped method, **untyped options) { () -> untyped } -> untyped
+    def request: (untyped url, ?method: untyped method, **untyped options) ?{ () -> untyped } -> untyped
 
-    def send_request: (untyped method, untyped url, **untyped options) { () -> untyped } -> untyped
+    def send_request: (untyped method, untyped url, **untyped options) ?{ () -> untyped } -> untyped
 
     # Yields chunks of the response body to the block.
     def stream_body: (untyped response) { () -> untyped } -> untyped
