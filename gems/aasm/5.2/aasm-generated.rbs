@@ -1,0 +1,1299 @@
+module AASM
+  # this is used internally as an argument default value to represent no value
+  NO_VALUE: ::Symbol
+
+  def self.included: (untyped base) -> untyped
+
+  module ClassMethods
+    # make sure inheritance (aka subclassing) works with AASM
+    def inherited: (untyped base) -> untyped
+
+    # this is the entry point for all state and event definitions
+    def aasm: (*untyped args) { () -> untyped } -> untyped
+  end
+
+  # this is the entry point for all instance-level access to AASM
+  def aasm: (?::Symbol name) -> untyped
+
+  def initialize_dup: (untyped other) -> untyped
+
+  private
+
+  # Takes args and a from state and removes the first
+  # element from args if it is a valid to_state for
+  # the event given the from_state
+  def process_args: (untyped event, untyped from_state, *untyped args) -> untyped
+
+  def aasm_fire_event: (untyped state_machine_name, untyped event_name, untyped options, *untyped args) { () -> untyped } -> untyped
+
+  def fire_default_callbacks: (untyped event, *untyped processed_args) -> untyped
+
+  def fire_exit_callbacks: (untyped old_state, *untyped processed_args) -> untyped
+
+  def aasm_fired: (untyped state_machine_name, untyped event, untyped old_state, untyped new_state_name, untyped options, *untyped args) { () -> untyped } -> untyped
+
+  def aasm_failed: (untyped state_machine_name, untyped event_name, untyped old_state, ?untyped failures) -> untyped
+end
+
+module AASM
+  class Base
+    attr_reader klass: untyped
+
+    attr_reader state_machine: untyped
+
+    def initialize: (untyped klass, untyped name, untyped state_machine, ?::Hash[untyped, untyped] options) { () -> untyped } -> void
+
+    # This method is both a getter and a setter
+    def attribute_name: (?untyped? column_name) -> untyped
+
+    def initial_state: (?untyped? new_initial_state) -> untyped
+
+    # define a state
+    # args
+    # [0] state
+    # [1] options (or nil)
+    # or
+    # [0] state
+    # [1..] state
+    def state: (*untyped args) -> untyped
+
+    # define an event
+    def event: (untyped name, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+    def after_all_transitions: (*untyped callbacks) { () -> untyped } -> untyped
+
+    def after_all_transactions: (*untyped callbacks) { () -> untyped } -> untyped
+
+    def before_all_transactions: (*untyped callbacks) { () -> untyped } -> untyped
+
+    def before_all_events: (*untyped callbacks) { () -> untyped } -> untyped
+
+    def after_all_events: (*untyped callbacks) { () -> untyped } -> untyped
+
+    def error_on_all_events: (*untyped callbacks) { () -> untyped } -> untyped
+
+    def ensure_on_all_events: (*untyped callbacks) { () -> untyped } -> untyped
+
+    def states: () -> untyped
+
+    def events: () -> untyped
+
+    def human_event_name: (untyped event) -> untyped
+
+    def states_for_select: () -> untyped
+
+    def from_states_for_state: (untyped state, ?::Hash[untyped, untyped] options) -> untyped
+
+    private
+
+    def default_column: () -> untyped
+
+    def configure: (untyped key, untyped default_value) -> untyped
+
+    def safely_define_method: (untyped klass, untyped method_name, untyped method_definition) -> untyped
+
+    def namespace?: () -> untyped
+
+    def namespace: () -> untyped
+
+    def interpret_state_args: (untyped args) -> untyped
+
+    def skip_instance_level_validation: (untyped event, untyped name, untyped aasm_name, untyped klass) -> untyped
+
+    def setup_timestamps: (untyped aasm_name) -> (nil | untyped)
+
+    def setup_no_direct_assignment: (untyped aasm_name) -> (nil | untyped)
+  end
+end
+
+module AASM
+  class Configuration
+    # for all persistence layers: which database column to use?
+    attr_accessor column: untyped
+
+    # let's cry if the transition is invalid
+    attr_accessor whiny_transitions: untyped
+
+    # for all persistence layers: create named scopes for each state
+    attr_accessor create_scopes: untyped
+
+    # for ActiveRecord: when the model is invalid, true -> raise, false -> return false
+    attr_accessor whiny_persistence: untyped
+
+    # for ActiveRecord: store the new state even if the model is invalid and return true
+    attr_accessor skip_validation_on_save: untyped
+
+    # for ActiveRecord: use transactions
+    attr_accessor use_transactions: untyped
+
+    # for ActiveRecord: use requires_new for nested transactions?
+    attr_accessor requires_new_transaction: untyped
+
+    # for ActiveRecord: use pessimistic locking
+    attr_accessor requires_lock: untyped
+
+    # automatically set `"#{state_name}_at" = ::Time.now` on state changes
+    attr_accessor timestamps: untyped
+
+    # forbid direct assignment in aasm_state column (in ActiveRecord)
+    attr_accessor no_direct_assignment: untyped
+
+    # allow a AASM::Base sub-class to be used for state machine
+    attr_accessor with_klass: untyped
+
+    attr_accessor enum: untyped
+
+    # namespace reader methods and constants
+    attr_accessor namespace: untyped
+
+    # Configure a logger, with default being a Logger to STDERR
+    attr_accessor logger: untyped
+
+    attr_accessor self.hide_warnings: untyped
+  end
+end
+
+module AASM::Core
+  class Event
+    include AASM::DslHelper
+
+    attr_reader name: untyped
+
+    attr_reader state_machine: untyped
+
+    attr_reader options: untyped
+
+    attr_reader default_display_name: untyped
+
+    def initialize: (untyped name, untyped state_machine, ?::Hash[untyped, untyped] options) { () -> untyped } -> void
+
+    # called internally by Ruby 1.9 after clone()
+    def initialize_copy: (untyped orig) -> untyped
+
+    # a neutered version of fire - it doesn't actually fire the event, it just
+    # executes the transition guards to determine if a transition is even
+    # an option given current conditions.
+    def may_fire?: (untyped obj, ?untyped to_state, *untyped args) -> untyped
+
+    def fire: (untyped obj, ?::Hash[untyped, untyped] options, ?untyped to_state, *untyped args) -> untyped
+
+    def transitions_from_state?: (untyped state) -> untyped
+
+    def transitions_from_state: (untyped state) -> untyped
+
+    def transitions_to_state?: (untyped state) -> untyped
+
+    def transitions_to_state: (untyped state) -> untyped
+
+    def fire_global_callbacks: (untyped callback_name, untyped record, *untyped args) -> untyped
+
+    def fire_callbacks: (untyped callback_name, untyped record, *untyped args) -> untyped
+
+    def fire_transition_callbacks: (untyped obj, *untyped args) -> untyped
+
+    def ==: (untyped event) -> untyped
+
+    #  DSL interface
+    def transitions: (?untyped? definitions) { () -> untyped } -> untyped
+
+    def failed_callbacks: () -> untyped
+
+    def to_s: () -> untyped
+
+    private
+
+    def attach_event_guards: (untyped definitions) -> untyped
+
+    def _fire: (untyped obj, ?::Hash[untyped, untyped] options, ?untyped to_state, *untyped args) -> untyped
+
+    def clear_failed_callbacks: () -> untyped
+
+    def invoke_callbacks: (untyped code, untyped record, untyped args) -> untyped
+  end
+end
+
+module AASM
+  module Core
+    #
+    # main invoker class which encapsulates the logic
+    # for invoking literal-based, proc-based, class-based
+    # and array-based callbacks for different entities.
+    class Invoker
+      DEFAULT_RETURN_VALUE: bool
+
+      def initialize: (untyped subject, untyped record, untyped args) -> void
+
+      def with_options: (untyped options) -> untyped
+
+      def with_failures: (untyped failures) -> untyped
+
+      def with_default_return_value: (untyped value) -> untyped
+
+      # rubocop:disable Metrics/AbcSize
+      def invoke: () -> untyped
+
+      private
+
+      attr_reader subject: untyped
+
+      attr_reader record: untyped
+
+      attr_reader args: untyped
+
+      attr_reader options: untyped
+
+      attr_reader failures: untyped
+
+      attr_reader default_return_value: untyped
+
+      def invoke_array: () -> untyped
+
+      def sub_invoke: (untyped new_subject) -> untyped
+
+      def proc_invoker: () -> untyped
+
+      def class_invoker: () -> untyped
+
+      def literal_invoker: () -> untyped
+    end
+  end
+end
+
+module AASM
+  module Core
+    module Invokers
+      #
+      # Base concrete invoker class which contain basic
+      # invoking and logging definitions
+      class BaseInvoker
+        attr_reader failures: untyped
+
+        attr_reader subject: untyped
+
+        attr_reader record: untyped
+
+        attr_reader args: untyped
+
+        attr_reader result: untyped
+
+        def initialize: (untyped subject, untyped record, untyped args) -> void
+
+        def with_failures: (untyped failures_buffer) -> untyped
+
+        def invoke: () -> (nil | untyped)
+
+        def may_invoke?: () -> untyped
+
+        def log_failure: () -> untyped
+
+        def invoke_subject: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Core
+    module Invokers
+      #
+      # Class invoker which allows to use classes which respond to #call
+      # to be used as state/event/transition callbacks.
+      class ClassInvoker < BaseInvoker
+        def may_invoke?: () -> untyped
+
+        def log_failure: () -> untyped
+
+        def invoke_subject: () -> untyped
+
+        private
+
+        def log_source_location: () -> untyped
+
+        def log_method_info: () -> untyped
+
+        def instance: () -> untyped
+
+        # rubocop:disable Metrics/AbcSize
+        def retrieve_instance: () -> untyped
+
+        def subject_arity: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Core
+    module Invokers
+      #
+      # Literal invoker which allows to use strings or symbols to call
+      # record methods as state/event/transition callbacks.
+      class LiteralInvoker < BaseInvoker
+        def may_invoke?: () -> untyped
+
+        def log_failure: () -> untyped
+
+        def invoke_subject: () -> untyped
+
+        private
+
+        def subject_arity: () -> untyped
+
+        # rubocop:disable Metrics/AbcSize
+        def exec_subject: () -> untyped
+
+        def record_error: () -> ::Array[untyped | ::String]
+      end
+    end
+  end
+end
+
+module AASM
+  module Core
+    module Invokers
+      #
+      # Proc invoker which allows to use Procs as
+      # state/event/transition callbacks.
+      class ProcInvoker < BaseInvoker
+        def may_invoke?: () -> untyped
+
+        def log_failure: () -> untyped
+
+        def invoke_subject: () -> untyped
+
+        private
+
+        def support_parameters?: () -> untyped
+
+        # rubocop:disable Metrics/AbcSize
+        def exec_proc: (untyped parameters_size) -> untyped
+
+        def log_source_location: () -> untyped
+
+        def log_proc_info: () -> untyped
+
+        def parameters_to_arity: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM::Core
+  class State
+    attr_reader name: untyped
+
+    attr_reader state_machine: untyped
+
+    attr_reader options: untyped
+
+    attr_reader default_display_name: untyped
+
+    def initialize: (untyped name, untyped klass, untyped state_machine, ?::Hash[untyped, untyped] options) -> void
+
+    # called internally by Ruby 1.9 after clone()
+    def initialize_copy: (untyped orig) -> untyped
+
+    def ==: (untyped state) -> untyped
+
+    def <=>: (untyped state) -> untyped
+
+    def to_s: () -> untyped
+
+    def fire_callbacks: (untyped action, untyped record, *untyped args) -> untyped
+
+    def display_name: () -> untyped
+
+    def localized_name: () -> untyped
+
+    alias human_name localized_name
+
+    def for_select: () -> ::Array[untyped]
+
+    private
+
+    def update: (?::Hash[untyped, untyped] options) -> untyped
+
+    def _fire_callbacks: (untyped action, untyped record, untyped args) -> untyped
+  end
+end
+
+module AASM::Core
+  class Transition
+    include AASM::DslHelper
+
+    attr_reader from: untyped
+
+    attr_reader to: untyped
+
+    attr_reader event: untyped
+
+    attr_reader opts: untyped
+
+    attr_reader failures: untyped
+
+    alias options opts
+
+    def initialize: (untyped event, untyped opts) { () -> untyped } -> void
+
+    # called internally by Ruby 1.9 after clone()
+    def initialize_copy: (untyped orig) -> untyped
+
+    def allowed?: (untyped obj, *untyped args) -> untyped
+
+    def execute: (untyped obj, *untyped args) -> untyped
+
+    def ==: (untyped obj) -> untyped
+
+    def from?: (untyped value) -> untyped
+
+    def invoke_success_callbacks: (untyped obj, *untyped args) -> untyped
+
+    private
+
+    def invoke_callbacks_compatible_with_guard: (untyped code, untyped record, untyped args, ?::Hash[untyped, untyped] options) -> untyped
+
+    def _fire_callbacks: (untyped code, untyped record, untyped args) -> untyped
+  end
+end
+
+module AASM
+  module DslHelper
+    class Proxy
+      attr_accessor options: untyped
+
+      def initialize: (untyped options, untyped valid_keys, untyped source) -> void
+
+      def method_missing: (untyped name, *untyped args) { () -> untyped } -> untyped
+    end
+
+    def add_options_from_dsl: (untyped options, untyped valid_keys) { () -> untyped } -> untyped
+  end
+end
+
+module AASM
+  class UnknownStateMachineError < RuntimeError
+  end
+
+  class InvalidTransition < RuntimeError
+    attr_reader object: untyped
+
+    attr_reader event_name: untyped
+
+    attr_reader originating_state: untyped
+
+    attr_reader failures: untyped
+
+    attr_reader state_machine_name: untyped
+
+    def initialize: (untyped object, untyped event_name, untyped state_machine_name, ?untyped failures) -> void
+
+    def reasoning: () -> untyped
+  end
+
+  class UndefinedState < RuntimeError
+  end
+
+  class NoDirectAssignmentError < RuntimeError
+  end
+end
+
+module AASM
+  class InstanceBase
+    attr_accessor from_state: untyped
+
+    attr_accessor to_state: untyped
+
+    attr_accessor current_event: untyped
+
+    def initialize: (untyped `instance`, ?::Symbol name) -> void
+
+    def current_state: () -> untyped
+
+    def current_state=: (untyped state) -> untyped
+
+    def enter_initial_state: () -> untyped
+
+    def human_state: () -> untyped
+
+    def states: (?::Hash[untyped, untyped] options, *untyped args) -> untyped
+
+    def events: (?::Hash[untyped, untyped] options, *untyped args) -> untyped
+
+    def permitted_transitions: () -> untyped
+
+    def state_object_for_name: (untyped name) -> untyped
+
+    def determine_state_name: (untyped state) -> untyped
+
+    def may_fire_event?: (untyped name, *untyped args) -> untyped
+
+    def fire: (untyped event_name, *untyped args) { () -> untyped } -> untyped
+
+    def fire!: (untyped event_name, *untyped args) { () -> untyped } -> untyped
+
+    def set_current_state_with_persistence: (untyped state) -> untyped
+  end
+end
+
+module AASM
+  class Localizer
+    def human_event_name: (untyped klass, untyped event) -> untyped
+
+    def human_state_name: (untyped klass, untyped state) -> untyped
+
+    private
+
+    def item_for: (untyped klass, untyped state, untyped ancestor, ?::Hash[untyped, untyped] options) -> ::Symbol
+
+    def translate_queue: (untyped checklist) -> (untyped | nil)
+
+    # added for rails 2.x compatibility
+    def i18n_scope: (untyped klass) -> untyped
+
+    # added for rails < 3.0.3 compatibility
+    def i18n_klass: (untyped klass) -> untyped
+
+    def ancestors_list: (untyped klass) -> untyped
+
+    def default_display_name: (untyped object) -> untyped
+  end
+end
+
+Minitest: untyped
+
+module Minitest::Assertions
+  def assert_event_allowed: (untyped object, untyped event, ?::Hash[untyped, untyped] options) -> untyped
+
+  def refute_event_allowed: (untyped object, untyped event, ?::Hash[untyped, untyped] options) -> untyped
+end
+
+module Minitest::Assertions
+  def assert_transition_to_allowed: (untyped object, untyped to_state, ?::Hash[untyped, untyped] options) -> untyped
+
+  def refute_transition_to_allowed: (untyped object, untyped to_state, ?::Hash[untyped, untyped] options) -> untyped
+end
+
+module Minitest::Assertions
+  def assert_have_state: (untyped object, untyped state, ?::Hash[untyped, untyped] options) -> untyped
+
+  def refute_have_state: (untyped object, untyped state, ?::Hash[untyped, untyped] options) -> untyped
+end
+
+module Minitest::Assertions
+  def assert_transitions_from: (untyped object, untyped from_state, *untyped args) -> untyped
+
+  def refute_transitions_from: (untyped object, untyped from_state, *untyped args) -> untyped
+
+  def _transitions_from?: (untyped object, untyped from_state, untyped args, untyped options) -> untyped
+end
+
+module Minitest::Expectations
+end
+
+module AASM
+  module Persistence
+    def self.load_persistence: (untyped base) -> untyped
+
+    private
+
+    def self.require_persistence: (untyped `type`) -> untyped
+
+    def self.include_persistence: (untyped base, untyped `type`) -> untyped
+
+    def self.capitalize: (untyped string_or_symbol) -> untyped
+
+    def self.constantize: (untyped string) -> untyped
+  end
+end
+
+module AASM
+  module Persistence
+    module ActiveRecordPersistence
+      # This method:
+      #
+      # * extends the model with ClassMethods
+      # * includes InstanceMethods
+      #
+      # Adds
+      #
+      #   after_initialize :aasm_ensure_initial_state
+      #
+      # As a result, it doesn't matter when you define your methods - the following 2 are equivalent
+      #
+      #   class Foo < ActiveRecord::Base
+      #     def aasm_write_state(state)
+      #       "bar"
+      #     end
+      #     include AASM
+      #   end
+      #
+      #   class Foo < ActiveRecord::Base
+      #     include AASM
+      #     def aasm_write_state(state)
+      #       "bar"
+      #     end
+      #   end
+      #
+      def self.included: (untyped base) -> untyped
+
+      module ClassMethods
+        def aasm_create_scope: (untyped state_machine_name, untyped scope_name) -> untyped
+      end
+
+      module InstanceMethods
+        private
+
+        def aasm_execute_after_commit: () { () -> untyped } -> untyped
+
+        def aasm_raise_invalid_record: () -> untyped
+
+        def aasm_save: () -> untyped
+
+        def aasm_update_column: (untyped attribute_name, untyped value) -> untyped
+
+        def aasm_read_attribute: (untyped name) -> untyped
+
+        def aasm_write_attribute: (untyped name, untyped value) -> untyped
+
+        def aasm_transaction: (untyped requires_new, untyped requires_lock) { () -> untyped } -> untyped
+
+        def aasm_enum: (?::Symbol name) -> untyped
+
+        def aasm_column_looks_like_enum: (?::Symbol name) -> untyped
+
+        def aasm_guess_enum_method: (?::Symbol name) -> untyped
+
+        def aasm_raw_attribute_value: (untyped state, ?::Symbol name) -> untyped
+
+        # Ensures that if the aasm_state column is nil and the record is new
+        # then the initial state gets populated after initialization
+        #
+        #   foo = Foo.new
+        #   foo.aasm_state # => "open" (where :open is the initial state)
+        #
+        #
+        #   foo = Foo.find(:first)
+        #   foo.aasm_state # => 1
+        #   foo.aasm_state = nil
+        #   foo.valid?
+        #   foo.aasm_state # => nil
+        #
+        def aasm_ensure_initial_state: () -> untyped
+
+        def aasm_column_is_blank?: (untyped state_machine_name) -> untyped
+
+        def aasm_validate_states: () -> untyped
+
+        def aasm_invalid_state?: (untyped state_machine_name) -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    module Base
+      def self.included: (untyped base) -> untyped
+
+      # Returns the value of the aasm.attribute_name - called from <tt>aasm.current_state</tt>
+      #
+      # If it's a new record, and the aasm state column is blank it returns the initial state
+      # (example provided here for ActiveRecord, but it's true for Mongoid as well):
+      #
+      #   class Foo < ActiveRecord::Base
+      #     include AASM
+      #     aasm :column => :status do
+      #       state :opened
+      #       state :closed
+      #     end
+      #   end
+      #
+      #   foo = Foo.new
+      #   foo.current_state # => :opened
+      #   foo.close
+      #   foo.current_state # => :closed
+      #
+      #   foo = Foo.find(1)
+      #   foo.current_state # => :opened
+      #   foo.aasm_state = nil
+      #   foo.current_state # => nil
+      #
+      # NOTE: intended to be called from an event
+      #
+      # This allows for nil aasm states - be sure to add validation to your model
+      def aasm_read_state: (?::Symbol name) -> untyped
+
+      def aasm_new_record?: () -> untyped
+
+      module ClassMethods
+        def aasm_column: (?untyped? attribute_name) -> untyped
+      end
+    end
+  end
+
+  class Base
+    # make sure to create a (named) scope for each state
+    def state_with_scope: (*untyped args) -> untyped
+
+    alias state_without_scope state
+
+    alias state state_with_scope
+
+    private
+
+    def create_scope?: (untyped name) -> untyped
+
+    def create_scope: (untyped name) -> untyped
+
+    def create_scopes: (untyped name) -> untyped
+  end
+end
+
+module AASM
+  module Persistence
+    module CoreDataQueryPersistence
+      def self.included: (untyped base) -> untyped
+
+      module ClassMethods
+        def aasm_create_scope: (untyped state_machine_name, untyped scope_name) -> untyped
+      end
+
+      module InstanceMethods
+        # Writes <tt>state</tt> to the state column and persists it to the database
+        # using update_attribute (which bypasses validation)
+        #
+        #   foo = Foo.find(1)
+        #   foo.aasm.current_state # => :opened
+        #   foo.close!
+        #   foo.aasm.current_state # => :closed
+        #   Foo.find(1).aasm.current_state # => :closed
+        #
+        # NOTE: intended to be called from an event
+        def aasm_write_state: (untyped state, ?::Symbol name) -> untyped
+
+        # Writes <tt>state</tt> to the state column, but does not persist it to the database
+        #
+        #   foo = Foo.find(1)
+        #   foo.aasm.current_state # => :opened
+        #   foo.close
+        #   foo.aasm.current_state # => :closed
+        #   Foo.find(1).aasm.current_state # => :opened
+        #   foo.save
+        #   foo.aasm.current_state # => :closed
+        #   Foo.find(1).aasm.current_state # => :closed
+        #
+        # NOTE: intended to be called from an event
+        def aasm_write_state_without_persistence: (untyped state, ?::Symbol name) -> untyped
+
+        private
+
+        # Ensures that if the aasm_state column is nil and the record is new
+        # that the initial state gets populated before validation on create
+        #
+        #   foo = Foo.new
+        #   foo.aasm_state # => nil
+        #   foo.valid?
+        #   foo.aasm_state # => "open" (where :open is the initial state)
+        #
+        #
+        #   foo = Foo.find(:first)
+        #   foo.aasm_state # => 1
+        #   foo.aasm_state = nil
+        #   foo.valid?
+        #   foo.aasm_state # => nil
+        #
+        def aasm_ensure_initial_state: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    module DynamoidPersistence
+      def self.included: (untyped base) -> untyped
+
+      module InstanceMethods
+        # Writes <tt>state</tt> to the state column and persists it to the database
+        # using update_attribute (which bypasses validation)
+        #
+        #   foo = Foo.find(1)
+        #   foo.aasm.current_state # => :opened
+        #   foo.close!
+        #   foo.aasm.current_state # => :closed
+        #   Foo.find(1).aasm.current_state # => :closed
+        #
+        # NOTE: intended to be called from an event
+        def aasm_write_state: (untyped state, ?::Symbol name) -> (::FalseClass | ::TrueClass)
+
+        # Writes <tt>state</tt> to the state column, but does not persist it to the database
+        #
+        #   foo = Foo.find(1)
+        #   foo.aasm.current_state # => :opened
+        #   foo.close
+        #   foo.aasm.current_state # => :closed
+        #   Foo.find(1).aasm.current_state # => :opened
+        #   foo.save
+        #   foo.aasm.current_state # => :closed
+        #   Foo.find(1).aasm.current_state # => :closed
+        #
+        # NOTE: intended to be called from an event
+        def aasm_write_state_without_persistence: (untyped state, ?::Symbol name) -> untyped
+
+        private
+
+        # Ensures that if the aasm_state column is nil and the record is new
+        # that the initial state gets populated before validation on create
+        #
+        #   foo = Foo.new
+        #   foo.aasm_state # => nil
+        #   foo.valid?
+        #   foo.aasm_state # => "open" (where :open is the initial state)
+        #
+        #
+        #   foo = Foo.find(:first)
+        #   foo.aasm_state # => 1
+        #   foo.aasm_state = nil
+        #   foo.valid?
+        #   foo.aasm_state # => nil
+        #
+        def aasm_ensure_initial_state: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    module MongoidPersistence
+      # This method:
+      #
+      # * extends the model with ClassMethods
+      # * includes InstanceMethods
+      #
+      # Adds
+      #
+      #   before_validation :aasm_ensure_initial_state
+      #
+      # As a result, it doesn't matter when you define your methods - the following 2 are equivalent
+      #
+      #   class Foo
+      #     include Mongoid::Document
+      #     def aasm_write_state(state)
+      #       "bar"
+      #     end
+      #     include AASM
+      #   end
+      #
+      #   class Foo
+      #     include Mongoid::Document
+      #     include AASM
+      #     def aasm_write_state(state)
+      #       "bar"
+      #     end
+      #   end
+      #
+      def self.included: (untyped base) -> untyped
+
+      module ClassMethods
+        def aasm_create_scope: (untyped state_machine_name, untyped scope_name) -> untyped
+      end
+
+      module InstanceMethods
+        private
+
+        def aasm_save: () -> untyped
+
+        def aasm_raise_invalid_record: () -> untyped
+
+        def aasm_supports_transactions?: () -> ::FalseClass
+
+        def aasm_update_column: (untyped attribute_name, untyped value) -> ::TrueClass
+
+        def aasm_read_attribute: (untyped name) -> untyped
+
+        def aasm_write_attribute: (untyped name, untyped value) -> untyped
+
+        # Ensures that if the aasm_state column is nil and the record is new
+        # that the initial state gets populated before validation on create
+        #
+        #   foo = Foo.new
+        #   foo.aasm_state # => nil
+        #   foo.valid?
+        #   foo.aasm_state # => "open" (where :open is the initial state)
+        #
+        #
+        #   foo = Foo.find(:first)
+        #   foo.aasm_state # => 1
+        #   foo.aasm_state = nil
+        #   foo.valid?
+        #   foo.aasm_state # => nil
+        #
+        def aasm_ensure_initial_state: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    module NoBrainerPersistence
+      # This method:
+      #
+      # * extends the model with ClassMethods
+      # * includes InstanceMethods
+      #
+      # Adds
+      #
+      #   before_validation :aasm_ensure_initial_state
+      #
+      # As a result, it doesn't matter when you define your methods - the following 2 are equivalent
+      #
+      #   class Foo
+      #     include NoBrainer::Document
+      #     def aasm_write_state(state)
+      #       "bar"
+      #     end
+      #     include AASM
+      #   end
+      #
+      #   class Foo
+      #     include NoBrainer::Document
+      #     include AASM
+      #     def aasm_write_state(state)
+      #       "bar"
+      #     end
+      #   end
+      #
+      def self.included: (untyped base) -> untyped
+
+      module ClassMethods
+        def aasm_create_scope: (untyped state_machine_name, untyped scope_name) -> untyped
+      end
+
+      module InstanceMethods
+        private
+
+        def aasm_save: () -> untyped
+
+        def aasm_raise_invalid_record: () -> untyped
+
+        def aasm_supports_transactions?: () -> ::FalseClass
+
+        def aasm_update_column: (untyped attribute_name, untyped value) -> ::TrueClass
+
+        def aasm_read_attribute: (untyped name) -> untyped
+
+        def aasm_write_attribute: (untyped name, untyped value) -> untyped
+
+        # Ensures that if the aasm_state column is nil and the record is new
+        # that the initial state gets populated before validation on create
+        #
+        #   foo = Foo.new
+        #   foo.aasm_state # => nil
+        #   foo.valid?
+        #   foo.aasm_state # => "open" (where :open is the initial state)
+        #
+        #
+        #   foo = Foo.find(:first)
+        #   foo.aasm_state # => 1
+        #   foo.aasm_state = nil
+        #   foo.valid?
+        #   foo.aasm_state # => nil
+        #
+        def aasm_ensure_initial_state: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    # This module adds transactional support for any database that supports it.
+    # This includes rollback capability and rollback/commit callbacks.
+    module ORM
+      # Writes <tt>state</tt> to the state column and persists it to the database
+      #
+      #   foo = Foo.find(1)
+      #   foo.aasm.current_state # => :opened
+      #   foo.close!
+      #   foo.aasm.current_state # => :closed
+      #   Foo.find(1).aasm.current_state # => :closed
+      #
+      # NOTE: intended to be called from an event
+      def aasm_write_state: (untyped state, ?::Symbol name) -> untyped
+
+      # Writes <tt>state</tt> to the state field, but does not persist it to the database
+      #
+      #   foo = Foo.find(1)
+      #   foo.aasm.current_state # => :opened
+      #   foo.close
+      #   foo.aasm.current_state # => :closed
+      #   Foo.find(1).aasm.current_state # => :opened
+      #   foo.save
+      #   foo.aasm.current_state # => :closed
+      #   Foo.find(1).aasm.current_state # => :closed
+      #
+      # NOTE: intended to be called from an event
+      def aasm_write_state_without_persistence: (untyped state, ?::Symbol name) -> untyped
+
+      private
+
+      # Save the record and return true if it succeeded/false otherwise.
+      def aasm_save: () -> untyped
+
+      def aasm_raise_invalid_record: () -> untyped
+
+      # Update only the column without running validations.
+      def aasm_update_column: (untyped attribute_name, untyped value) -> untyped
+
+      def aasm_read_attribute: (untyped name) -> untyped
+
+      def aasm_write_attribute: (untyped name, untyped value) -> untyped
+
+      # Returns true or false if transaction completed successfully.
+      def aasm_transaction: (untyped requires_new, untyped requires_lock) -> untyped
+
+      def aasm_supports_transactions?: () -> ::TrueClass
+
+      def aasm_execute_after_commit: () { () -> untyped } -> untyped
+
+      def aasm_write_state_attribute: (untyped state, ?::Symbol name) -> untyped
+
+      def aasm_raw_attribute_value: (untyped state, ?::Symbol _name) -> untyped
+
+      def aasm_rollback: (untyped name, untyped old_value) -> ::FalseClass
+
+      def aasm_whiny_persistence: (untyped state_machine_name) -> untyped
+
+      def aasm_skipping_validations: (untyped state_machine_name) -> untyped
+
+      def use_transactions?: (untyped state_machine_name) -> untyped
+
+      def requires_new?: (untyped state_machine_name) -> untyped
+
+      def requires_lock?: (untyped state_machine_name) -> untyped
+
+      # Returns true if event was fired successfully and transaction completed.
+      def aasm_fire_event: (untyped state_machine_name, untyped name, untyped options, *untyped args) { () -> untyped } -> untyped
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    module PlainPersistence
+      # may be overwritten by persistence mixins
+      def aasm_read_state: (?::Symbol name) -> untyped
+
+      # may be overwritten by persistence mixins
+      def aasm_write_state: (untyped new_state, ?::Symbol name) -> ::TrueClass
+
+      # may be overwritten by persistence mixins
+      def aasm_write_state_without_persistence: (untyped new_state, ?::Symbol name) -> untyped
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    module RedisPersistence
+      def self.included: (untyped base) -> untyped
+
+      module InstanceMethods
+        # Initialize with default values
+        #
+        # Redis::Objects removes the key from Redis when set to `nil`
+        def initialize: (*untyped args) -> void
+
+        # Returns the value of the aasm.attribute_name - called from <tt>aasm.current_state</tt>
+        #
+        # If it's a new record, and the aasm state column is blank it returns the initial state
+        #
+        #   class Foo
+        #     include Redis::Objects
+        #     include AASM
+        #     aasm :column => :status do
+        #       state :opened
+        #       state :closed
+        #     end
+        #   end
+        #
+        #   foo = Foo.new
+        #   foo.current_state # => :opened
+        #   foo.close
+        #   foo.current_state # => :closed
+        #
+        #   foo = Foo[1]
+        #   foo.current_state # => :opened
+        #   foo.aasm_state = nil
+        #   foo.current_state # => nil
+        #
+        # NOTE: intended to be called from an event
+        #
+        # This allows for nil aasm states - be sure to add validation to your model
+        def aasm_read_state: (?::Symbol name) -> untyped
+
+        # Ensures that if the aasm_state column is nil and the record is new
+        # that the initial state gets populated before validation on create
+        #
+        #   foo = Foo.new
+        #   foo.aasm_state # => nil
+        #   foo.valid?
+        #   foo.aasm_state # => "open" (where :open is the initial state)
+        #
+        #
+        #   foo = Foo.find(:first)
+        #   foo.aasm_state # => 1
+        #   foo.aasm_state = nil
+        #   foo.valid?
+        #   foo.aasm_state # => nil
+        #
+        def aasm_ensure_initial_state: () -> untyped
+
+        # Writes <tt>state</tt> to the state column and persists it to the database
+        #
+        #   foo = Foo[1]
+        #   foo.aasm.current_state # => :opened
+        #   foo.close!
+        #   foo.aasm.current_state # => :closed
+        #   Foo[1].aasm.current_state # => :closed
+        #
+        # NOTE: intended to be called from an event
+        def aasm_write_state: (untyped state, ?::Symbol name) -> untyped
+
+        # Writes <tt>state</tt> to the state column, but does not persist it to the database
+        # (but actually it still does)
+        #
+        # With Redis::Objects it's not possible to skip persisting - it's not an ORM,
+        # it does not operate like an AR model and does not know how to postpone changes.
+        #
+        #   foo = Foo[1]
+        #   foo.aasm.current_state # => :opened
+        #   foo.close
+        #   foo.aasm.current_state # => :closed
+        #   Foo[1].aasm.current_state # => :opened
+        #   foo.save
+        #   foo.aasm.current_state # => :closed
+        #   Foo[1].aasm.current_state # => :closed
+        #
+        # NOTE: intended to be called from an event
+        def aasm_write_state_without_persistence: (untyped state, ?::Symbol name) -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  module Persistence
+    module SequelPersistence
+      def self.included: (untyped base) -> untyped
+
+      module InstanceMethods
+        def before_validation: () -> untyped
+
+        def before_create: () -> untyped
+
+        def aasm_raise_invalid_record: () -> untyped
+
+        def aasm_new_record?: () -> untyped
+
+        # Returns nil if fails silently
+        # http://sequel.jeremyevans.net/rdoc/classes/Sequel/Model/InstanceMethods.html#method-i-save
+        def aasm_save: () -> untyped
+
+        def aasm_read_attribute: (untyped name) -> untyped
+
+        def aasm_write_attribute: (untyped name, untyped value) -> untyped
+
+        def aasm_transaction: (untyped requires_new, untyped requires_lock) { () -> untyped } -> untyped
+
+        def aasm_update_column: (untyped attribute_name, untyped value) -> untyped
+
+        # Ensures that if the aasm_state column is nil and the record is new
+        # that the initial state gets populated before validation on create
+        #
+        #   foo = Foo.new
+        #   foo.aasm_state # => nil
+        #   foo.valid?
+        #   foo.aasm_state # => "open" (where :open is the initial state)
+        #
+        #
+        #   foo = Foo.find(:first)
+        #   foo.aasm_state # => 1
+        #   foo.aasm_state = nil
+        #   foo.valid?
+        #   foo.aasm_state # => nil
+        #
+        def aasm_ensure_initial_state: () -> untyped
+      end
+    end
+  end
+end
+
+module AASM
+  class StateMachine
+    attr_accessor states: untyped
+
+    attr_accessor events: untyped
+
+    attr_accessor initial_state: untyped
+
+    attr_accessor config: untyped
+
+    attr_accessor name: untyped
+
+    attr_accessor global_callbacks: untyped
+
+    def initialize: (untyped name) -> void
+
+    # called internally by Ruby 1.9 after clone()
+    def initialize_copy: (untyped orig) -> untyped
+
+    def add_state: (untyped state_name, untyped klass, untyped options) -> untyped
+
+    def add_event: (untyped name, untyped options) { () -> untyped } -> untyped
+
+    def add_global_callbacks: (untyped name, *untyped callbacks) { () -> untyped } -> untyped
+
+    private
+
+    def set_initial_state: (untyped name, untyped options) -> untyped
+  end
+end
+
+module AASM
+  class StateMachineStore
+    def self.stores: () -> untyped
+
+    # do not overwrite existing state machines, which could have been created by
+    # inheritance, see AASM::ClassMethods method inherited
+    def self.register: (untyped klass, ?bool overwrite, ?untyped? state_machine) -> untyped
+
+    alias self.[]= self.register
+
+    def self.fetch: (untyped klass, ?untyped? fallback) -> untyped
+
+    alias self.[] self.fetch
+
+    def self.unregister: (untyped klass) -> untyped
+
+    def initialize: () -> void
+
+    def clone: () -> untyped
+
+    def machine: (untyped name) -> untyped
+
+    alias [] machine
+
+    def machine_names: () -> untyped
+
+    alias keys machine_names
+
+    def register: (untyped name, untyped machine, ?bool force) -> untyped
+  end
+end
+
+module AASM
+  VERSION: ::String
+end
