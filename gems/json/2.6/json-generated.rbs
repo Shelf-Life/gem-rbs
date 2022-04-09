@@ -146,7 +146,7 @@ class Set
   def to_json: (*untyped args) -> untyped
 end
 
-class Struct
+class Struct[Elem] < Object
   # Deserializes JSON string by constructing new Struct object with values
   # <tt>v</tt> serialized by <tt>to_json</tt>.
   def self.json_create: (untyped object) -> untyped
