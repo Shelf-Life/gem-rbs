@@ -88,7 +88,7 @@ class OpenStruct
   def to_json: (*untyped args) -> untyped
 end
 
-class Range
+class Range[out Elem] < Object
   # Deserializes JSON string by constructing new Range object with arguments
   # <tt>a</tt> serialized by <tt>to_json</tt>.
   def self.json_create: (untyped object) -> untyped
