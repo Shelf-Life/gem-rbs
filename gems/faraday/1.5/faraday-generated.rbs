@@ -1,0 +1,2176 @@
+::Faraday::Timer: untyped
+
+# This is the main namespace for Faraday.
+#
+# It provides methods to create {Connection} objects, and HTTP-related
+# methods to use directly.
+#
+# @example Helpful class methods for easy usage
+#   Faraday.get "http://faraday.com"
+#
+# @example Helpful class method `.new` to create {Connection} objects.
+#   conn = Faraday.new "http://faraday.com"
+#   conn.get '/'
+#
+module Faraday
+  # The root path that Faraday is being loaded from.
+  #
+  # This is the root from where the libraries are auto-loaded.
+  #
+  # @return [String]
+  attr_accessor self.root_path: untyped
+
+  # Gets or sets the path that the Faraday libs are loaded from.
+  # @return [String]
+  attr_accessor self.lib_path: untyped
+
+  # @overload default_adapter
+  #   Gets the Symbol key identifying a default Adapter to use
+  #   for the default {Faraday::Connection}. Defaults to `:net_http`.
+  #   @return [Symbol] the default adapter
+  # @overload default_adapter=(adapter)
+  #   Updates default adapter while resetting {.default_connection}.
+  #   @return [Symbol] the new default_adapter.
+  attr_reader self.default_adapter: untyped
+
+  # Documented below, see default_connection
+  attr_writer self.default_connection: untyped
+
+  # Tells Faraday to ignore the environment proxy (http_proxy).
+  # Defaults to `false`.
+  # @return [Boolean]
+  attr_accessor self.ignore_env_proxy: untyped
+
+  # Initializes a new {Connection}.
+  #
+  # @param url [String,Hash] The optional String base URL to use as a prefix
+  #           for all requests.  Can also be the options Hash. Any of these
+  #           values will be set on every request made, unless overridden
+  #           for a specific request.
+  # @param options [Hash]
+  # @option options [String] :url Base URL
+  # @option options [Hash] :params Hash of unencoded URI query params.
+  # @option options [Hash] :headers Hash of unencoded HTTP headers.
+  # @option options [Hash] :request Hash of request options.
+  # @option options [Hash] :ssl Hash of SSL options.
+  # @option options [Hash] :proxy Hash of Proxy options.
+  # @return [Faraday::Connection]
+  #
+  # @example With an URL argument
+  #   Faraday.new 'http://faraday.com'
+  #   # => Faraday::Connection to http://faraday.com
+  #
+  # @example With an URL argument and an options hash
+  #   Faraday.new 'http://faraday.com', params: { page: 1 }
+  #   # => Faraday::Connection to http://faraday.com?page=1
+  #
+  # @example With everything in an options hash
+  #   Faraday.new url: 'http://faraday.com',
+  #               params: { page: 1 }
+  #   # => Faraday::Connection to http://faraday.com?page=1
+  def self.new: (?untyped? url, ?::Hash[untyped, untyped] options) ?{ () -> untyped } -> untyped
+
+  # @private
+  # Internal: Requires internal Faraday libraries.
+  #
+  # @param libs [Array] one or more relative String names to Faraday classes.
+  # @return [void]
+  def self.require_libs: (*untyped libs) -> untyped
+
+  alias self.require_lib self.require_libs
+
+  # Documented elsewhere, see default_adapter reader
+  def self.default_adapter=: (untyped adapter) -> untyped
+
+  def self.respond_to_missing?: (untyped symbol, ?bool include_private) -> untyped
+
+  # @overload default_connection
+  #   Gets the default connection used for simple scripts.
+  #   @return [Faraday::Connection] a connection configured with
+  #   the default_adapter.
+  # @overload default_connection=(connection)
+  #   @param connection [Faraday::Connection]
+  #   Sets the default {Faraday::Connection} for simple scripts that
+  #   access the Faraday constant directly, such as
+  #   <code>Faraday.get "https://faraday.com"</code>.
+  def self.default_connection: () -> untyped
+
+  # Gets the default connection options used when calling {Faraday#new}.
+  #
+  # @return [Faraday::ConnectionOptions]
+  def self.default_connection_options: () -> untyped
+
+  # Sets the default options used when calling {Faraday#new}.
+  #
+  # @param options [Hash, Faraday::ConnectionOptions]
+  def self.default_connection_options=: (untyped options) -> untyped
+
+  private
+
+  # Internal: Proxies method calls on the Faraday constant to
+  # .default_connection.
+  def self.method_missing: (untyped name, *untyped args) { () -> untyped } -> untyped
+end
+
+module Faraday
+  # Base class for all Faraday adapters. Adapters are
+  # responsible for fulfilling a Faraday request.
+  class Adapter
+    extend MiddlewareRegistry
+
+    extend DependencyLoader
+
+    CONTENT_LENGTH: ::String
+
+    # This module marks an Adapter as supporting parallel requests.
+    module Parallelism
+      attr_writer supports_parallel: untyped
+
+      def supports_parallel?: () -> untyped
+
+      def inherited: (untyped subclass) -> untyped
+    end
+
+    extend Parallelism
+
+    def initialize: (?untyped? _app, ?::Hash[untyped, untyped] opts) { () -> untyped } -> untyped
+
+    # Yields or returns an adapter's configured connection. Depends on
+    # #build_connection being defined on this adapter.
+    #
+    # @param env [Faraday::Env, Hash] The env object for a faraday request.
+    #
+    # @return The return value of the given block, or the HTTP connection object
+    #         if no block is given.
+    def connection: (untyped env) { (untyped) -> untyped } -> untyped
+
+    # Close any persistent connections. The adapter should still be usable
+    # after calling close.
+    def close: () -> nil
+
+    def call: (untyped env) -> untyped
+
+    private
+
+    def save_response: (untyped env, untyped status, untyped body, ?untyped? headers, ?untyped? reason_phrase) { (untyped) -> untyped } -> untyped
+
+    # Fetches either a read, write, or open timeout setting. Defaults to the
+    # :timeout value if a more specific one is not given.
+    #
+    # @param type [Symbol] Describes which timeout setting to get: :read,
+    #                      :write, or :open.
+    # @param options [Hash] Hash containing Symbol keys like :timeout,
+    #                       :read_timeout, :write_timeout, :open_timeout, or
+    #                       :timeout
+    #
+    # @return [Integer, nil] Timeout duration in seconds, or nil if no timeout
+    #                        has been set.
+    def request_timeout: (untyped `type`, untyped options) -> untyped
+
+    TIMEOUT_KEYS: untyped
+  end
+end
+
+module Faraday
+  class Adapter
+    # Sends requests to a Rack app.
+    #
+    # @example
+    #
+    #   class MyRackApp
+    #     def call(env)
+    #       [200, {'Content-Type' => 'text/html'}, ["hello world"]]
+    #     end
+    #   end
+    #
+    #   Faraday.new do |conn|
+    #     conn.adapter :rack, MyRackApp.new
+    #   end
+    class Rack < Faraday::Adapter
+      # not prefixed with "HTTP_"
+      SPECIAL_HEADERS: untyped
+
+      def initialize: (untyped faraday_app, untyped rack_app) -> untyped
+
+      def call: (untyped env) -> untyped
+
+      private
+
+      def execute_request: (untyped env, untyped rack_env) -> untyped
+
+      def build_rack_env: (untyped env) -> ::Hash[:method | :input | ::String, untyped]
+    end
+  end
+end
+
+module Faraday
+  class Adapter
+    # @example
+    #   test = Faraday::Connection.new do
+    #     use Faraday::Adapter::Test do |stub|
+    #       # Define matcher to match the request
+    #       stub.get '/resource.json' do
+    #         # return static content
+    #         [200, {'Content-Type' => 'application/json'}, 'hi world']
+    #       end
+    #
+    #       # response with content generated based on request
+    #       stub.get '/showget' do |env|
+    #         [200, {'Content-Type' => 'text/plain'}, env[:method].to_s]
+    #       end
+    #
+    #       # A regular expression can be used as matching filter
+    #       stub.get /\A\/items\/(\d+)\z/ do |env, meta|
+    #         # in case regular expression is used, an instance of MatchData
+    #         # can be received
+    #         [200,
+    #          {'Content-Type' => 'text/plain'},
+    #          "showing item: #{meta[:match_data][1]}"
+    #         ]
+    #       end
+    #     end
+    #   end
+    #
+    #   resp = test.get '/resource.json'
+    #   resp.body # => 'hi world'
+    #
+    #   resp = test.get '/showget'
+    #   resp.body # => 'get'
+    #
+    #   resp = test.get '/items/1'
+    #   resp.body # => 'showing item: 1'
+    #
+    #   resp = test.get '/items/2'
+    #   resp.body # => 'showing item: 2'
+    class Test < Faraday::Adapter
+      attr_accessor stubs: untyped
+
+      # A stack of Stubs
+      class Stubs
+        class NotFound < StandardError
+        end
+
+        def initialize: () { (untyped) -> untyped } -> untyped
+
+        def empty?: () -> untyped
+
+        def match: (untyped request_method, untyped host, untyped path, untyped headers, untyped body) -> (::FalseClass | untyped)
+
+        def get: (untyped path, ?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+
+        def head: (untyped path, ?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+
+        def post: (untyped path, ?untyped? body, ?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+
+        def put: (untyped path, ?untyped? body, ?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+
+        def patch: (untyped path, ?untyped? body, ?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+
+        def delete: (untyped path, ?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+
+        def options: (untyped path, ?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+
+        # Raises an error if any of the stubbed calls have not been made.
+        def verify_stubbed_calls: () -> untyped
+
+        def new_stub: (untyped request_method, untyped path, ?::Hash[untyped, untyped] headers, ?untyped? body) { () -> untyped } -> untyped
+
+        def matches?: (untyped stack, untyped host, untyped path, untyped headers, untyped body) -> (untyped | nil)
+      end
+
+      # Stub request
+      # rubocop:disable Style/StructInheritance
+      class Stub
+        # rubocop:enable Style/StructInheritance
+        def initialize: (untyped host, untyped full, untyped headers, untyped body, untyped block) -> untyped
+
+        def matches?: (untyped request_host, untyped request_uri, untyped request_headers, untyped request_body) -> ::Array[untyped]
+
+        def path_match?: (untyped request_path, untyped meta) -> untyped
+
+        def params_match?: (untyped request_params) -> untyped
+
+        def headers_match?: (untyped request_headers) -> untyped
+
+        def to_s: () -> ::String
+      end
+
+      def initialize: (untyped app, ?untyped? stubs) { () -> untyped } -> untyped
+
+      def configure: () { (untyped) -> untyped } -> untyped
+
+      def call: (untyped env) -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Adapter
+    # Typhoeus adapter. This class is just a stub, the real adapter is in
+    # https://github.com/typhoeus/typhoeus/blob/master/lib/typhoeus/adapters/faraday.rb
+    class Typhoeus < Faraday::Adapter
+      # Needs to define this method in order to support Typhoeus <= 1.3.0
+      def call: () -> nil
+    end
+  end
+end
+
+module Faraday
+  # AdapterRegistry registers adapter class names so they can be looked up by a
+  # String or Symbol name.
+  class AdapterRegistry
+    def initialize: () -> untyped
+
+    def get: (untyped name) -> untyped
+
+    def set: (untyped klass, ?untyped? name) -> untyped
+  end
+end
+
+module Faraday
+  # Adds the ability for other modules to manage autoloadable
+  # constants.
+  #
+  # @api private
+  module AutoloadHelper
+    # Registers the constants to be auto loaded.
+    #
+    # @param prefix [String] The require prefix. If the path is inside Faraday,
+    #           then it will be prefixed with the root path of this loaded
+    #           Faraday version.
+    # @param options [{ Symbol => String }] library names.
+    #
+    # @example
+    #
+    #   Faraday.autoload_all 'faraday/foo',
+    #     Bar: 'bar'
+    #
+    #   # requires faraday/foo/bar to load Faraday::Bar.
+    #   Faraday::Bar
+    #
+    # @return [void]
+    def autoload_all: (untyped prefix, untyped options) -> untyped
+
+    # Loads each autoloaded constant.  If thread safety is a concern,
+    # wrap this in a Mutex.
+    #
+    # @return [void]
+    def load_autoloaded_constants: () -> untyped
+
+    # Filters the module's contents with those that have been already
+    # autoloaded.
+    #
+    # @return [Array<Class, Module>]
+    def all_loaded_constants: () -> untyped
+  end
+
+  # Adapter is the base class for all Faraday adapters.
+  # @see lib/faraday/adapter.rb Original class location
+  class Adapter
+    extend AutoloadHelper
+  end
+
+  # Request represents a single HTTP request for a Faraday adapter to make.
+  # @see lib/faraday/request.rb Original class location
+  class Request
+    extend AutoloadHelper
+  end
+
+  # Response represents the returned value of a sent Faraday request.
+  # @see lib/faraday/response.rb Original class location
+  class Response
+    extend AutoloadHelper
+  end
+end
+
+module Faraday
+  # Connection objects manage the default properties and the middleware
+  # stack for fulfilling an HTTP request.
+  #
+  # @example
+  #
+  #   conn = Faraday::Connection.new 'http://sushi.com'
+  #
+  #   # GET http://sushi.com/nigiri
+  #   conn.get 'nigiri'
+  #   # => #<Faraday::Response>
+  #
+  class Connection
+    # A Set of allowed HTTP verbs.
+    METHODS: untyped
+
+    # @return [Hash] URI query unencoded key/value pairs.
+    attr_reader params: untyped
+
+    # @return [Hash] unencoded HTTP header key/value pairs.
+    attr_reader headers: untyped
+
+    # @return [String] a URI with the prefix used for all requests from this
+    #   Connection. This includes a default host name, scheme, port, and path.
+    attr_reader url_prefix: untyped
+
+    # @return [Faraday::RackBuilder] Builder for this Connection.
+    attr_reader builder: untyped
+
+    # @return [Hash] SSL options.
+    attr_reader ssl: untyped
+
+    # @return [Object] the parallel manager for this Connection.
+    attr_reader parallel_manager: untyped
+
+    # Sets the default parallel manager for this connection.
+    attr_writer default_parallel_manager: untyped
+
+    # @return [Hash] proxy options.
+    attr_reader proxy: untyped
+
+    # Initializes a new Faraday::Connection.
+    #
+    # @param url [URI, String] URI or String base URL to use as a prefix for all
+    #           requests (optional).
+    # @param options [Hash, Faraday::ConnectionOptions]
+    # @option options [URI, String] :url ('http:/') URI or String base URL
+    # @option options [Hash<String => String>] :params URI query unencoded
+    #                 key/value pairs.
+    # @option options [Hash<String => String>] :headers Hash of unencoded HTTP
+    #                 header key/value pairs.
+    # @option options [Hash] :request Hash of request options.
+    # @option options [Hash] :ssl Hash of SSL options.
+    # @option options [Hash, URI, String] :proxy proxy options, either as a URL
+    #                 or as a Hash
+    # @option options [URI, String] :proxy[:uri]
+    # @option options [String] :proxy[:user]
+    # @option options [String] :proxy[:password]
+    # @yield [self] after all setup has been done
+    def initialize: (?untyped? url, ?untyped? options) { (untyped) -> untyped } -> untyped
+
+    def initialize_proxy: (untyped url, untyped options) -> untyped
+
+    # Sets the Hash of URI query unencoded key/value pairs.
+    # @param hash [Hash]
+    def params=: (untyped hash) -> untyped
+
+    # Sets the Hash of unencoded HTTP header key/value pairs.
+    # @param hash [Hash]
+    def headers=: (untyped hash) -> untyped
+
+    extend Forwardable
+
+    # Closes the underlying resources and/or connections. In the case of
+    # persistent connections, this closes all currently open connections
+    # but does not prevent new connections from being made.
+    def close: () -> untyped
+
+    # @overload options()
+    #   Returns current Connection options.
+    #
+    # @overload options(url, params = nil, headers = nil)
+    #   Makes an OPTIONS HTTP request to the given URL.
+    #   @param url [String] String base URL to sue as a prefix for all requests.
+    #   @param params [Hash] Hash of URI query unencoded key/value pairs.
+    #   @param headers [Hash] unencoded HTTP header key/value pairs.
+    #
+    # @example
+    #   conn.options '/items/1'
+    #
+    # @yield [Faraday::Request] for further request customizations
+    # @return [Faraday::Response]
+    def options: (*untyped args) { (untyped) -> untyped } -> untyped
+
+    # Sets up the Authorization header with these credentials, encoded
+    # with base64.
+    #
+    # @param login [String] The authentication login.
+    # @param pass [String] The authentication password.
+    #
+    # @example
+    #
+    #   conn.basic_auth 'Aladdin', 'open sesame'
+    #   conn.headers['Authorization']
+    #   # => "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
+    #
+    # @return [void]
+    def basic_auth: (untyped login, untyped pass) -> untyped
+
+    # Sets up the Authorization header with the given token.
+    #
+    # @param token [String]
+    # @param options [Hash] extra token options.
+    #
+    # @example
+    #
+    #   conn.token_auth 'abcdef', foo: 'bar'
+    #   conn.headers['Authorization']
+    #   # => "Token token=\"abcdef\",
+    #               foo=\"bar\""
+    #
+    # @return [void]
+    def token_auth: (untyped token, ?untyped? options) -> untyped
+
+    # Sets up a custom Authorization header.
+    #
+    # @param type [String] authorization type
+    # @param token [String, Hash] token. A String value is taken literally, and
+    #         a Hash is encoded into comma-separated key/value pairs.
+    #
+    # @example
+    #
+    #   conn.authorization :Bearer, 'mF_9.B5f-4.1JqM'
+    #   conn.headers['Authorization']
+    #   # => "Bearer mF_9.B5f-4.1JqM"
+    #
+    #   conn.authorization :Token, token: 'abcdef', foo: 'bar'
+    #   conn.headers['Authorization']
+    #   # => "Token token=\"abcdef\",
+    #               foo=\"bar\""
+    #
+    # @return [void]
+    def authorization: (untyped `type`, untyped token) -> untyped
+
+    # Check if the adapter is parallel-capable.
+    #
+    # @yield if the adapter isn't parallel-capable, or if no adapter is set yet.
+    #
+    # @return [Object, nil] a parallel manager or nil if yielded
+    # @api private
+    def default_parallel_manager: () { () -> untyped } -> untyped
+
+    # Determine if this Faraday::Connection can make parallel requests.
+    #
+    # @return [Boolean]
+    def in_parallel?: () -> untyped
+
+    # Sets up the parallel manager to make a set of requests.
+    #
+    # @param manager [Object] The parallel manager that this Connection's
+    #                Adapter uses.
+    #
+    # @yield a block to execute multiple requests.
+    # @return [void]
+    def in_parallel: (?untyped? manager) { () -> untyped } -> untyped
+
+    # Sets the Hash proxy options.
+    #
+    # @param new_value [Object]
+    def proxy=: (untyped new_value) -> untyped
+
+    # Parses the given URL with URI and stores the individual
+    # components in this connection. These components serve as defaults for
+    # requests made by this connection.
+    #
+    # @param url [String, URI]
+    # @param encoder [Object]
+    #
+    # @example
+    #
+    #   conn = Faraday::Connection.new { ... }
+    #   conn.url_prefix = "https://sushi.com/api"
+    #   conn.scheme      # => https
+    #   conn.path_prefix # => "/api"
+    #
+    #   conn.get("nigiri?page=2") # accesses https://sushi.com/api/nigiri
+    def url_prefix=: (untyped url, ?untyped? encoder) -> untyped
+
+    # Sets the path prefix and ensures that it always has a leading
+    # slash.
+    #
+    # @param value [String]
+    #
+    # @return [String] the new path prefix
+    def path_prefix=: (untyped value) -> untyped
+
+    # Takes a relative url for a request and combines it with the defaults
+    # set on the connection instance.
+    #
+    # @param url [String]
+    # @param extra_params [Hash]
+    #
+    # @example
+    #   conn = Faraday::Connection.new { ... }
+    #   conn.url_prefix = "https://sushi.com/api?token=abc"
+    #   conn.scheme      # => https
+    #   conn.path_prefix # => "/api"
+    #
+    #   conn.build_url("nigiri?page=2")
+    #   # => https://sushi.com/api/nigiri?token=abc&page=2
+    #
+    #   conn.build_url("nigiri", page: 2)
+    #   # => https://sushi.com/api/nigiri?token=abc&page=2
+    #
+    def build_url: (?untyped? url, ?untyped? extra_params) -> untyped
+
+    # Builds and runs the Faraday::Request.
+    #
+    # @param method [Symbol] HTTP method.
+    # @param url [String, URI] String or URI to access.
+    # @param body [Object] The request body that will eventually be converted to
+    #             a string.
+    # @param headers [Hash] unencoded HTTP header key/value pairs.
+    #
+    # @return [Faraday::Response]
+    def run_request: (untyped method, untyped url, untyped body, untyped headers) { (untyped) -> untyped } -> untyped
+
+    # Creates and configures the request object.
+    #
+    # @param method [Symbol]
+    #
+    # @yield [Faraday::Request] if block given
+    # @return [Faraday::Request]
+    def build_request: (untyped method) { (untyped) -> untyped } -> untyped
+
+    # Build an absolute URL based on url_prefix.
+    #
+    # @param url [String, URI]
+    # @param params [Faraday::Utils::ParamsHash] A Faraday::Utils::ParamsHash to
+    #               replace the query values
+    #          of the resulting url (default: nil).
+    #
+    # @return [URI]
+    def build_exclusive_url: (?untyped? url, ?untyped? params, ?untyped? params_encoder) -> untyped
+
+    # Creates a duplicate of this Faraday::Connection.
+    #
+    # @api private
+    #
+    # @return [Faraday::Connection]
+    def dup: () -> untyped
+
+    # Yields username and password extracted from a URI if they both exist.
+    #
+    # @param uri [URI]
+    # @yield [username, password] any username and password
+    # @yieldparam username [String] any username from URI
+    # @yieldparam password [String] any password from URI
+    # @return [void]
+    # @api private
+    def with_uri_credentials: (untyped uri) { (untyped, untyped) -> untyped } -> (nil | untyped)
+
+    def set_authorization_header: (untyped header_type, *untyped args) -> untyped
+
+    def proxy_from_env: (untyped url) -> (nil | untyped)
+
+    def find_default_proxy: () -> (nil | untyped)
+
+    def proxy_for_request: (untyped url) -> untyped
+
+    def support_parallel?: (untyped adapter) -> untyped
+  end
+end
+
+module Faraday
+  # DependencyLoader helps Faraday adapters and middleware load dependencies.
+  module DependencyLoader
+    attr_reader load_error: untyped
+
+    # Executes a block which should try to require and reference dependent
+    # libraries
+    def dependency: (?untyped? lib) { () -> untyped } -> untyped
+
+    def new: () -> untyped
+
+    def loaded?: () -> untyped
+
+    def inherited: (untyped subclass) -> untyped
+
+    private
+
+    attr_writer load_error: untyped
+  end
+end
+
+module Faraday
+  # FlatParamsEncoder manages URI params as a flat hash. Any Array values repeat
+  # the parameter multiple times.
+  module FlatParamsEncoder
+    extend Forwardable
+
+    # Encode converts the given param into a URI querystring. Keys and values
+    # will converted to strings and appropriately escaped for the URI.
+    #
+    # @param params [Hash] query arguments to convert.
+    #
+    # @example
+    #
+    #   encode({a: %w[one two three], b: true, c: "C"})
+    #   # => 'a=one&a=two&a=three&b=true&c=C'
+    #
+    # @return [String] the URI querystring (without the leading '?')
+    def self.encode: (untyped params) -> (nil | untyped)
+
+    # Decode converts the given URI querystring into a hash.
+    #
+    # @param query [String] query arguments to parse.
+    #
+    # @example
+    #
+    #   decode('a=one&a=two&a=three&b=true&c=C')
+    #   # => {"a"=>["one", "two", "three"], "b"=>"true", "c"=>"C"}
+    #
+    # @return [Hash] parsed keys and value strings from the querystring.
+    def self.decode: (untyped query) -> (nil | untyped)
+
+    attr_accessor self.sort_params: untyped
+  end
+end
+
+module Faraday
+  # Sub-module for encoding parameters into query-string.
+  module EncodeMethods
+    # @param params [nil, Array, #to_hash] parameters to be encoded
+    #
+    # @return [String] the encoded params
+    #
+    # @raise [TypeError] if params can not be converted to a Hash
+    def encode: (untyped params) -> (nil | untyped)
+
+    def encode_pair: (untyped parent, untyped value) -> untyped
+
+    def encode_hash: (untyped parent, untyped value) -> untyped
+
+    def encode_array: (untyped parent, untyped value) -> untyped
+  end
+
+  # Sub-module for decoding query-string into parameters.
+  module DecodeMethods
+    # @param query [nil, String]
+    #
+    # @return [Array<Array, String>] the decoded params
+    #
+    # @raise [TypeError] if the nesting is incorrect
+    def decode: (untyped query) -> (nil | untyped)
+
+    SUBKEYS_REGEX: untyped
+
+    def decode_pair: (untyped key, untyped value, untyped context) -> untyped
+
+    def prepare_context: (untyped context, untyped subkey, untyped is_array, untyped last_subkey) -> untyped
+
+    def new_context: (untyped subkey, untyped is_array, untyped context) -> untyped
+
+    def match_context: (untyped context, untyped subkey) -> untyped
+
+    def add_to_context: (untyped is_array, untyped context, untyped value, untyped subkey) -> untyped
+
+    # Internal: convert a nested hash with purely numeric keys into an array.
+    # FIXME: this is not compatible with Rack::Utils.parse_nested_query
+    # @!visibility private
+    def dehash: (untyped hash, untyped depth) -> untyped
+  end
+
+  # This is the default encoder for Faraday requests.
+  # Using this encoder, parameters will be encoded respecting their structure,
+  # so you can send objects such as Arrays or Hashes as parameters
+  # for your requests.
+  module NestedParamsEncoder
+    attr_accessor self.sort_params: untyped
+
+    extend Forwardable
+
+    extend EncodeMethods
+
+    extend DecodeMethods
+  end
+end
+
+# Faraday namespace.
+module Faraday
+  # Faraday error base class.
+  class Error < StandardError
+    attr_reader response: untyped
+
+    attr_reader wrapped_exception: untyped
+
+    def initialize: (untyped exc, ?untyped? response) -> untyped
+
+    def backtrace: () -> untyped
+
+    def inspect: () -> ::String
+
+    def response_status: () -> untyped
+
+    def response_headers: () -> untyped
+
+    def response_body: () -> untyped
+
+    # Pulls out potential parent exception and response hash, storing them in
+    # instance variables.
+    # exc      - Either an Exception, a string message, or a response hash.
+    # response - Hash
+    #              :status  - Optional integer HTTP response status
+    #              :headers - String key/value hash of HTTP response header
+    #                         values.
+    #              :body    - Optional string HTTP response body.
+    #              :request - Hash
+    #                           :method   - Symbol with the request HTTP method.
+    #                           :url_path - String with the url path requested.
+    #                           :params   - String key/value hash of query params
+    #                                     present in the request.
+    #                           :headers  - String key/value hash of HTTP request
+    #                                     header values.
+    #                           :body     - String HTTP request body.
+    #
+    # If a subclass has to call this, then it should pass a string message
+    # to `super`. See NilStatusError.
+    def exc_msg_and_response!: (untyped exc, ?untyped? response) -> untyped
+
+    # Pulls out potential parent exception and response hash.
+    def exc_msg_and_response: (untyped exc, ?untyped? response) -> (::Array[untyped] | ::Array[nil | ::String | untyped] | ::Array[nil | untyped])
+  end
+
+  # Faraday client error class. Represents 4xx status responses.
+  class ClientError < Error
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a 400 response.
+  class BadRequestError < ClientError
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a 401 response.
+  class UnauthorizedError < ClientError
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a 403 response.
+  class ForbiddenError < ClientError
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a 404 response.
+  class ResourceNotFound < ClientError
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a 407 response.
+  class ProxyAuthError < ClientError
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a 409 response.
+  class ConflictError < ClientError
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a 422 response.
+  class UnprocessableEntityError < ClientError
+  end
+
+  # Faraday server error class. Represents 5xx status responses.
+  class ServerError < Error
+  end
+
+  # A unified client error for timeouts.
+  class TimeoutError < ServerError
+    def initialize: (?::String exc, ?untyped? response) -> untyped
+  end
+
+  # Raised by Faraday::Response::RaiseError in case of a nil status in response.
+  class NilStatusError < ServerError
+    def initialize: (untyped exc, ?untyped? response) -> untyped
+  end
+
+  # A unified error for failed connections.
+  class ConnectionFailed < Error
+  end
+
+  # A unified client error for SSL errors.
+  class SSLError < Error
+  end
+
+  # Raised by FaradayMiddleware::ResponseMiddleware
+  class ParsingError < Error
+  end
+
+  # Exception used to control the Retry middleware.
+  #
+  # @see Faraday::Request::Retry
+  class RetriableResponse < Error
+  end
+end
+
+module Faraday
+  # @!method initialize(filename_or_io, content_type, filename = nil, opts = {})
+  #
+  #   @param filename_or_io [String, IO] Either a String filename to a local
+  #     file or an open IO object.
+  #   @param content_type [String] String content type of the file data.
+  #   @param filename [String] Optional String filename, usually to add context
+  #     to a given IO object.
+  #   @param opts [Hash] Optional Hash of String key/value pairs to describethis
+  #     this uploaded file. Expected Header keys include:
+  #     * Content-Transfer-Encoding - Defaults to "binary"
+  #     * Content-Disposition - Defaults to "form-data"
+  #     * Content-Type - Defaults to the content_type argument.
+  #     * Content-ID - Optional.
+  #
+  # @return [Faraday::FilePart]
+  #
+  # @!attribute [r] content_type
+  # The uploaded binary data's content type.
+  #
+  # @return [String]
+  #
+  # @!attribute [r] original_filename
+  # The base filename, taken either from the filename_or_io or filename
+  # arguments in #initialize.
+  #
+  # @return [String]
+  #
+  # @!attribute [r] opts
+  # Extra String key/value pairs to make up the header for this uploaded file.
+  #
+  # @return [Hash]
+  #
+  # @!attribute [r] io
+  # The open IO object for the uploaded file.
+  #
+  # @return [IO]
+  FilePart: untyped
+
+  # Multipart value used to POST a file.
+  #
+  # @deprecated Use FilePart instead of this class. It behaves identically, with
+  #   a matching name to ParamPart.
+  UploadIO: untyped
+
+  Parts: untyped
+
+  # Similar to, but not compatible with CompositeReadIO provided by the
+  # multipart-post gem.
+  # https://github.com/nicksieger/multipart-post/blob/master/lib/composite_io.rb
+  class CompositeReadIO
+    def initialize: (*untyped parts) -> untyped
+
+    # @return [Integer] sum of the lengths of all the parts
+    def length: () -> untyped
+
+    # Rewind each of the IOs and reset the index to 0.
+    #
+    # @return [void]
+    def rewind: () -> untyped
+
+    # Read from IOs in order until `length` bytes have been received.
+    #
+    # @param length [Integer, nil]
+    # @param outbuf [String, nil]
+    def read: (?untyped? length, ?untyped? outbuf) -> untyped
+
+    # Close each of the IOs.
+    #
+    # @return [void]
+    def close: () -> untyped
+
+    def ensure_open_and_readable: () -> nil
+
+    private
+
+    def current_io: () -> untyped
+
+    def advance_io: () -> untyped
+  end
+end
+
+module Faraday
+  module Logging
+    # Serves as an integration point to customize logging
+    class Formatter
+      extend Forwardable
+
+      DEFAULT_OPTIONS: untyped
+
+      def initialize: (logger: untyped logger, options: untyped options) -> untyped
+
+      def request: (untyped env) -> untyped
+
+      def response: (untyped env) -> untyped
+
+      def filter: (untyped filter_word, untyped filter_replacement) -> untyped
+
+      private
+
+      def dump_headers: (untyped headers) -> untyped
+
+      def dump_body: (untyped body) -> untyped
+
+      def pretty_inspect: (untyped body) -> untyped
+
+      def log_headers?: (untyped `type`) -> untyped
+
+      def log_body?: (untyped `type`) -> untyped
+
+      def apply_filters: (untyped output) -> untyped
+
+      def log_level: () -> (:info | untyped)
+
+      def log_headers: (untyped `type`, untyped headers) -> untyped
+
+      def log_body: (untyped `type`, untyped body) -> untyped
+    end
+  end
+end
+
+module Faraday
+  METHODS_WITH_QUERY: untyped
+
+  METHODS_WITH_BODY: untyped
+end
+
+module Faraday
+  # Middleware is the basic base class of any Faraday middleware.
+  class Middleware
+    extend MiddlewareRegistry
+
+    extend DependencyLoader
+
+    attr_reader app: untyped
+
+    attr_reader options: untyped
+
+    def initialize: (?untyped? app, ?::Hash[untyped, untyped] options) -> untyped
+
+    def call: (untyped env) -> untyped
+
+    def close: () -> untyped
+  end
+end
+
+module Faraday
+  # Adds the ability for other modules to register and lookup
+  # middleware classes.
+  module MiddlewareRegistry
+    # Register middleware class(es) on the current module.
+    #
+    # @param autoload_path [String] Middleware autoload path
+    # @param mapping [Hash{
+    #          Symbol => Module,
+    #          Symbol => Array<Module, Symbol, String>,
+    #        }] Middleware mapping from a lookup symbol to a reference to the
+    #        middleware.
+    #        Classes can be expressed as:
+    #          - a fully qualified constant
+    #          - a Symbol
+    #          - a Proc that will be lazily called to return the former
+    #          - an array is given, its first element is the constant or symbol,
+    #            and its second is a file to `require`.
+    # @return [void]
+    #
+    # @example Lookup by a constant
+    #
+    #   module Faraday
+    #     class Whatever
+    #       # Middleware looked up by :foo returns Faraday::Whatever::Foo.
+    #       register_middleware foo: Foo
+    #     end
+    #   end
+    #
+    # @example Lookup by a symbol
+    #
+    #   module Faraday
+    #     class Whatever
+    #       # Middleware looked up by :bar returns
+    #       # Faraday::Whatever.const_get(:Bar)
+    #       register_middleware bar: :Bar
+    #     end
+    #   end
+    #
+    # @example Lookup by a symbol and string in an array
+    #
+    #   module Faraday
+    #     class Whatever
+    #       # Middleware looked up by :baz requires 'baz' and returns
+    #       # Faraday::Whatever.const_get(:Baz)
+    #       register_middleware baz: [:Baz, 'baz']
+    #     end
+    #   end
+    #
+    def register_middleware: (?untyped? autoload_path, ?untyped? mapping) -> untyped
+
+    # Unregister a previously registered middleware class.
+    #
+    # @param key [Symbol] key for the registered middleware.
+    def unregister_middleware: (untyped key) -> untyped
+
+    # Lookup middleware class with a registered Symbol shortcut.
+    #
+    # @param key [Symbol] key for the registered middleware.
+    # @return [Class] a middleware Class.
+    # @raise [Faraday::Error] if given key is not registered
+    #
+    # @example
+    #
+    #   module Faraday
+    #     class Whatever
+    #       register_middleware foo: Foo
+    #     end
+    #   end
+    #
+    #   Faraday::Whatever.lookup_middleware(:foo)
+    #   # => Faraday::Whatever::Foo
+    #
+    def lookup_middleware: (untyped key) -> untyped
+
+    def middleware_mutex: () { () -> untyped } -> untyped
+
+    def fetch_middleware: (untyped key) -> untyped
+
+    def load_middleware: (untyped key) -> untyped
+  end
+end
+
+module Faraday
+  # Subclasses Struct with some special helpers for converting from a Hash to
+  # a Struct.
+  class Options < Struct[untyped]
+    # Public
+    def self.from: (untyped value) -> untyped
+
+    # Public
+    def each: () { (untyped, untyped) -> untyped } -> untyped
+
+    # Public
+    def update: (untyped obj) -> untyped
+
+    # Public
+    def delete: (untyped key) -> untyped
+
+    # Public
+    def clear: () -> untyped
+
+    # Public
+    def merge!: (untyped other) -> untyped
+
+    # Public
+    def merge: (untyped other) -> untyped
+
+    # Public
+    def deep_dup: () -> untyped
+
+    # Public
+    def fetch: (untyped key, *untyped args) { (untyped) -> untyped } -> untyped
+
+    # Public
+    def values_at: (*untyped keys) -> untyped
+
+    # Public
+    def keys: () -> untyped
+
+    # Public
+    def empty?: () -> untyped
+
+    # Public
+    def each_key: () { () -> untyped } -> untyped
+
+    # Public
+    def key?: (untyped key) -> untyped
+
+    alias has_key? key?
+
+    # Public
+    def each_value: () { () -> untyped } -> untyped
+
+    # Public
+    def value?: (untyped value) -> untyped
+
+    alias has_value? value?
+
+    # Public
+    def to_hash: () -> untyped
+
+    # Internal
+    def inspect: () -> ::String
+
+    # Internal
+    def self.options: (untyped mapping) -> untyped
+
+    # Internal
+    def self.options_for: (untyped key) -> untyped
+
+    # Internal
+    def self.attribute_options: () -> untyped
+
+    def self.memoized: (untyped key) { () -> untyped } -> untyped
+
+    def self.memoized_attributes: () -> untyped
+
+    def []: (untyped key) -> untyped
+
+    def symbolized_key_set: () -> untyped
+
+    def self.inherited: (untyped subclass) -> untyped
+
+    def self.fetch_error_class: () -> untyped
+  end
+end
+
+module Faraday
+  # ConnectionOptions contains the configurable properties for a Faraday
+  # connection object.
+  class ConnectionOptions
+    def new_builder: (untyped block) -> untyped
+  end
+end
+
+module Faraday
+  # @!attribute method
+  #   @return [Symbol] HTTP method (`:get`, `:post`)
+  #
+  # @!attribute body
+  #   @return [String] The request body that will eventually be converted to a
+  #   string.
+  #
+  # @!attribute url
+  #   @return [URI] URI instance for the current request.
+  #
+  # @!attribute request
+  #   @return [Hash] options for configuring the request.
+  #   Options for configuring the request.
+  #
+  #   - `:timeout`  open/read timeout Integer in seconds
+  #   - `:open_timeout` - read timeout Integer in seconds
+  #   - `:on_data`      - Proc for streaming
+  #   - `:proxy`        - Hash of proxy options
+  #       - `:uri`        - Proxy Server URI
+  #       - `:user`       - Proxy server username
+  #       - `:password`   - Proxy server password
+  #
+  # @!attribute request_headers
+  #   @return [Hash] HTTP Headers to be sent to the server.
+  #
+  # @!attribute ssl
+  #   @return [Hash] options for configuring SSL requests
+  #
+  # @!attribute parallel_manager
+  #   @return [Object] sent if the connection is in parallel mode
+  #
+  # @!attribute params
+  #   @return [Hash]
+  #
+  # @!attribute response
+  #   @return [Response]
+  #
+  # @!attribute response_headers
+  #   @return [Hash] HTTP headers from the server
+  #
+  # @!attribute status
+  #   @return [Integer] HTTP response status code
+  #
+  # @!attribute reason_phrase
+  #   @return [String]
+  class Env
+    # rubocop:disable Naming/ConstantName
+    ContentLength: ::String
+
+    StatusesWithoutBody: untyped
+
+    SuccessfulStatuses: untyped
+
+    # A Set of HTTP verbs that typically send a body.  If no body is set for
+    # these requests, the Content-Length header is set to 0.
+    MethodsWithBodies: untyped
+
+    extend Forwardable
+
+    # Build a new Env from given value. Respects and updates `custom_members`.
+    #
+    # @param value [Object] a value fitting Option.from(v).
+    # @return [Env] from given value
+    def self.from: (untyped value) -> untyped
+
+    # @param key [Object]
+    def []: (untyped key) -> untyped
+
+    # @param key [Object]
+    # @param value [Object]
+    def []=: (untyped key, untyped value) -> (nil | untyped)
+
+    def current_body: () -> untyped
+
+    def body: () -> untyped
+
+    def body=: (untyped value) -> untyped
+
+    # @return [Boolean] true if status is in the set of {SuccessfulStatuses}.
+    def success?: () -> untyped
+
+    # @return [Boolean] true if there's no body yet, and the method is in the
+    # set of {MethodsWithBodies}.
+    def needs_body?: () -> untyped
+
+    # Sets content length to zero and the body to the empty string.
+    def clear_body: () -> untyped
+
+    # @return [Boolean] true if the status isn't in the set of
+    # {StatusesWithoutBody}.
+    def parse_body?: () -> untyped
+
+    # @return [Boolean] true if there is a parallel_manager
+    def parallel?: () -> untyped
+
+    def inspect: () -> ::String
+
+    # @private
+    def custom_members: () -> untyped
+
+    def in_member_set?: (untyped key) -> untyped
+
+    # @private
+    def self.member_set: () -> untyped
+  end
+end
+
+module Faraday
+  # ProxyOptions contains the configurable properties for the proxy
+  # configuration used when making an HTTP request.
+  class ProxyOptions
+    extend Forwardable
+
+    def self.from: (untyped value) -> untyped
+  end
+end
+
+module Faraday
+  # RequestOptions contains the configurable properties for a Faraday request.
+  class RequestOptions
+    def []=: (untyped key, untyped value) -> untyped
+
+    def stream_response?: () -> untyped
+  end
+end
+
+module Faraday
+  # SSL-related options.
+  #
+  # @!attribute verify
+  #   @return [Boolean] whether to verify SSL certificates or not
+  #
+  # @!attribute ca_file
+  #   @return [String] CA file
+  #
+  # @!attribute ca_path
+  #   @return [String] CA path
+  #
+  # @!attribute verify_mode
+  #   @return [Integer] Any `OpenSSL::SSL::` constant (see https://ruby-doc.org/stdlib-2.5.1/libdoc/openssl/rdoc/OpenSSL/SSL.html)
+  #
+  # @!attribute cert_store
+  #   @return [OpenSSL::X509::Store] certificate store
+  #
+  # @!attribute client_cert
+  #   @return [String, OpenSSL::X509::Certificate] client certificate
+  #
+  # @!attribute client_key
+  #   @return [String, OpenSSL::PKey::RSA, OpenSSL::PKey::DSA] client key
+  #
+  # @!attribute certificate
+  #   @return [OpenSSL::X509::Certificate] certificate (Excon only)
+  #
+  # @!attribute private_key
+  #   @return [OpenSSL::PKey::RSA, OpenSSL::PKey::DSA] private key (Excon only)
+  #
+  # @!attribute verify_depth
+  #   @return [Integer] maximum depth for the certificate chain verification
+  #
+  # @!attribute version
+  #   @return [String, Symbol] SSL version (see https://ruby-doc.org/stdlib-2.5.1/libdoc/openssl/rdoc/OpenSSL/SSL/SSLContext.html#method-i-ssl_version-3D)
+  #
+  # @!attribute min_version
+  #   @return [String, Symbol] minimum SSL version (see https://ruby-doc.org/stdlib-2.5.1/libdoc/openssl/rdoc/OpenSSL/SSL/SSLContext.html#method-i-min_version-3D)
+  #
+  # @!attribute max_version
+  #   @return [String, Symbol] maximum SSL version (see https://ruby-doc.org/stdlib-2.5.1/libdoc/openssl/rdoc/OpenSSL/SSL/SSLContext.html#method-i-max_version-3D)
+  class SSLOptions
+    # @return [Boolean] true if should verify
+    def verify?: () -> untyped
+
+    # @return [Boolean] true if should not verify
+    def disable?: () -> untyped
+  end
+end
+
+module Faraday
+  # Multipart value used to POST data with a content type.
+  class ParamPart
+    # @param value [String] Uploaded content as a String.
+    # @param content_type [String] String content type of the value.
+    # @param content_id [String] Optional String of this value's Content-ID.
+    #
+    # @return [Faraday::ParamPart]
+    def initialize: (untyped value, untyped content_type, ?untyped? content_id) -> untyped
+
+    # Converts this value to a form part.
+    #
+    # @param boundary [String] String multipart boundary that must not exist in
+    #   the content exactly.
+    # @param key [String] String key name for this value.
+    #
+    # @return [Faraday::Parts::Part]
+    def to_part: (untyped boundary, untyped key) -> untyped
+
+    # Returns a Hash of String key/value pairs.
+    #
+    # @return [Hash]
+    def headers: () -> ::Hash[::String, untyped]
+
+    # The content to upload.
+    #
+    # @return [String]
+    attr_reader value: untyped
+
+    # The value's content type.
+    #
+    # @return [String]
+    attr_reader content_type: untyped
+
+    # The value's content ID, if given.
+    #
+    # @return [String, nil]
+    attr_reader content_id: untyped
+  end
+end
+
+module Faraday
+  # A Builder that processes requests into responses by passing through an inner
+  # middleware stack (heavily inspired by Rack).
+  #
+  # @example
+  #   Faraday::Connection.new(url: 'http://sushi.com') do |builder|
+  #     builder.request  :url_encoded  # Faraday::Request::UrlEncoded
+  #     builder.adapter  :net_http     # Faraday::Adapter::NetHttp
+  #   end
+  class RackBuilder
+    # Used to detect missing arguments
+    NO_ARGUMENT: untyped
+
+    attr_accessor handlers: untyped
+
+    # Error raised when trying to modify the stack after calling `lock!`
+    class StackLocked < RuntimeError
+    end
+
+    # borrowed from ActiveSupport::Dependencies::Reference &
+    # ActionDispatch::MiddlewareStack::Middleware
+    class Handler
+      REGISTRY: untyped
+
+      attr_reader name: untyped
+
+      def initialize: (untyped klass, *untyped args) { () -> untyped } -> untyped
+
+      def klass: () -> untyped
+
+      def inspect: () -> untyped
+
+      def ==: (untyped other) -> untyped
+
+      def build: (?untyped? app) -> untyped
+    end
+
+    def initialize: (?untyped handlers, ?untyped? adapter) { () -> untyped } -> untyped
+
+    def build: (?::Hash[untyped, untyped] options) { (untyped) -> untyped } -> untyped
+
+    def []: (untyped idx) -> untyped
+
+    # Locks the middleware stack to ensure no further modifications are made.
+    def lock!: () -> untyped
+
+    def locked?: () -> untyped
+
+    def use: (untyped klass, *untyped args) { () -> untyped } -> untyped
+
+    def request: (untyped key, *untyped args) { () -> untyped } -> untyped
+
+    def response: (untyped key, *untyped args) { () -> untyped } -> untyped
+
+    def adapter: (?untyped klass, *untyped args) { () -> untyped } -> untyped
+
+    def insert: (untyped index, *untyped args) { () -> untyped } -> untyped
+
+    alias insert_before insert
+
+    def insert_after: (untyped index, *untyped args) { () -> untyped } -> untyped
+
+    def swap: (untyped index, *untyped args) { () -> untyped } -> untyped
+
+    def delete: (untyped handler) -> untyped
+
+    # Processes a Request into a Response by passing it through this Builder's
+    # middleware stack.
+    #
+    # @param connection [Faraday::Connection]
+    # @param request [Faraday::Request]
+    #
+    # @return [Faraday::Response]
+    def build_response: (untyped connection, untyped request) -> untyped
+
+    # The "rack app" wrapped in middleware. All requests are sent here.
+    #
+    # The builder is responsible for creating the app object. After this,
+    # the builder gets locked to ensure no further modifications are made
+    # to the middleware stack.
+    #
+    # Returns an object that responds to `call` and returns a Response.
+    def app: () -> untyped
+
+    def to_app: () -> untyped
+
+    def ==: (untyped other) -> untyped
+
+    def dup: () -> untyped
+
+    # ENV Keys
+    # :http_method - a symbolized request HTTP method (:get, :post)
+    # :body   - the request body that will eventually be converted to a string.
+    # :url    - URI instance for the current request.
+    # :status           - HTTP response status code
+    # :request_headers  - hash of HTTP Headers to be sent to the server
+    # :response_headers - Hash of HTTP headers from the server
+    # :parallel_manager - sent if the connection is in parallel mode
+    # :request - Hash of options for configuring the request.
+    #   :timeout      - open/read timeout Integer in seconds
+    #   :open_timeout - read timeout Integer in seconds
+    #   :proxy        - Hash of proxy options
+    #     :uri        - Proxy Server URI
+    #     :user       - Proxy server username
+    #     :password   - Proxy server password
+    # :ssl - Hash of options for configuring SSL requests.
+    def build_env: (untyped connection, untyped request) -> untyped
+
+    private
+
+    LOCK_ERR: ::String
+
+    def raise_if_locked: () -> untyped
+
+    def raise_if_adapter: (untyped klass) -> (nil | untyped)
+
+    def adapter_set?: () -> untyped
+
+    def is_adapter?: (untyped klass) -> untyped
+
+    def use_symbol: (untyped mod, untyped key, *untyped args) { () -> untyped } -> untyped
+
+    def assert_index: (untyped index) -> untyped
+  end
+end
+
+module Faraday
+  # Used to setup URLs, params, headers, and the request body in a sane manner.
+  #
+  # @example
+  #   @connection.post do |req|
+  #     req.url 'http://localhost', 'a' => '1' # 'http://localhost?a=1'
+  #     req.headers['b'] = '2' # Header
+  #     req.params['c']  = '3' # GET Param
+  #     req['b']         = '2' # also Header
+  #     req.body = 'abc'
+  #   end
+  #
+  # @!attribute http_method
+  #   @return [Symbol] the HTTP method of the Request
+  # @!attribute path
+  #   @return [URI, String] the path
+  # @!attribute params
+  #   @return [Hash] query parameters
+  # @!attribute headers
+  #   @return [Faraday::Utils::Headers] headers
+  # @!attribute body
+  #   @return [Hash] body
+  # @!attribute options
+  #   @return [RequestOptions] options
+  #
+  # rubocop:disable Style/StructInheritance
+  class Request
+    extend MiddlewareRegistry
+
+    # @param request_method [String]
+    # @yield [request] for block customization, if block given
+    # @yieldparam request [Request]
+    # @return [Request]
+    def self.create: (untyped request_method) { (untyped) -> untyped } -> untyped
+
+    def method: () -> untyped
+
+    # Replace params, preserving the existing hash type.
+    #
+    # @param hash [Hash] new params
+    def params=: (untyped hash) -> untyped
+
+    # Replace request headers, preserving the existing hash type.
+    #
+    # @param hash [Hash] new headers
+    def headers=: (untyped hash) -> untyped
+
+    # Update path and params.
+    #
+    # @param path [URI, String]
+    # @param params [Hash, nil]
+    # @return [void]
+    def url: (untyped path, ?untyped? params) -> untyped
+
+    # @param key [Object] key to look up in headers
+    # @return [Object] value of the given header name
+    def []: (untyped key) -> untyped
+
+    # @param key [Object] key of header to write
+    # @param value [Object] value of header
+    def []=: (untyped key, untyped value) -> untyped
+
+    # Marshal serialization support.
+    #
+    # @return [Hash] the hash ready to be serialized in Marshal.
+    def marshal_dump: () -> { http_method: untyped, body: untyped, headers: untyped, path: untyped, params: untyped, options: untyped }
+
+    # Marshal serialization support.
+    # Restores the instance variables according to the +serialised+.
+    # @param serialised [Hash] the serialised object.
+    def marshal_load: (untyped serialised) -> untyped
+
+    # @return [Env] the Env for this Request
+    def to_env: (untyped connection) -> untyped
+  end
+end
+
+module Faraday
+  class Request
+    # Request middleware for the Authorization HTTP header
+    class Authorization < Faraday::Middleware
+      KEY: ::String
+
+      # @param type [String, Symbol]
+      # @param token [String, Symbol, Hash]
+      # @return [String] a header value
+      def self.header: (untyped `type`, untyped token) -> untyped
+
+      # @param type [String]
+      # @param hash [Hash]
+      # @return [String] type followed by comma-separated key=value pairs
+      # @api private
+      def self.build_hash: (untyped `type`, untyped hash) -> ::String
+
+      # @param app [#call]
+      # @param type [String, Symbol] Type of Authorization
+      # @param token [String, Symbol, Hash] Token value for the Authorization
+      def initialize: (untyped app, untyped `type`, untyped token) -> untyped
+
+      # @param env [Faraday::Env]
+      def call: (untyped env) -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Request
+    # Authorization middleware for Basic Authentication.
+    class BasicAuthentication
+      # @param login [String]
+      # @param pass [String]
+      #
+      # @return [String] a Basic Authentication header line
+      def self.header: (untyped login, untyped pass) -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Request
+    # Middleware for instrumenting Requests.
+    class Instrumentation < Faraday::Middleware
+      # Options class used in Request::Instrumentation class.
+      class Options
+        # @return [String]
+        def name: () -> untyped
+
+        # @return [Class]
+        def instrumenter: () -> untyped
+      end
+
+      # Instruments requests using Active Support.
+      #
+      # Measures time spent only for synchronous requests.
+      #
+      # @example Using ActiveSupport::Notifications to measure time spent
+      #   for Faraday requests.
+      #   ActiveSupport::Notifications
+      #     .subscribe('request.faraday') do |name, starts, ends, _, env|
+      #     url = env[:url]
+      #     http_method = env[:method].to_s.upcase
+      #     duration = ends - starts
+      #     $stderr.puts '[%s] %s %s (%.3f s)' %
+      #       [url.host, http_method, url.request_uri, duration]
+      #   end
+      # @param app [#call]
+      # @param options [nil, Hash] Options hash
+      # @option options [String] :name ('request.faraday')
+      #   Name of the instrumenter
+      # @option options [Class] :instrumenter (ActiveSupport::Notifications)
+      #   Active Support instrumenter class.
+      def initialize: (untyped app, ?untyped? options) -> untyped
+
+      # @param env [Faraday::Env]
+      def call: (untyped env) -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Request
+    # Middleware for supporting multi-part requests.
+    class Multipart < UrlEncoded
+      DEFAULT_BOUNDARY_PREFIX: ::String
+
+      def initialize: (?untyped? app, ?::Hash[untyped, untyped] options) -> untyped
+
+      # Checks for files in the payload, otherwise leaves everything untouched.
+      #
+      # @param env [Faraday::Env]
+      def call: (untyped env) -> untyped
+
+      # @param env [Faraday::Env]
+      def process_request?: (untyped env) -> untyped
+
+      def has_multipart?: (untyped obj) -> (::TrueClass | ::FalseClass)
+
+      # @param env [Faraday::Env]
+      # @param params [Hash]
+      def create_multipart: (untyped env, untyped params) -> untyped
+
+      def part: (untyped boundary, untyped key, untyped value) -> untyped
+
+      # @return [String]
+      def unique_boundary: () -> ::String
+
+      # @param params [Hash]
+      # @param prefix [String]
+      # @param pieces [Array]
+      def process_params: (untyped params, ?untyped? prefix, ?untyped? pieces) { () -> untyped } -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Request
+    # Catches exceptions and retries each request a limited number of times.
+    #
+    # By default, it retries 2 times and handles only timeout exceptions. It can
+    # be configured with an arbitrary number of retries, a list of exceptions to
+    # handle, a retry interval, a percentage of randomness to add to the retry
+    # interval, and a backoff factor.
+    #
+    # @example Configure Retry middleware using intervals
+    #   Faraday.new do |conn|
+    #     conn.request(:retry, max: 2,
+    #                          interval: 0.05,
+    #                          interval_randomness: 0.5,
+    #                          backoff_factor: 2,
+    #                          exceptions: [CustomException, 'Timeout::Error'])
+    #
+    #     conn.adapter(:net_http) # NB: Last middleware must be the adapter
+    #   end
+    #
+    # This example will result in a first interval that is random between 0.05
+    # and 0.075 and a second interval that is random between 0.1 and 0.125.
+    class Retry < Faraday::Middleware
+      DEFAULT_EXCEPTIONS: untyped
+
+      IDEMPOTENT_METHODS: untyped
+
+      # Options contains the configurable parameters for the Retry middleware.
+      class Options
+        DEFAULT_CHECK: untyped
+
+        def self.from: (untyped value) -> untyped
+
+        def max: () -> untyped
+
+        def interval: () -> untyped
+
+        def max_interval: () -> untyped
+
+        def interval_randomness: () -> untyped
+
+        def backoff_factor: () -> untyped
+
+        def exceptions: () -> untyped
+
+        def methods: () -> untyped
+
+        def retry_if: () -> untyped
+
+        def retry_block: () -> untyped
+
+        def retry_statuses: () -> untyped
+      end
+
+      # @param app [#call]
+      # @param options [Hash]
+      # @option options [Integer] :max (2) Maximum number of retries
+      # @option options [Integer] :interval (0) Pause in seconds between retries
+      # @option options [Integer] :interval_randomness (0) The maximum random
+      #   interval amount expressed as a float between
+      #   0 and 1 to use in addition to the interval.
+      # @option options [Integer] :max_interval (Float::MAX) An upper limit
+      #   for the interval
+      # @option options [Integer] :backoff_factor (1) The amount to multiply
+      #   each successive retry's interval amount by in order to provide backoff
+      # @option options [Array] :exceptions ([ Errno::ETIMEDOUT,
+      #   'Timeout::Error', Faraday::TimeoutError, Faraday::RetriableResponse])
+      #   The list of exceptions to handle. Exceptions can be given as
+      #   Class, Module, or String.
+      # @option options [Array] :methods (the idempotent HTTP methods
+      #   in IDEMPOTENT_METHODS) A list of HTTP methods to retry without
+      #   calling retry_if. Pass an empty Array to call retry_if
+      #   for all exceptions.
+      # @option options [Block] :retry_if (false) block that will receive
+      #   the env object and the exception raised
+      #   and should decide if the code should retry still the action or
+      #   not independent of the retry count. This would be useful
+      #   if the exception produced is non-recoverable or if the
+      #   the HTTP method called is not idempotent.
+      # @option options [Block] :retry_block block that is executed before
+      #   every retry. Request environment, middleware options, current number
+      #   of retries and the exception is passed to the block as parameters.
+      # @option options [Array] :retry_statuses Array of Integer HTTP status
+      #   codes or a single Integer value that determines whether to raise
+      #   a Faraday::RetriableResponse exception based on the HTTP status code
+      #   of an HTTP response.
+      def initialize: (untyped app, ?untyped? options) -> untyped
+
+      def calculate_sleep_amount: (untyped retries, untyped env) -> (nil | untyped)
+
+      # @param env [Faraday::Env]
+      def call: (untyped env) -> untyped
+
+      # An exception matcher for the rescue clause can usually be any object
+      # that responds to `===`, but for Ruby 1.8 it has to be a Class or Module.
+      #
+      # @param exceptions [Array]
+      # @api private
+      # @return [Module] an exception matcher
+      def build_exception_matcher: (untyped exceptions) -> untyped
+
+      private
+
+      def retry_request?: (untyped env, untyped exception) -> untyped
+
+      def rewind_files: (untyped body) -> (nil | untyped)
+
+      # MDN spec for Retry-After header:
+      # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+      def calculate_retry_after: (untyped env) -> (nil | untyped)
+
+      def calculate_retry_interval: (untyped retries) -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Request
+    # TokenAuthentication is a middleware that adds a 'Token' header to a
+    # Faraday request.
+    class TokenAuthentication
+      # Public
+      def self.header: (untyped token, ?untyped? options) -> untyped
+
+      def initialize: (untyped app, untyped token, ?untyped? options) -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Request
+    # Middleware for supporting urlencoded requests.
+    class UrlEncoded < Faraday::Middleware
+      CONTENT_TYPE: ::String
+
+      attr_accessor self.mime_type: untyped
+
+      # Encodes as "application/x-www-form-urlencoded" if not already encoded or
+      # of another type.
+      #
+      # @param env [Faraday::Env]
+      def call: (untyped env) -> untyped
+
+      # @param env [Faraday::Env]
+      # @yield [request_body] Body of the request
+      def match_content_type: (untyped env) { (untyped) -> untyped } -> (nil | untyped)
+
+      # @param env [Faraday::Env]
+      #
+      # @return [Boolean] True if the request has a body and its Content-Type is
+      #                   urlencoded.
+      def process_request?: (untyped env) -> untyped
+
+      # @param env [Faraday::Env]
+      #
+      # @return [String]
+      def request_type: (untyped env) -> untyped
+    end
+  end
+end
+
+module Faraday
+  # Response represents an HTTP response from making an HTTP request.
+  class Response
+    # Used for simple response middleware.
+    class Middleware < Faraday::Middleware
+      # Override this to modify the environment after the response has finished.
+      # Calls the `parse` method if defined
+      # `parse` method can be defined as private, public and protected
+      def on_complete: (untyped env) -> (nil | untyped)
+    end
+
+    extend Forwardable
+
+    extend MiddlewareRegistry
+
+    def initialize: (?untyped? env) -> untyped
+
+    attr_reader env: untyped
+
+    def status: () -> untyped
+
+    def reason_phrase: () -> untyped
+
+    def headers: () -> untyped
+
+    def body: () -> untyped
+
+    def finished?: () -> untyped
+
+    def on_complete: () { (untyped) -> untyped } -> untyped
+
+    def finish: (untyped env) -> untyped
+
+    def success?: () -> untyped
+
+    def to_hash: () -> { status: untyped, body: untyped, response_headers: untyped }
+
+    # because @on_complete_callbacks cannot be marshalled
+    def marshal_dump: () -> untyped
+
+    def marshal_load: (untyped env) -> untyped
+
+    # Expand the env with more properties, without overriding existing ones.
+    # Useful for applying request params after restoring a marshalled Response.
+    def apply_request: (untyped request_env) -> untyped
+  end
+end
+
+module Faraday
+  class Response
+    # Logger is a middleware that logs internal events in the HTTP request
+    # lifecycle to a given Logger object. By default, this logs to STDOUT. See
+    # Faraday::Logging::Formatter to see specifically what is logged.
+    class Logger < Middleware
+      def initialize: (untyped app, ?untyped? logger, ?::Hash[untyped, untyped] options) { (untyped) -> untyped } -> untyped
+
+      def call: (untyped env) -> untyped
+
+      def on_complete: (untyped env) -> untyped
+    end
+  end
+end
+
+module Faraday
+  class Response
+    # RaiseError is a Faraday middleware that raises exceptions on common HTTP
+    # client or server error responses.
+    class RaiseError < Middleware
+      # rubocop:disable Naming/ConstantName
+      ClientErrorStatuses: untyped
+
+      ServerErrorStatuses: untyped
+
+      def on_complete: (untyped env) -> untyped
+
+      def response_values: (untyped env) -> { status: untyped, headers: untyped, body: untyped, request: { method: untyped, url_path: untyped, params: untyped, headers: untyped, body: untyped } }
+    end
+  end
+end
+
+module Faraday
+  # Utils contains various static helper methods.
+  module Utils
+    def self?.build_query: (untyped params) -> untyped
+
+    def self?.build_nested_query: (untyped params) -> untyped
+
+    def self?.default_space_encoding: () -> untyped
+
+    attr_writer self.default_space_encoding: untyped
+
+    ESCAPE_RE: untyped
+
+    def self?.escape: (untyped str) -> untyped
+
+    def self?.unescape: (untyped str) -> untyped
+
+    DEFAULT_SEP: untyped
+
+    # Adapted from Rack
+    def self?.parse_query: (untyped query) -> untyped
+
+    def self?.parse_nested_query: (untyped query) -> untyped
+
+    def self?.default_params_encoder: () -> untyped
+
+    attr_writer self.default_params_encoder: untyped
+
+    def self?.URI: (untyped url) -> untyped
+
+    def self?.default_uri_parser: () -> untyped
+
+    def self?.default_uri_parser=: (untyped parser) -> untyped
+
+    # Receives a String or URI and returns just
+    # the path with the query string sorted.
+    def self?.normalize_path: (untyped url) -> untyped
+
+    # Recursive hash update
+    def self?.deep_merge!: (untyped target, untyped hash) -> untyped
+
+    # Recursive hash merge
+    def self?.deep_merge: (untyped source, untyped hash) -> untyped
+
+    def self?.sort_query_params: (untyped query) -> untyped
+  end
+end
+
+module Faraday
+  module Utils
+    # A case-insensitive Hash that preserves the original case of a header
+    # when set.
+    #
+    # Adapted from Rack::Utils::HeaderHash
+    class Headers < ::Hash[untyped, untyped]
+      def self.from: (untyped value) -> untyped
+
+      def self.allocate: () -> untyped
+
+      def initialize: (?untyped? hash) -> untyped
+
+      def initialize_names: () -> untyped
+
+      # on dup/clone, we need to duplicate @names hash
+      def initialize_copy: (untyped other) -> untyped
+
+      # symbol -> string mapper + cache
+      KeyMap: untyped
+
+      def []: (untyped key) -> untyped
+
+      def []=: (untyped key, untyped val) -> untyped
+
+      def fetch: (untyped key, *untyped args) { () -> untyped } -> untyped
+
+      def delete: (untyped key) -> (nil | untyped)
+
+      def include?: (untyped key) -> untyped
+
+      alias has_key? include?
+
+      alias member? include?
+
+      alias key? include?
+
+      def merge!: (untyped other) -> untyped
+
+      alias update merge!
+
+      def merge: (untyped other) -> untyped
+
+      def replace: (untyped other) -> untyped
+
+      def to_hash: () -> untyped
+
+      def parse: (untyped header_string) -> (nil | untyped)
+
+      attr_reader names: untyped
+
+      private
+
+      # Join multiple values with a comma.
+      def add_parsed: (untyped key, untyped value) -> untyped
+    end
+  end
+end
+
+module Faraday
+  module Utils
+    # A hash with stringified keys.
+    class ParamsHash < Hash[untyped, untyped]
+      def []: (untyped key) -> untyped
+
+      def []=: (untyped key, untyped value) -> untyped
+
+      def delete: (untyped key) -> untyped
+
+      def include?: (untyped key) -> untyped
+
+      alias has_key? include?
+
+      alias member? include?
+
+      alias key? include?
+
+      def update: (untyped params) -> untyped
+
+      alias merge! update
+
+      def merge: (untyped params) -> untyped
+
+      def replace: (untyped other) -> untyped
+
+      def merge_query: (untyped query, ?untyped? encoder) -> untyped
+
+      def to_query: (?untyped? encoder) -> untyped
+
+      private
+
+      def convert_key: (untyped key) -> untyped
+    end
+  end
+end
+
+module Faraday
+  VERSION: ::String
+end
+
+class ParentOptions
+end
+
+module Faraday
+  module HelperMethods
+    def self.included: (untyped base) -> untyped
+
+    module ClassMethods
+      def features: (*untyped features) -> untyped
+
+      def on_feature: (untyped name) { () -> untyped } -> untyped
+
+      def feature?: (untyped name) -> untyped
+
+      def method_with_body?: (untyped method) -> untyped
+    end
+
+    def ssl_mode?: () -> untyped
+
+    def normalize: (untyped url) -> untyped
+
+    def with_default_uri_parser: (untyped parser) { () -> untyped } -> untyped
+
+    def with_env: (untyped new_env) { () -> untyped } -> untyped
+
+    def with_env_proxy_disabled: () { () -> untyped } -> untyped
+
+    def capture_warnings: () { () -> untyped } -> untyped
+
+    def multipart_file: () -> untyped
+
+    # parse boundary out of a Content-Type header like:
+    #   Content-Type: multipart/form-data; boundary=gc0p4Jq0M2Yt08jU534c0p
+    def parse_multipart_boundary: (untyped ctype) -> untyped
+
+    # parse a multipart MIME message, returning a hash of any multipart errors
+    def parse_multipart: (untyped boundary, untyped body) -> untyped
+
+    def method_with_body?: (untyped method) -> untyped
+
+    def big_string: () -> untyped
+  end
+end

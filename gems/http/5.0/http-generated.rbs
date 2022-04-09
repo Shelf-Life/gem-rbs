@@ -1,0 +1,1659 @@
+# HTTP should be easy
+module HTTP
+  extend Chainable
+
+  # HTTP[:accept => 'text/html'].get(...)
+  alias self.[] self.headers
+end
+
+module HTTP
+  module Chainable
+    # Request a get sans response body
+    # @param uri
+    # @option options [Hash]
+    def head: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Get a resource
+    # @param uri
+    # @option options [Hash]
+    def get: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Post to a resource
+    # @param uri
+    # @option options [Hash]
+    def post: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Put to a resource
+    # @param uri
+    # @option options [Hash]
+    def put: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Delete a resource
+    # @param uri
+    # @option options [Hash]
+    def delete: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Echo the request back to the client
+    # @param uri
+    # @option options [Hash]
+    def trace: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Return the methods supported on the given URI
+    # @param uri
+    # @option options [Hash]
+    def options: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Convert to a transparent TCP/IP tunnel
+    # @param uri
+    # @option options [Hash]
+    def connect: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Apply partial modifications to a resource
+    # @param uri
+    # @option options [Hash]
+    def patch: (untyped uri, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Make an HTTP request with the given verb
+    # @param (see Client#request)
+    def request: (*untyped args) -> untyped
+
+    # Prepare an HTTP request with the given verb
+    # @param (see Client#build_request)
+    def build_request: (*untyped args) -> untyped
+
+    # @overload timeout(options = {})
+    #   Adds per operation timeouts to the request
+    #   @param [Hash] options
+    #   @option options [Float] :read Read timeout
+    #   @option options [Float] :write Write timeout
+    #   @option options [Float] :connect Connect timeout
+    # @overload timeout(global_timeout)
+    #   Adds a global timeout to the full request
+    #   @param [Numeric] global_timeout
+    def timeout: (untyped options) -> untyped
+
+    # @overload persistent(host, timeout: 5)
+    #   Flags as persistent
+    #   @param  [String] host
+    #   @option [Integer] timeout Keep alive timeout
+    #   @raise  [Request::Error] if Host is invalid
+    #   @return [HTTP::Client] Persistent client
+    # @overload persistent(host, timeout: 5, &block)
+    #   Executes given block with persistent client and automatically closes
+    #   connection at the end of execution.
+    #
+    #   @example
+    #
+    #       def keys(users)
+    #         HTTP.persistent("https://github.com") do |http|
+    #           users.map { |u| http.get("/#{u}.keys").to_s }
+    #         end
+    #       end
+    #
+    #       # same as
+    #
+    #       def keys(users)
+    #         http = HTTP.persistent "https://github.com"
+    #         users.map { |u| http.get("/#{u}.keys").to_s }
+    #       ensure
+    #         http.close if http
+    #       end
+    #
+    #
+    #   @yieldparam [HTTP::Client] client Persistent client
+    #   @return [Object] result of last expression in the block
+    def persistent: (untyped host, ?timeout: ::Integer timeout) { (untyped) -> untyped } -> untyped
+
+    # Make a request through an HTTP proxy
+    # @param [Array] proxy
+    # @raise [Request::Error] if HTTP proxy is invalid
+    def via: (*untyped proxy) -> untyped
+
+    alias through via
+
+    # Make client follow redirects.
+    # @param options
+    # @return [HTTP::Client]
+    # @see Redirector#initialize
+    def follow: (?::Hash[untyped, untyped] options) -> untyped
+
+    # Make a request with the given headers
+    # @param headers
+    def headers: (untyped headers) -> untyped
+
+    # Make a request with the given cookies
+    def cookies: (untyped cookies) -> untyped
+
+    # Force a specific encoding for response body
+    def encoding: (untyped encoding) -> untyped
+
+    # Accept the given MIME type(s)
+    # @param type
+    def accept: (untyped `type`) -> untyped
+
+    # Make a request with the given Authorization header
+    # @param [#to_s] value Authorization header value
+    def auth: (untyped value) -> untyped
+
+    # Make a request with the given Basic authorization header
+    # @see http://tools.ietf.org/html/rfc2617
+    # @param [#fetch] opts
+    # @option opts [#to_s] :user
+    # @option opts [#to_s] :pass
+    def basic_auth: (untyped opts) -> untyped
+
+    # Get options for HTTP
+    # @return [HTTP::Options]
+    def default_options: () -> untyped
+
+    # Set options for HTTP
+    # @param opts
+    # @return [HTTP::Options]
+    def default_options=: (untyped opts) -> untyped
+
+    # Set TCP_NODELAY on the socket
+    def nodelay: () -> untyped
+
+    # Turn on given features. Available features are:
+    # * auto_inflate
+    # * auto_deflate
+    # * instrumentation
+    # * logging
+    # * normalize_uri
+    # @param features
+    def use: (*untyped features) -> untyped
+
+    private
+
+    # :nodoc:
+    def branch: (untyped options) -> untyped
+  end
+end
+
+module HTTP
+  # Clients make requests and receive responses
+  class Client
+    extend Forwardable
+
+    include Chainable
+
+    HTTP_OR_HTTPS_RE: untyped
+
+    def initialize: (?::Hash[untyped, untyped] default_options) -> void
+
+    # Make an HTTP request
+    def request: (untyped verb, untyped uri, ?::Hash[untyped, untyped] opts) -> untyped
+
+    # Prepare an HTTP request
+    def build_request: (untyped verb, untyped uri, ?::Hash[untyped, untyped] opts) -> untyped
+
+    # Perform a single (no follow) HTTP request
+    def perform: (untyped req, untyped options) -> untyped
+
+    def close: () -> untyped
+
+    private
+
+    def build_response: (untyped req, untyped options) -> untyped
+
+    # Verify our request isn't going to be made against another URI
+    def verify_connection!: (untyped uri) -> untyped
+
+    # Merges query params if needed
+    #
+    # @param [#to_s] uri
+    # @return [URI]
+    def make_request_uri: (untyped uri, untyped opts) -> untyped
+
+    # Creates request headers with cookies (if any) merged in
+    def make_request_headers: (untyped opts) -> untyped
+
+    # Create the request body object to send
+    def make_request_body: (untyped opts, untyped headers) -> untyped
+
+    def make_form_data: (untyped form) -> untyped
+  end
+end
+
+module HTTP
+  # A connection to the HTTP server
+  class Connection
+    extend Forwardable
+
+    # Allowed values for CONNECTION header
+    KEEP_ALIVE: ::String
+
+    CLOSE: ::String
+
+    # Attempt to read this much data
+    BUFFER_SIZE: ::Integer
+
+    # HTTP/1.0
+    HTTP_1_0: ::String
+
+    # HTTP/1.1
+    HTTP_1_1: ::String
+
+    # Returned after HTTP CONNECT (via proxy)
+    attr_reader proxy_response_headers: untyped
+
+    # @param [HTTP::Request] req
+    # @param [HTTP::Options] options
+    # @raise [HTTP::ConnectionError] when failed to connect
+    def initialize: (untyped req, untyped options) -> void
+
+    # @return [Boolean] whenever proxy connect failed
+    def failed_proxy_connect?: () -> untyped
+
+    # Send a request to the server
+    #
+    # @param [Request] req Request to send to the server
+    # @return [nil]
+    def send_request: (untyped req) -> untyped
+
+    # Read a chunk of the body
+    #
+    # @return [String] data chunk
+    # @return [nil] when no more data left
+    def readpartial: (?untyped size) -> (nil | untyped)
+
+    # Reads data from socket up until headers are loaded
+    # @return [void]
+    def read_headers!: () -> untyped
+
+    # Callback for when we've reached the end of a response
+    # @return [void]
+    def finish_response: () -> untyped
+
+    # Close the connection
+    # @return [void]
+    def close: () -> untyped
+
+    # Whether we're keeping the conn alive
+    # @return [Boolean]
+    def keep_alive?: () -> untyped
+
+    # Whether our connection has expired
+    # @return [Boolean]
+    def expired?: () -> untyped
+
+    private
+
+    # Sets up SSL context and starts TLS if needed.
+    # @param (see #initialize)
+    # @return [void]
+    def start_tls: (untyped req, untyped options) -> (nil | untyped)
+
+    # Open tunnel through proxy
+    def send_proxy_connect_request: (untyped req) -> (nil | untyped)
+
+    # Resets expiration of persistent connection.
+    # @return [void]
+    def reset_timer: () -> untyped
+
+    # Store whether the connection should be kept alive.
+    # Once we reset the parser, we lose all of this state.
+    # @return [void]
+    def set_keep_alive: () -> untyped
+
+    # Feeds some more data into parser
+    # @return [void]
+    def read_more: (untyped size) -> untyped
+  end
+end
+
+module HTTP
+  class ContentType
+    MIME_TYPE_RE: untyped
+
+    CHARSET_RE: untyped
+
+    attr_accessor mime_type: untyped
+
+    attr_accessor charset: untyped
+
+    # Parse string and return ContentType struct
+    def self.parse: (untyped str) -> untyped
+
+    private
+
+    # :nodoc:
+    def self.mime_type: (untyped str) -> untyped
+
+    # :nodoc:
+    def self.charset: (untyped str) -> untyped
+
+    public
+
+    def initialize: (?untyped? mime_type, ?untyped? charset) -> void
+  end
+end
+
+module HTTP
+  # Generic error
+  class Error < StandardError
+  end
+
+  # Generic Connection error
+  class ConnectionError < Error
+  end
+
+  # Generic Request error
+  class RequestError < Error
+  end
+
+  # Generic Response error
+  class ResponseError < Error
+  end
+
+  # Requested to do something when we're in the wrong state
+  class StateError < ResponseError
+  end
+
+  # Generic Timeout error
+  class TimeoutError < Error
+  end
+
+  # Header value is of unexpected format (similar to Net::HTTPHeaderSyntaxError)
+  class HeaderError < Error
+  end
+end
+
+module HTTP
+  class Feature
+    def initialize: (?::Hash[untyped, untyped] opts) -> void
+
+    def wrap_request: (untyped request) -> untyped
+
+    def wrap_response: (untyped response) -> untyped
+
+    def on_error: (untyped request, untyped error) -> nil
+  end
+end
+
+module HTTP
+  module Features
+    class AutoDeflate < Feature
+      attr_reader method: untyped
+
+      def initialize: () -> void
+
+      def wrap_request: (untyped request) -> untyped
+
+      def deflated_body: (untyped body) -> untyped
+
+      class CompressedBody < HTTP::Request::Body
+        def initialize: (untyped uncompressed_body) -> void
+
+        def size: () -> untyped
+
+        def each: () { () -> untyped } -> untyped
+
+        private
+
+        def compressed_each: () { (untyped) -> untyped } -> untyped
+
+        def compress_all!: () -> untyped
+      end
+
+      class GzippedBody < CompressedBody
+        def compress: () { () -> untyped } -> untyped
+
+        class BlockIO
+          def initialize: (untyped block) -> void
+
+          def write: (untyped data) -> untyped
+        end
+      end
+
+      class DeflatedBody < CompressedBody
+        def compress: () { (untyped) -> untyped } -> untyped
+      end
+    end
+  end
+end
+
+module HTTP
+  module Features
+    class AutoInflate < Feature
+      SUPPORTED_ENCODING: untyped
+
+      def wrap_response: (untyped response) -> untyped
+
+      def stream_for: (untyped connection) -> untyped
+
+      private
+
+      def supported_encoding?: (untyped response) -> untyped
+    end
+  end
+end
+
+module HTTP
+  module Features
+    # Instrument requests and responses. Expects an
+    # ActiveSupport::Notifications-compatible instrumenter. Defaults to use a
+    # namespace of 'http' which may be overridden with a `:namespace` param.
+    # Emits a single event like `"request.{namespace}"`, eg `"request.http"`.
+    # Be sure to specify the instrumenter when enabling the feature:
+    #
+    #    HTTP
+    #      .use(instrumentation: {instrumenter: ActiveSupport::Notifications.instrumenter})
+    #      .get("https://example.com/")
+    #
+    # Emits two events on every request:
+    #
+    #  * `start_request.http` before the request is made, so you can log the reqest being started
+    #  * `request.http` after the response is recieved, and contains `start`
+    #    and `finish` so the duration of the request can be calculated.
+    #
+    class Instrumentation < Feature
+      attr_reader instrumenter: untyped
+
+      attr_reader name: untyped
+
+      def initialize: (?instrumenter: untyped instrumenter, ?namespace: ::String namespace) -> void
+
+      def wrap_request: (untyped request) -> untyped
+
+      def wrap_response: (untyped response) -> untyped
+
+      class NullInstrumenter
+        def instrument: (untyped name, ?::Hash[untyped, untyped] payload) { (untyped) -> untyped } -> untyped
+
+        def start: (untyped _name, untyped _payload) -> ::TrueClass
+
+        def finish: (untyped _name, untyped _payload) -> ::TrueClass
+      end
+    end
+  end
+end
+
+module HTTP
+  module Features
+    # Log requests and responses. Request verb and uri, and Response status are
+    # logged at `info`, and the headers and bodies of both are logged at
+    # `debug`. Be sure to specify the logger when enabling the feature:
+    #
+    #    HTTP.use(logging: {logger: Logger.new(STDOUT)}).get("https://example.com/")
+    #
+    class Logging < Feature
+      class NullLogger
+      end
+
+      attr_reader logger: untyped
+
+      def initialize: (?logger: untyped logger) -> void
+
+      def wrap_request: (untyped request) -> untyped
+
+      def wrap_response: (untyped response) -> untyped
+
+      private
+
+      def stringify_headers: (untyped headers) -> untyped
+    end
+  end
+end
+
+module HTTP
+  module Features
+    class NormalizeUri < Feature
+      attr_reader normalizer: untyped
+
+      def initialize: (?normalizer: untyped normalizer) -> void
+    end
+  end
+end
+
+module HTTP
+  # HTTP Headers container.
+  class Headers
+    extend Forwardable
+
+    include Enumerable[untyped]
+
+    # Matches HTTP header names when in "Canonical-Http-Format"
+    CANONICAL_NAME_RE: untyped
+
+    # Matches valid header field name according to RFC.
+    # @see http://tools.ietf.org/html/rfc7230#section-3.2
+    COMPLIANT_NAME_RE: untyped
+
+    # Class constructor.
+    def initialize: () -> void
+
+    # Sets header.
+    #
+    # @param (see #add)
+    # @return [void]
+    def set: (untyped name, untyped value) -> untyped
+
+    alias []= set
+
+    # Removes header.
+    #
+    # @param [#to_s] name header name
+    # @return [void]
+    def delete: (untyped name) -> untyped
+
+    # Appends header.
+    #
+    # @param [String, Symbol] name header name. When specified as a string, the
+    #   name is sent as-is. When specified as a symbol, the name is converted
+    #   to a string of capitalized words separated by a dash. Word boundaries
+    #   are determined by an underscore (`_`) or a dash (`-`).
+    #   Ex: `:content_type` is sent as `"Content-Type"`, and `"auth_key"` (string)
+    #   is sent as `"auth_key"`.
+    # @param [Array<#to_s>, #to_s] value header value(s) to be appended
+    # @return [void]
+    def add: (untyped name, untyped value) -> untyped
+
+    # Returns list of header values if any.
+    #
+    # @return [Array<String>]
+    def get: (untyped name) -> untyped
+
+    # Smart version of {#get}.
+    #
+    # @return [nil] if header was not set
+    # @return [String] if header has exactly one value
+    # @return [Array<String>] if header has more than one value
+    def []: (untyped name) -> untyped
+
+    # Tells whenever header with given `name` is set or not.
+    #
+    # @return [Boolean]
+    def include?: (untyped name) -> untyped
+
+    # Returns Rack-compatible headers Hash
+    #
+    # @return [Hash]
+    def to_h: () -> untyped
+
+    alias to_hash to_h
+
+    # Returns headers key/value pairs.
+    #
+    # @return [Array<[String, String]>]
+    def to_a: () -> untyped
+
+    # Returns human-readable representation of `self` instance.
+    #
+    # @return [String]
+    def inspect: () -> ::String
+
+    # Returns list of header names.
+    #
+    # @return [Array<String>]
+    def keys: () -> untyped
+
+    # Compares headers to another Headers or Array of key/value pairs
+    #
+    # @return [Boolean]
+    def ==: (untyped other) -> (::FalseClass | untyped)
+
+    # Calls the given block once for each key/value pair in headers container.
+    #
+    # @return [Enumerator] if no block given
+    # @return [Headers] self-reference
+    def each: () { (untyped) -> untyped } -> untyped
+
+    # Properly clones internal key/value storage.
+    #
+    # @api private
+    def initialize_copy: (untyped orig) -> untyped
+
+    # Merges `other` headers into `self`.
+    #
+    # @see #merge
+    # @return [void]
+    def merge!: (untyped other) -> untyped
+
+    # Returns new instance with `other` headers merged in.
+    #
+    # @see #merge!
+    # @return [Headers]
+    def merge: (untyped other) -> untyped
+
+    # Coerces given `object` into Headers.
+    #
+    # @raise [Error] if object can't be coerced
+    # @param [#to_hash, #to_h, #to_a] object
+    # @return [Headers]
+    def self.coerce: (untyped object) -> untyped
+
+    alias self.[] self.coerce
+
+    private
+
+    # Transforms `name` to canonical HTTP header capitalization
+    #
+    # @param [String] name
+    # @raise [HeaderError] if normalized name does not
+    #   match {HEADER_NAME_RE}
+    # @return [String] canonical HTTP header name
+    def normalize_header: (untyped name) -> untyped
+
+    # Ensures there is no new line character in the header value
+    #
+    # @param [String] value
+    # @raise [HeaderError] if value includes new line character
+    # @return [String] stringified header value
+    def validate_value: (untyped value) -> untyped
+  end
+end
+
+module HTTP
+  class Headers
+    # Content-Types that are acceptable for the response.
+    ACCEPT: ::String
+
+    # Content-codings that are acceptable in the response.
+    ACCEPT_ENCODING: ::String
+
+    # The age the object has been in a proxy cache in seconds.
+    AGE: ::String
+
+    # Authentication credentials for HTTP authentication.
+    AUTHORIZATION: ::String
+
+    # Used to specify directives that must be obeyed by all caching mechanisms
+    # along the request-response chain.
+    CACHE_CONTROL: ::String
+
+    # An HTTP cookie previously sent by the server with Set-Cookie.
+    COOKIE: ::String
+
+    # Control options for the current connection and list
+    # of hop-by-hop request fields.
+    CONNECTION: ::String
+
+    # The length of the request body in octets (8-bit bytes).
+    CONTENT_LENGTH: ::String
+
+    # The MIME type of the body of the request
+    # (used with POST and PUT requests).
+    CONTENT_TYPE: ::String
+
+    # The date and time that the message was sent (in "HTTP-date" format as
+    # defined by RFC 7231 Date/Time Formats).
+    DATE: ::String
+
+    # An identifier for a specific version of a resource,
+    # often a message digest.
+    ETAG: ::String
+
+    # Gives the date/time after which the response is considered stale (in
+    # "HTTP-date" format as defined by RFC 7231).
+    EXPIRES: ::String
+
+    # The domain name of the server (for virtual hosting), and the TCP port
+    # number on which the server is listening. The port number may be omitted
+    # if the port is the standard port for the service requested.
+    HOST: ::String
+
+    # Allows a 304 Not Modified to be returned if content is unchanged.
+    IF_MODIFIED_SINCE: ::String
+
+    # Allows a 304 Not Modified to be returned if content is unchanged.
+    IF_NONE_MATCH: ::String
+
+    # The last modified date for the requested object (in "HTTP-date" format as
+    # defined by RFC 7231).
+    LAST_MODIFIED: ::String
+
+    # Used in redirection, or when a new resource has been created.
+    LOCATION: ::String
+
+    # Authorization credentials for connecting to a proxy.
+    PROXY_AUTHORIZATION: ::String
+
+    # An HTTP cookie.
+    SET_COOKIE: ::String
+
+    # The form of encoding used to safely transfer the entity to the user.
+    # Currently defined methods are: chunked, compress, deflate, gzip, identity.
+    TRANSFER_ENCODING: ::String
+
+    # Indicates what additional content codings have been applied to the
+    # entity-body.
+    CONTENT_ENCODING: ::String
+
+    # The user agent string of the user agent.
+    USER_AGENT: ::String
+
+    # Tells downstream proxies how to match future request headers to decide
+    # whether the cached response can be used rather than requesting a fresh
+    # one from the origin server.
+    VARY: ::String
+  end
+end
+
+module HTTP
+  class Headers
+    # Provides shared behavior for {HTTP::Request} and {HTTP::Response}.
+    # Expects `@headers` to be an instance of {HTTP::Headers}.
+    #
+    # @example Usage
+    #
+    #   class MyHttpRequest
+    #     include HTTP::Headers::Mixin
+    #
+    #     def initialize
+    #       @headers = HTTP::Headers.new
+    #     end
+    #   end
+    module Mixin
+      extend Forwardable
+
+      # @return [HTTP::Headers]
+      attr_reader headers: untyped
+    end
+  end
+end
+
+module HTTP
+  # MIME type encode/decode adapters
+  module MimeType
+    # Associate MIME type with adapter
+    #
+    # @example
+    #
+    #   module JsonAdapter
+    #     class << self
+    #       def encode(obj)
+    #         # encode logic here
+    #       end
+    #
+    #       def decode(str)
+    #         # decode logic here
+    #       end
+    #     end
+    #   end
+    #
+    #   HTTP::MimeType.register_adapter 'application/json', MyJsonAdapter
+    #
+    # @param [#to_s] type
+    # @param [#encode, #decode] adapter
+    # @return [void]
+    def self.register_adapter: (untyped `type`, untyped adapter) -> untyped
+
+    # Returns adapter associated with MIME type
+    #
+    # @param [#to_s] type
+    # @raise [Error] if no adapter found
+    # @return [Class]
+    def self.[]: (untyped `type`) -> untyped
+
+    # Register a shortcut for MIME type
+    #
+    # @example
+    #
+    #   HTTP::MimeType.register_alias 'application/json', :json
+    #
+    # @param [#to_s] type
+    # @param [#to_sym] shortcut
+    # @return [void]
+    def self.register_alias: (untyped `type`, untyped shortcut) -> untyped
+
+    # Resolves type by shortcut if possible
+    #
+    # @param [#to_s] type
+    # @return [String]
+    def self.normalize: (untyped `type`) -> untyped
+
+    private
+
+    # :nodoc:
+    def self.adapters: () -> untyped
+
+    # :nodoc:
+    def self.aliases: () -> untyped
+  end
+end
+
+module HTTP
+  module MimeType
+    # Base encode/decode MIME type adapter
+    class Adapter
+      include Singleton
+
+      extend Forwardable
+    end
+  end
+end
+
+module HTTP
+  module MimeType
+    # JSON encode/decode MIME type adapter
+    class JSON < Adapter
+      # Encodes object to JSON
+      def encode: (untyped obj) -> untyped
+
+      # Decodes JSON
+      def decode: (untyped str) -> untyped
+    end
+  end
+end
+
+module HTTP
+  class Options
+    attr_accessor self.default_socket_class: untyped
+
+    attr_accessor self.default_ssl_socket_class: untyped
+
+    attr_accessor self.default_timeout_class: untyped
+
+    attr_reader self.available_features: untyped
+
+    def self.new: (?::Hash[untyped, untyped] options) -> untyped
+
+    def self.defined_options: () -> untyped
+
+    def self.register_feature: (untyped name, untyped impl) -> untyped
+
+    def self.def_option: (untyped name, ?reader_only: bool reader_only) { () -> untyped } -> untyped
+
+    def initialize: (?::Hash[untyped, untyped] options) -> void
+
+    def features=: (untyped features) -> untyped
+
+    def follow=: (untyped value) -> untyped
+
+    def persistent=: (untyped value) -> untyped
+
+    def persistent?: () -> untyped
+
+    def merge: (untyped other) -> untyped
+
+    def to_hash: () -> untyped
+
+    def dup: () { (untyped) -> untyped } -> untyped
+
+    def feature: (untyped name) -> untyped
+
+    def []=: (untyped option, untyped val) -> untyped
+
+    private
+
+    def argument_error!: (untyped message) -> untyped
+  end
+end
+
+module HTTP
+  class Redirector
+    # Notifies that we reached max allowed redirect hops
+    class TooManyRedirectsError < ResponseError
+    end
+
+    # Notifies that following redirects got into an endless loop
+    class EndlessRedirectError < TooManyRedirectsError
+    end
+
+    # HTTP status codes which indicate redirects
+    REDIRECT_CODES: untyped
+
+    # Codes which which should raise StateError in strict mode if original
+    # request was any of {UNSAFE_VERBS}
+    STRICT_SENSITIVE_CODES: untyped
+
+    # Insecure http verbs, which should trigger StateError in strict mode
+    # upon {STRICT_SENSITIVE_CODES}
+    UNSAFE_VERBS: untyped
+
+    # Verbs which will remain unchanged upon See Other response.
+    SEE_OTHER_ALLOWED_VERBS: untyped
+
+    # @!attribute [r] strict
+    #   Returns redirector policy.
+    #   @return [Boolean]
+    attr_reader strict: untyped
+
+    # @!attribute [r] max_hops
+    #   Returns maximum allowed hops.
+    #   @return [Fixnum]
+    attr_reader max_hops: untyped
+
+    # @param [Hash] opts
+    # @option opts [Boolean] :strict (true) redirector hops policy
+    # @option opts [#to_i] :max_hops (5) maximum allowed amount of hops
+    def initialize: (?::Hash[untyped, untyped] opts) -> void
+
+    # Follows redirects until non-redirect response found
+    def perform: (untyped request, untyped response) { (untyped) -> untyped } -> untyped
+
+    private
+
+    # Check if we reached max amount of redirect hops
+    # @return [Boolean]
+    def too_many_hops?: () -> untyped
+
+    # Check if we got into an endless loop
+    # @return [Boolean]
+    def endless_loop?: () -> untyped
+
+    # Redirect policy for follow
+    # @return [Request]
+    def redirect_to: (untyped uri) -> untyped
+  end
+end
+
+module HTTP
+  class Request
+    extend Forwardable
+
+    include HTTP::Headers::Mixin
+
+    # The method given was not understood
+    class UnsupportedMethodError < RequestError
+    end
+
+    # The scheme of given URI was not understood
+    class UnsupportedSchemeError < RequestError
+    end
+
+    # Default User-Agent header value
+    USER_AGENT: ::String
+
+    METHODS: untyped
+
+    # Allowed schemes
+    SCHEMES: untyped
+
+    # Default ports of supported schemes
+    PORTS: untyped
+
+    # Method is given as a lowercase symbol e.g. :get, :post
+    attr_reader verb: untyped
+
+    # Scheme is normalized to be a lowercase symbol e.g. :http, :https
+    attr_reader scheme: untyped
+
+    attr_reader uri_normalizer: untyped
+
+    # "Request URI" as per RFC 2616
+    # http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+    attr_reader uri: untyped
+
+    attr_reader proxy: untyped
+
+    attr_reader body: untyped
+
+    attr_reader version: untyped
+
+    # @option opts [String] :version
+    # @option opts [#to_s] :verb HTTP request method
+    # @option opts [#call] :uri_normalizer (HTTP::URI::NORMALIZER)
+    # @option opts [HTTP::URI, #to_s] :uri
+    # @option opts [Hash] :headers
+    # @option opts [Hash] :proxy
+    # @option opts [String, Enumerable, IO, nil] :body
+    def initialize: (untyped opts) -> void
+
+    # Returns new Request with updated uri
+    def redirect: (untyped uri, ?untyped verb) -> untyped
+
+    # Stream the request to a socket
+    def stream: (untyped socket) -> untyped
+
+    # Is this request using a proxy?
+    def using_proxy?: () -> untyped
+
+    # Is this request using an authenticated proxy?
+    def using_authenticated_proxy?: () -> untyped
+
+    def include_proxy_headers: () -> untyped
+
+    # Compute and add the Proxy-Authorization header
+    def include_proxy_authorization_header: () -> untyped
+
+    def proxy_authorization_header: () -> ::String
+
+    # Setup tunnel through proxy for SSL request
+    def connect_using_proxy: (untyped socket) -> untyped
+
+    # Compute HTTP request header for direct or proxy request
+    def headline: () -> ::String
+
+    # Compute HTTP request header SSL proxy connection
+    def proxy_connect_header: () -> ::String
+
+    # Headers to send with proxy connect request
+    def proxy_connect_headers: () -> untyped
+
+    # Host for tcp socket
+    def socket_host: () -> untyped
+
+    # Port for tcp socket
+    def socket_port: () -> untyped
+
+    # Human-readable representation of base request info.
+    #
+    # @example
+    #
+    #     req.inspect
+    #     # => #<HTTP::Request/1.1 GET https://example.com>
+    #
+    # @return [String]
+    def inspect: () -> ::String
+
+    private
+
+    # @!attribute [r] port
+    #   @return [Fixnum]
+    def port: () -> untyped
+
+    # @return [String] Default host (with port if needed) header value.
+    def default_host_header_value: () -> untyped
+
+    def prepare_body: (untyped body) -> untyped
+
+    def prepare_headers: (untyped headers) -> untyped
+  end
+end
+
+module HTTP
+  class Request
+    class Body
+      attr_reader source: untyped
+
+      def initialize: (untyped source) -> void
+
+      # Returns size which should be used for the "Content-Length" header.
+      #
+      # @return [Integer]
+      def size: () -> untyped
+
+      # Yields chunks of content to be streamed to the request body.
+      #
+      # @yieldparam [String]
+      def each: () { (untyped) -> untyped } -> untyped
+
+      # Request bodies are equivalent when they have the same source.
+      def ==: (untyped other) -> untyped
+
+      private
+
+      def rewind: (untyped io) -> untyped
+
+      def validate_source_type!: () -> (nil | untyped)
+
+      # This class provides a "writable IO" wrapper around a proc object, with
+      # #write simply calling the proc, which we can pass in as the
+      # "destination IO" in IO.copy_stream.
+      class ProcIO
+        def initialize: (untyped block) -> void
+
+        def write: (untyped data) -> untyped
+      end
+    end
+  end
+end
+
+module HTTP
+  class Request
+    class Writer
+      # CRLF is the universal HTTP delimiter
+      CRLF: ::String
+
+      # Chunked data termintaor.
+      ZERO: ::String
+
+      # Chunked transfer encoding
+      CHUNKED: ::String
+
+      # End of a chunked transfer
+      CHUNKED_END: ::String
+
+      def initialize: (untyped socket, untyped body, untyped headers, untyped headline) -> void
+
+      # Adds headers to the request header from the headers array
+      def add_headers: () -> untyped
+
+      # Stream the request to a socket
+      def stream: () -> untyped
+
+      # Send headers needed to connect through proxy
+      def connect_through_proxy: () -> untyped
+
+      # Adds the headers to the header array for the given request body we are working
+      # with
+      def add_body_type_headers: () -> (nil | untyped)
+
+      # Joins the headers specified in the request into a correctly formatted
+      # http request header string
+      def join_headers: () -> untyped
+
+      # Writes HTTP request data into the socket.
+      def send_request: () -> untyped
+
+      # Yields chunks of request data that should be sent to the socket.
+      #
+      # It's important to send the request in a single write call when possible
+      # in order to play nicely with Nagle's algorithm. Making two writes in a
+      # row triggers a pathological case where Nagle is expecting a third write
+      # that never happens.
+      def each_chunk: () { (untyped) -> untyped } -> untyped
+
+      # Returns the chunk encoded for to the specified "Transfer-Encoding" header.
+      def encode_chunk: (untyped chunk) -> untyped
+
+      # Returns true if the request should be sent in chunked encoding.
+      def chunked?: () -> untyped
+
+      private
+
+      def write: (untyped data) -> untyped
+    end
+  end
+end
+
+module HTTP
+  class Response
+    extend Forwardable
+
+    include HTTP::Headers::Mixin
+
+    # @return [Status]
+    attr_reader status: untyped
+
+    # @return [String]
+    attr_reader version: untyped
+
+    # @return [Body]
+    attr_reader body: untyped
+
+    # @return [Request]
+    attr_reader request: untyped
+
+    # @return [Hash]
+    attr_reader proxy_headers: untyped
+
+    # Inits a new instance
+    #
+    # @option opts [Integer] :status Status code
+    # @option opts [String] :version HTTP version
+    # @option opts [Hash] :headers
+    # @option opts [Hash] :proxy_headers
+    # @option opts [HTTP::Connection] :connection
+    # @option opts [String] :encoding Encoding to use when reading body
+    # @option opts [String] :body
+    # @option opts [HTTP::Request] request
+    def initialize: (untyped opts) -> void
+
+    alias to_str to_s
+
+    # Returns an Array ala Rack: `[status, headers, body]`
+    #
+    # @return [Array(Fixnum, Hash, String)]
+    def to_a: () -> ::Array[untyped]
+
+    # Flushes body and returns self-reference
+    #
+    # @return [Response]
+    def flush: () -> untyped
+
+    # Value of the Content-Length header.
+    #
+    # @return [nil] if Content-Length was not given, or it's value was invalid
+    #   (not an integer, e.g. empty string or string with non-digits).
+    # @return [Integer] otherwise
+    def content_length: () -> (nil | untyped)
+
+    # Parsed Content-Type header
+    #
+    # @return [HTTP::ContentType]
+    def content_type: () -> untyped
+
+    def cookies: () -> untyped
+
+    def chunked?: () -> (::FalseClass | untyped)
+
+    # Parse response body with corresponding MIME type adapter.
+    #
+    # @param type [#to_s] Parse as given MIME type.
+    # @raise (see MimeType.[])
+    # @return [Object]
+    def parse: (?untyped? `type`) -> untyped
+
+    # Inspect a response
+    def inspect: () -> ::String
+  end
+end
+
+module HTTP
+  class Response
+    # A streamable response body, also easily converted into a string
+    class Body
+      extend Forwardable
+
+      include Enumerable[untyped]
+
+      # The connection object used to make the corresponding request.
+      #
+      # @return [HTTP::Connection]
+      attr_reader connection: untyped
+
+      def initialize: (untyped stream, ?encoding: untyped encoding) -> void
+
+      # (see HTTP::Client#readpartial)
+      def readpartial: (*untyped args) -> untyped
+
+      # Iterate over the body, allowing it to be enumerable
+      def each: () { (untyped) -> untyped } -> untyped
+
+      # @return [String] eagerly consume the entire body as a string
+      def to_s: () -> untyped
+
+      alias to_str to_s
+
+      # Assert that the body is actively being streamed
+      def stream!: () -> untyped
+
+      # Easier to interpret string inspect
+      def inspect: () -> ::String
+
+      private
+
+      # Retrieve encoding by name. If encoding cannot be found, default to binary.
+      def find_encoding: (untyped encoding) -> untyped
+    end
+  end
+end
+
+module HTTP
+  class Response
+    class Inflater
+      attr_reader connection: untyped
+
+      def initialize: (untyped connection) -> void
+
+      def readpartial: (*untyped args) -> untyped
+
+      private
+
+      def zstream: () -> untyped
+    end
+  end
+end
+
+module HTTP
+  class Response
+    # @api private
+    class Parser
+      attr_reader parser: untyped
+
+      attr_reader headers: untyped
+
+      attr_reader status_code: untyped
+
+      attr_reader http_version: untyped
+
+      def initialize: () -> void
+
+      def reset: () -> untyped
+
+      def add: (untyped data) -> untyped
+
+      alias << add
+
+      def mark_header_finished: () -> untyped
+
+      def headers?: () -> untyped
+
+      def add_header: (untyped name, untyped value) -> untyped
+
+      def mark_message_finished: () -> untyped
+
+      def finished?: () -> untyped
+
+      def add_body: (untyped chunk) -> untyped
+
+      def read: (untyped size) -> (nil | untyped)
+
+      class Handler
+        def initialize: (untyped target) -> void
+
+        def reset: () -> untyped
+
+        def on_header_field: (untyped field) -> untyped
+
+        def on_header_value: (untyped value) -> untyped
+
+        def on_headers_complete: () -> untyped
+
+        def on_body: (untyped body) -> untyped
+
+        def on_message_complete: () -> untyped
+
+        private
+
+        def append_header: () -> untyped
+      end
+    end
+  end
+end
+
+module HTTP
+  class Response
+    class Status < ::Delegator
+      # Coerces given value to Status.
+      #
+      # @example
+      #
+      #   Status.coerce(:bad_request) # => Status.new(400)
+      #   Status.coerce("400")        # => Status.new(400)
+      #   Status.coerce(true)         # => raises HTTP::Error
+      #
+      # @raise [Error] if coercion is impossible
+      # @param [Symbol, #to_i] object
+      # @return [Status]
+      def self.coerce: (untyped object) -> untyped
+
+      alias self.[] self.coerce
+
+      private
+
+      # Symbolizes given string
+      #
+      # @example
+      #
+      #   symbolize "Bad Request"           # => :bad_request
+      #   symbolize "Request-URI Too Long"  # => :request_uri_too_long
+      #   symbolize "I'm a Teapot"          # => :im_a_teapot
+      #
+      # @param [#to_s] str
+      # @return [Symbol]
+      def self.symbolize: (untyped str) -> untyped
+
+      public
+
+      # Code to Symbol map
+      #
+      # @example Usage
+      #
+      #   SYMBOLS[400] # => :bad_request
+      #   SYMBOLS[414] # => :request_uri_too_long
+      #   SYMBOLS[418] # => :im_a_teapot
+      #
+      # @return [Hash<Fixnum => Symbol>]
+      SYMBOLS: untyped
+
+      # Reversed {SYMBOLS} map.
+      #
+      # @example Usage
+      #
+      #   SYMBOL_CODES[:bad_request]           # => 400
+      #   SYMBOL_CODES[:request_uri_too_long]  # => 414
+      #   SYMBOL_CODES[:im_a_teapot]           # => 418
+      #
+      # @return [Hash<Symbol => Fixnum>]
+      SYMBOL_CODES: untyped
+
+      # @return [Fixnum] status code
+      attr_reader code: untyped
+
+      # @see REASONS
+      # @return [String, nil] status message
+      def reason: () -> untyped
+
+      # @return [String] string representation of HTTP status
+      def to_s: () -> untyped
+
+      # Check if status code is informational (1XX)
+      # @return [Boolean]
+      def informational?: () -> untyped
+
+      # Check if status code is successful (2XX)
+      # @return [Boolean]
+      def success?: () -> untyped
+
+      # Check if status code is redirection (3XX)
+      # @return [Boolean]
+      def redirect?: () -> untyped
+
+      # Check if status code is client error (4XX)
+      # @return [Boolean]
+      def client_error?: () -> untyped
+
+      # Check if status code is server error (5XX)
+      # @return [Boolean]
+      def server_error?: () -> untyped
+
+      # Symbolized {#reason}
+      #
+      # @return [nil] unless code is well-known (see REASONS)
+      # @return [Symbol]
+      def to_sym: () -> untyped
+
+      # Printable version of HTTP Status, surrounded by quote marks,
+      # with special characters escaped.
+      #
+      # (see String#inspect)
+      def inspect: () -> ::String
+
+      def __setobj__: (untyped obj) -> untyped
+
+      def __getobj__: () -> untyped
+    end
+  end
+end
+
+module HTTP
+  class Response
+    class Status < ::Delegator
+      # Code to Reason map
+      #
+      # @example Usage
+      #
+      #   REASONS[400] # => "Bad Request"
+      #   REASONS[414] # => "Request-URI Too Long"
+      #
+      # @return [Hash<Fixnum => String>]
+      REASONS: untyped
+    end
+  end
+end
+
+module HTTP
+  module Timeout
+    class Global < Null
+      def initialize: (*untyped args) -> void
+
+      # To future me: Don't remove this again, past you was smarter.
+      def reset_counter: () -> untyped
+
+      def connect: (untyped socket_class, untyped host, untyped port, ?bool nodelay) -> untyped
+
+      def connect_ssl: () -> untyped
+
+      # Read from the socket
+      def readpartial: (untyped size, ?untyped? buffer) -> untyped
+
+      # Write to the socket
+      def write: (untyped data) -> untyped
+
+      alias << write
+
+      private
+
+      def read_nonblock: (untyped size, ?untyped? buffer) -> untyped
+
+      def write_nonblock: (untyped data) -> untyped
+
+      # Perform the given I/O operation with the given argument
+      def perform_io: () { () -> untyped } -> untyped
+
+      # Wait for a socket to become readable
+      def wait_readable_or_timeout: () -> untyped
+
+      # Wait for a socket to become writable
+      def wait_writable_or_timeout: () -> untyped
+
+      # Due to the run/retry nature of nonblocking I/O, it's easier to keep track of time
+      # via method calls instead of a block to monitor.
+      def reset_timer: () -> untyped
+
+      def log_time: () -> untyped
+    end
+  end
+end
+
+module HTTP
+  module Timeout
+    class Null
+      extend Forwardable
+
+      attr_reader options: untyped
+
+      attr_reader socket: untyped
+
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      # Connects to a socket
+      def connect: (untyped socket_class, untyped host, untyped port, ?bool nodelay) -> untyped
+
+      # Starts a SSL connection on a socket
+      def connect_ssl: () -> untyped
+
+      # Configures the SSL connection and starts the connection
+      def start_tls: (untyped host, untyped ssl_socket_class, untyped ssl_context) -> (nil | untyped)
+
+      # Read from the socket
+      def readpartial: (untyped size, ?untyped? buffer) -> untyped
+
+      # Write to the socket
+      def write: (untyped data) -> untyped
+
+      alias << write
+
+      private
+
+      # Retry reading
+      def rescue_readable: (?untyped timeout) { () -> untyped } -> untyped
+
+      # Retry writing
+      def rescue_writable: (?untyped timeout) { () -> untyped } -> untyped
+    end
+  end
+end
+
+module HTTP
+  module Timeout
+    class PerOperation < Null
+      CONNECT_TIMEOUT: ::Float
+
+      WRITE_TIMEOUT: ::Float
+
+      READ_TIMEOUT: ::Float
+
+      def initialize: (*untyped args) -> void
+
+      def connect: (untyped socket_class, untyped host, untyped port, ?bool nodelay) -> untyped
+
+      def connect_ssl: () -> untyped
+
+      # Read data from the socket
+      def readpartial: (untyped size, ?untyped? buffer) -> (:eof | untyped)
+
+      # Write data to the socket
+      def write: (untyped data) -> untyped
+    end
+  end
+end
+
+module HTTP
+  class URI
+    extend Forwardable
+
+    # @private
+    HTTP_SCHEME: ::String
+
+    # @private
+    HTTPS_SCHEME: ::String
+
+    # @private
+    NORMALIZER: untyped
+
+    # Parse the given URI string, returning an HTTP::URI object
+    #
+    # @param [HTTP::URI, String, #to_str] uri to parse
+    #
+    # @return [HTTP::URI] new URI instance
+    def self.parse: (untyped uri) -> untyped
+
+    # Encodes key/value pairs as application/x-www-form-urlencoded
+    #
+    # @param [#to_hash, #to_ary] form_values to encode
+    # @param [TrueClass, FalseClass] sort should key/value pairs be sorted first?
+    #
+    # @return [String] encoded value
+    def self.form_encode: (untyped form_values, ?bool sort) -> untyped
+
+    # Creates an HTTP::URI instance from the given options
+    #
+    # @param [Hash, Addressable::URI] options_or_uri
+    #
+    # @option options_or_uri [String, #to_str] :scheme URI scheme
+    # @option options_or_uri [String, #to_str] :user for basic authentication
+    # @option options_or_uri [String, #to_str] :password for basic authentication
+    # @option options_or_uri [String, #to_str] :host name component
+    # @option options_or_uri [String, #to_str] :port network port to connect to
+    # @option options_or_uri [String, #to_str] :path component to request
+    # @option options_or_uri [String, #to_str] :query component distinct from path
+    # @option options_or_uri [String, #to_str] :fragment component at the end of the URI
+    #
+    # @return [HTTP::URI] new URI instance
+    def initialize: (?::Hash[untyped, untyped] options_or_uri) -> void
+
+    # Are these URI objects equal? Normalizes both URIs prior to comparison
+    #
+    # @param [Object] other URI to compare this one with
+    #
+    # @return [TrueClass, FalseClass] are the URIs equivalent (after normalization)?
+    def ==: (untyped other) -> untyped
+
+    # Are these URI objects equal? Does NOT normalizes both URIs prior to comparison
+    #
+    # @param [Object] other URI to compare this one with
+    #
+    # @return [TrueClass, FalseClass] are the URIs equivalent?
+    def eql?: (untyped other) -> untyped
+
+    # Hash value based off the normalized form of a URI
+    #
+    # @return [Integer] A hash of the URI
+    def hash: () -> untyped
+
+    # Port number, either as specified or the default if unspecified
+    #
+    # @return [Integer] port number
+    def port: () -> untyped
+
+    # @return [True] if URI is HTTP
+    # @return [False] otherwise
+    def http?: () -> untyped
+
+    # @return [True] if URI is HTTPS
+    # @return [False] otherwise
+    def https?: () -> untyped
+
+    # @return [Object] duplicated URI
+    def dup: () -> untyped
+
+    # Convert an HTTP::URI to a String
+    #
+    # @return [String] URI serialized as a String
+    def to_s: () -> untyped
+
+    alias to_str to_s
+
+    # @return [String] human-readable representation of URI
+    def inspect: () -> untyped
+  end
+end
+
+module HTTP
+  VERSION: ::String
+end

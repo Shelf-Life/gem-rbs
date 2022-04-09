@@ -1,0 +1,580 @@
+# Main FaradayMiddleware module.
+module FaradayMiddleware
+end
+
+module Faraday
+  # Autoload classes for Faraday::Request.
+  class Request
+  end
+
+  # Autoload classes for Faraday::Request.
+  class Response
+  end
+end
+
+module FaradayMiddleware
+  # Middleware to automatically decompress response bodies. If the
+  # "Accept-Encoding" header wasn't set in the request, this sets it to
+  # "gzip,deflate" and appropriately handles the compressed response from the
+  # server. This resembles what Ruby 1.9+ does internally in Net::HTTP#get.
+  #
+  # This middleware is NOT necessary when these adapters are used:
+  # - net_http on Ruby 1.9+
+  # - net_http_persistent on Ruby 2.0+
+  # - em_http
+  class Gzip < Faraday::Middleware
+    def self.optional_dependency: (?untyped? lib) { () -> untyped } -> untyped
+
+    BROTLI_SUPPORTED: untyped
+
+    def self.supported_encodings: () -> untyped
+
+    ACCEPT_ENCODING: ::String
+
+    CONTENT_ENCODING: ::String
+
+    CONTENT_LENGTH: ::String
+
+    SUPPORTED_ENCODINGS: untyped
+
+    def call: (untyped env) -> untyped
+
+    def reset_body: (untyped env) { (untyped) -> untyped } -> untyped
+
+    def uncompress_gzip: (untyped body) -> untyped
+
+    def inflate: (untyped body) -> untyped
+
+    def brotli_inflate: (untyped body) -> untyped
+
+    def raw_body: (untyped body) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Public: Instruments requests using Active Support.
+  #
+  # Measures time spent only for synchronous requests.
+  #
+  # Examples
+  #
+  #   ActiveSupport::Notifications.
+  #     subscribe('request.faraday') do |name, starts, ends, _, env|
+  #     url = env[:url]
+  #     http_method = env[:method].to_s.upcase
+  #     duration = ends - starts
+  #     $stderr.puts '[%s] %s %s (%.3f s)' % [url.host,
+  #                                           http_method,
+  #                                           url.request_uri,
+  #                                           duration]
+  #   end
+  class Instrumentation < Faraday::Middleware
+    def initialize: (untyped app, ?::Hash[untyped, untyped] options) -> untyped
+
+    def call: (untyped env) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Wraps a handler originally written for Rack for Faraday compatibility.
+  #
+  # Experimental. Only handles changes in request headers.
+  class RackCompatible
+    def initialize: (untyped app, untyped rack_handler, *untyped args) -> untyped
+
+    def call: (untyped env) -> untyped
+
+    NON_PREFIXED_HEADERS: untyped
+
+    # faraday to rack-compatible
+    def prepare_env: (untyped faraday_env) -> untyped
+
+    def headers_to_rack: (untyped env) -> untyped
+
+    # rack to faraday-compatible
+    def restore_env: (untyped rack_env) -> untyped
+
+    def finalize_response: (untyped env, untyped rack_response) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Exception thrown when the maximum amount of requests is
+  # exceeded.
+  class RedirectLimitReached < Faraday::ClientError
+    attr_reader response: untyped
+
+    def initialize: (untyped response) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Request middleware that encodes the body as JSON.
+  #
+  # Processes only requests with matching Content-type or those without a type.
+  # If a request doesn't have a type but has a body, it sets the Content-type
+  # to JSON MIME-type.
+  #
+  # Doesn't try to encode bodies that already are in string form.
+  class EncodeJson < Faraday::Middleware
+    CONTENT_TYPE: ::String
+
+    MIME_TYPE: ::String
+
+    MIME_TYPE_REGEX: untyped
+
+    def call: (untyped env) -> untyped
+
+    def encode: (untyped data) -> untyped
+
+    def match_content_type: (untyped env) { (untyped) -> untyped } -> (nil | untyped)
+
+    def process_request?: (untyped env) -> untyped
+
+    def has_body?: (untyped env) -> untyped
+
+    def request_type: (untyped env) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Public: Writes the original HTTP method to "X-Http-Method-Override" header
+  # and sends the request as POST.
+  #
+  # This can be used to work around technical issues with making non-POST
+  # requests, e.g. faulty HTTP client or server router.
+  #
+  # This header is recognized in Rack apps by default, courtesy of the
+  # Rack::MethodOverride module. See
+  # http://rack.rubyforge.org/doc/classes/Rack/MethodOverride.html
+  class MethodOverride < Faraday::Middleware
+    HEADER: ::String
+
+    # Public: Initialize the middleware.
+    #
+    # app     - the Faraday app to wrap
+    # options - (optional)
+    #           :rewrite - Array of HTTP methods to rewrite
+    #                      (default: all but GET and POST)
+    def initialize: (untyped app, ?untyped? options) -> untyped
+
+    def call: (untyped env) -> untyped
+
+    def rewrite_request?: (untyped method) -> untyped
+
+    # Internal: Write the original HTTP method to header, change method to POST.
+    def rewrite_request: (untyped env, untyped original_method) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Public: Uses the simple_oauth library to sign requests according the
+  # OAuth protocol.
+  #
+  # The options for this middleware are forwarded to SimpleOAuth::Header:
+  # :consumer_key, :consumer_secret, :token, :token_secret. All these
+  # parameters are optional.
+  #
+  # The signature is added to the "Authorization" HTTP request header. If the
+  # value for this header already exists, it is not overriden.
+  #
+  # If no Content-Type header is specified, this middleware assumes that
+  # request body parameters should be included while signing the request.
+  # Otherwise, it only includes them if the Content-Type is
+  # "application/x-www-form-urlencoded", as per OAuth 1.0.
+  #
+  # For better performance while signing requests, this middleware should be
+  # positioned before UrlEncoded middleware on the stack, but after any other
+  # body-encoding middleware (such as EncodeJson).
+  class OAuth < Faraday::Middleware
+    AUTH_HEADER: ::String
+
+    CONTENT_TYPE: ::String
+
+    TYPE_URLENCODED: ::String
+
+    extend Forwardable
+
+    def initialize: (untyped app, untyped options) -> untyped
+
+    def call: (untyped env) -> untyped
+
+    def oauth_header: (untyped env) -> untyped
+
+    def sign_request?: (untyped env) -> untyped
+
+    def oauth_options: (untyped env) -> untyped
+
+    def body_params: (untyped env) -> untyped
+
+    def include_body_params?: (untyped env) -> untyped
+
+    def signature_params: (untyped params) -> untyped
+  end
+end
+
+# deprecated alias
+Faraday::Request::OAuth: untyped
+
+module FaradayMiddleware
+  # Public: A simple middleware that adds an access token to each request.
+  #
+  # By default, the token is added as both "access_token" query parameter
+  # and the "Authorization" HTTP request header. It can alternatively be
+  # added exclusively as a bearer token "Authorization" header by specifying
+  # a "token_type" option of "bearer". However, an explicit "access_token"
+  # parameter or "Authorization" header for the current request are not
+  # overriden.
+  #
+  # Examples
+  #
+  #   # configure default token:
+  #   OAuth2.new(app, 'abc123')
+  #
+  #   # configure query parameter name:
+  #   OAuth2.new(app, 'abc123', :param_name => 'my_oauth_token')
+  #
+  #   # use bearer token authorization header only
+  #   OAuth2.new(app, 'abc123', :token_type => 'bearer')
+  #
+  #   # default token value is optional:
+  #   OAuth2.new(app, :param_name => 'my_oauth_token')
+  class OAuth2 < Faraday::Middleware
+    PARAM_NAME: ::String
+
+    TOKEN_TYPE: ::String
+
+    AUTH_HEADER: ::String
+
+    attr_reader param_name: untyped
+
+    attr_reader token_type: untyped
+
+    extend Forwardable
+
+    def call: (untyped env) -> untyped
+
+    def initialize: (untyped app, ?untyped? token, ?::Hash[untyped, untyped] options) -> (nil | untyped)
+
+    def query_params: (untyped url) -> untyped
+  end
+end
+
+# deprecated alias
+Faraday::Request::OAuth2: untyped
+
+module FaradayMiddleware
+  # Public: Caches GET responses and pulls subsequent ones from the cache.
+  class Caching < Faraday::Middleware
+    attr_reader cache: untyped
+
+    # Internal: List of status codes that can be cached:
+    # * 200 - 'OK'
+    # * 203 - 'Non-Authoritative Information'
+    # * 300 - 'Multiple Choices'
+    # * 301 - 'Moved Permanently'
+    # * 302 - 'Found'
+    # * 404 - 'Not Found'
+    # * 410 - 'Gone'
+    CACHEABLE_STATUS_CODES: untyped
+
+    extend Forwardable
+
+    # Public: initialize the middleware.
+    #
+    # cache   - An object that responds to read and write (default: nil).
+    # options - An options Hash (default: {}):
+    #           :ignore_params - String name or Array names of query
+    #                            params that should be ignored when forming
+    #                            the cache key (default: []).
+    #           :write_options - Hash of settings that should be passed as the
+    #                            third options parameter to the cache's #write
+    #                            method. If not specified, no options parameter
+    #                            will be passed.
+    #           :full_key      - Boolean - use full URL as cache key:
+    #                            (url.host + url.request_uri)
+    #
+    # Yields if no cache is given. The block should return a cache object.
+    def initialize: (untyped app, ?untyped? cache, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+    def call: (untyped env) -> untyped
+
+    def cache_key: (untyped env) -> untyped
+
+    def params_to_ignore: () -> untyped
+
+    def full_key?: () -> untyped
+
+    def cache_on_complete: (untyped env) -> untyped
+
+    def store_response_in_cache: (untyped key, untyped response) -> (nil | untyped)
+
+    def finalize_response: (untyped response, untyped env) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Public: Parse a Transfer-Encoding. Chunks response to just the original data
+  class Chunked < FaradayMiddleware::ResponseMiddleware
+    TRANSFER_ENCODING: ::String
+
+    def parse_response?: (untyped env) -> untyped
+
+    def chunked_encoding?: (untyped headers) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Public: Follow HTTP 301, 302, 303, 307, and 308 redirects.
+  #
+  # For HTTP 301, 302, and 303, the original GET, POST, PUT, DELETE, or PATCH
+  # request gets converted into a GET. With `:standards_compliant => true`,
+  # however, the HTTP method after 301/302 remains unchanged. This allows you
+  # to opt into HTTP/1.1 compliance and act unlike the major web browsers.
+  #
+  # This middleware currently only works with synchronous requests; i.e. it
+  # doesn't support parallelism.
+  #
+  # If you wish to persist cookies across redirects, you could use
+  # the faraday-cookie_jar gem:
+  #
+  #   Faraday.new(:url => url) do |faraday|
+  #     faraday.use FaradayMiddleware::FollowRedirects
+  #     faraday.use :cookie_jar
+  #     faraday.adapter Faraday.default_adapter
+  #   end
+  class FollowRedirects < Faraday::Middleware
+    # HTTP methods for which 30x redirects can be followed
+    ALLOWED_METHODS: untyped
+
+    # HTTP redirect status codes that this middleware implements
+    REDIRECT_CODES: untyped
+
+    # Keys in env hash which will get cleared between requests
+    ENV_TO_CLEAR: untyped
+
+    # Default value for max redirects followed
+    FOLLOW_LIMIT: ::Integer
+
+    # Regex that matches characters that need to be escaped in URLs, sans
+    # the "%" character which we assume already represents an escaped sequence.
+    URI_UNSAFE: untyped
+
+    AUTH_HEADER: ::String
+
+    # Public: Initialize the middleware.
+    #
+    # options - An options Hash (default: {}):
+    #     :limit                      - A Numeric redirect limit (default: 3)
+    #     :standards_compliant        - A Boolean indicating whether to respect
+    #                                  the HTTP spec when following 301/302
+    #                                  (default: false)
+    #     :callback                   - A callable used on redirects
+    #                                  with the old and new envs
+    #     :cookies                    - An Array of Strings (e.g.
+    #                                  ['cookie1', 'cookie2']) to choose
+    #                                  cookies to be kept, or :all to keep
+    #                                  all cookies (default: []).
+    #     :clear_authorization_header - A Boolean indicating whether the request
+    #                                  Authorization header should be cleared on
+    #                                  redirects (default: true)
+    def initialize: (untyped app, ?::Hash[untyped, untyped] options) -> untyped
+
+    def call: (untyped env) -> untyped
+
+    private
+
+    def convert_to_get?: (untyped response) -> untyped
+
+    def perform_with_redirection: (untyped env, untyped follows) -> untyped
+
+    def update_env: (untyped env, untyped request_body, untyped response) -> untyped
+
+    def follow_redirect?: (untyped env, untyped response) -> untyped
+
+    def follow_limit: () -> untyped
+
+    def standards_compliant?: () -> untyped
+
+    def callback: () -> untyped
+
+    # Internal: escapes unsafe characters from an URL which might be a path
+    # component only or a fully qualified URI so that it can be joined onto an
+    # URI:HTTP using the `+` operator. Doesn't escape "%" characters so to not
+    # risk double-escaping.
+    def safe_escape: (untyped uri) -> untyped
+
+    def clear_authorization_header: (untyped env, untyped from_url, untyped to_url) -> untyped
+
+    def redirect_to_same_host?: (untyped from_url, untyped to_url) -> (::TrueClass | untyped)
+  end
+end
+
+module FaradayMiddleware
+  # Public: Converts parsed response bodies to a Hashie::Mash if they were of
+  # Hash or Array type.
+  class Mashify < Faraday::Response::Middleware
+    attr_accessor mash_class: untyped
+
+    attr_accessor self.mash_class: untyped
+
+    def initialize: (?untyped? app, ?::Hash[untyped, untyped] options) -> untyped
+
+    def parse: (untyped body) -> untyped
+  end
+end
+
+# deprecated alias
+Faraday::Response::Mashify: untyped
+
+module FaradayMiddleware
+  # Parse dates from response body
+  class ParseDates < ::Faraday::Response::Middleware
+    ISO_DATE_FORMAT: untyped
+
+    def initialize: (untyped app, ?::Hash[untyped, untyped] options) -> untyped
+
+    def call: (untyped env) -> untyped
+
+    private
+
+    def parse_dates!: (untyped value) -> untyped
+  end
+end
+
+module FaradayMiddleware
+  # Public: Parse response bodies as JSON.
+  class ParseJson < ResponseMiddleware
+    # Public: Override the content-type of the response with "application/json"
+    # if the response body looks like it might be JSON, i.e. starts with an
+    # open bracket.
+    #
+    # This is to fix responses from certain API providers that insist on serving
+    # JSON with wrong MIME-types such as "text/javascript".
+    class MimeTypeFix < ResponseMiddleware
+      MIME_TYPE: ::String
+
+      def process_response: (untyped env) -> untyped
+
+      BRACKETS: untyped
+
+      WHITESPACE: untyped
+
+      def parse_response?: (untyped env) -> untyped
+
+      def first_char: (untyped body) -> untyped
+    end
+  end
+end
+
+# deprecated alias
+Faraday::Response::ParseJson: untyped
+
+module FaradayMiddleware
+  # Public: Restore marshalled Ruby objects in response bodies.
+  class ParseMarshal < ResponseMiddleware
+  end
+end
+
+# deprecated alias
+Faraday::Response::ParseMarshal: untyped
+
+module FaradayMiddleware
+  # Public: parses response bodies with MultiXml.
+  class ParseXml < ResponseMiddleware
+  end
+end
+
+# deprecated alias
+Faraday::Response::ParseXml: untyped
+
+module FaradayMiddleware
+  # Public: Parse response bodies as YAML.
+  #
+  # Warning: This is not backwards compatible with versions of this middleware
+  # prior to faraday_middleware v0.12 - prior to this version, we used
+  # YAML.load rather than YAMl.safe_load, which exposes serious remote code
+  # execution risks - see https://github.com/ruby/psych/issues/119 for details.
+  # If you're sure you can trust YAML you're passing, you can set up an unsafe
+  # version of this middleware like this:
+  #
+  #     class UnsafelyParseYaml < FaradayMiddleware::ResponseMiddleware
+  #       dependency do
+  #         require 'yaml'
+  #       end
+  #
+  #       define_parser do |body|
+  #         YAML.load body
+  #       end
+  #     end
+  #
+  #     Faraday.new(..) do |config|
+  #       config.use UnsafelyParseYaml
+  #       ...
+  #     end
+  class ParseYaml < ResponseMiddleware
+  end
+end
+
+# deprecated alias
+Faraday::Response::ParseYaml: untyped
+
+module FaradayMiddleware
+  # Public: Converts parsed response bodies to a Hashie::Rash if they were of
+  # Hash or Array type.
+  class Rashify < Mashify
+  end
+end
+
+# deprecated alias
+Faraday::Response::Rashify: untyped
+
+# Main FaradayMiddleware module.
+module FaradayMiddleware
+  # Internal: The base class for middleware that parses responses.
+  class ResponseMiddleware < Faraday::Middleware
+    CONTENT_TYPE: ::String
+
+    attr_accessor self.parser: untyped
+
+    # Store a Proc that receives the body and returns the parsed result.
+    def self.define_parser: (?untyped? parser) { () -> untyped } -> untyped
+
+    def self.inherited: (untyped subclass) -> untyped
+
+    def initialize: (?untyped? app, ?::Hash[untyped, untyped] options) -> untyped
+
+    def call: (untyped environment) -> untyped
+
+    def process_response: (untyped env) -> untyped
+
+    # Parse the response body.
+    #
+    # Instead of overriding this method, consider using `define_parser`.
+    def parse: (untyped body) -> untyped
+
+    def response_type: (untyped env) -> untyped
+
+    def process_response_type?: (untyped `type`) -> untyped
+
+    def parse_response?: (untyped env) -> untyped
+
+    def preserve_raw?: (untyped env) -> untyped
+  end
+
+  # DRAGONS
+  module OptionsExtension
+    attr_accessor preserve_raw: untyped
+
+    def to_hash: () -> untyped
+
+    def each: () { (untyped, untyped) -> untyped } -> untyped
+
+    def fetch: (untyped key, *untyped args) -> untyped
+  end
+end
+
+# Main FaradayMiddleware module.
+module FaradayMiddleware
+  VERSION: ::String
+end

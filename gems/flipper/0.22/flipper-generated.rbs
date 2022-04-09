@@ -1,0 +1,2135 @@
+module Flipper
+  extend ::Flipper
+
+  extend Forwardable
+
+  # Private: The namespace for all instrumented events.
+  InstrumentationNamespace: ::Symbol
+
+  # Public: Start here. Given an adapter returns a handy DSL to all the flipper
+  # goodness. To see supported options, check out dsl.rb.
+  def new: (untyped adapter, ?::Hash[untyped, untyped] options) -> untyped
+
+  # Public: Configure flipper.
+  #
+  #   Flipper.configure do |config|
+  #     config.adapter { ... }
+  #   end
+  #
+  # Yields Flipper::Configuration instance.
+  def configure: () { (untyped) -> untyped } -> untyped
+
+  # Public: Returns Flipper::Configuration instance.
+  def configuration: () -> untyped
+
+  # Public: Sets Flipper::Configuration instance.
+  def configuration=: (untyped configuration) -> untyped
+
+  # Public: Default per thread flipper instance if configured. You should not
+  # need to use this directly as most of the Flipper::DSL methods are delegated
+  # from Flipper module itself. Instead of doing Flipper.instance.enabled?(:search),
+  # you can use Flipper.enabled?(:search) for the same result.
+  #
+  # Returns Flipper::DSL instance.
+  def instance: () -> Flipper::DSL
+
+  # Public: Set the flipper instance. It is most common to use the
+  # Configuration#default to set this instance, but for things like the test
+  # environment, this writer is actually useful.
+  def instance=: (untyped flipper) -> untyped
+
+  # Public: Use this to register a group by name.
+  #
+  # name - The Symbol name of the group.
+  # block - The block that should be used to determine if the group matches a
+  #         given thing.
+  #
+  # Examples
+  #
+  #   Flipper.register(:admins) { |thing|
+  #     thing.respond_to?(:admin?) && thing.admin?
+  #   }
+  #
+  # Returns a Flipper::Group.
+  # Raises Flipper::DuplicateGroup if the group is already registered.
+  def register: (untyped name) { () -> untyped } -> untyped
+
+  # Public: Returns a Set of registered Types::Group instances.
+  def groups: () -> untyped
+
+  # Public: Returns a Set of symbols where each symbol is a registered
+  # group name. If you just want the names, this is more efficient than doing
+  # `Flipper.groups.map(&:name)`.
+  def group_names: () -> untyped
+
+  # Public: Clears the group registry.
+  #
+  # Returns nothing.
+  def unregister_groups: () -> untyped
+
+  # Public: Check if a group exists
+  #
+  # Returns boolean
+  def group_exists?: (untyped name) -> untyped
+
+  # Public: Fetches a group by name.
+  #
+  # name - The Symbol name of the group.
+  #
+  # Examples
+  #
+  #   Flipper.group(:admins)
+  #
+  # Returns Flipper::Group.
+  def group: (untyped name) -> untyped
+
+  # Internal: Registry of all groups_registry.
+  def groups_registry: () -> untyped
+
+  # Internal: Change the groups_registry registry.
+  def groups_registry=: (untyped registry) -> untyped
+end
+
+# Simple class for turning a flipper_id into an actor that can be based
+# to Flipper::Feature#enabled?.
+module Flipper
+  class Actor
+    attr_reader flipper_id: untyped
+
+    def initialize: (untyped flipper_id) -> void
+
+    def eql?: (untyped other) -> untyped
+
+    alias == eql?
+  end
+end
+
+module Flipper
+  # Adding a module include so we have some hooks for stuff down the road
+  module Adapter
+    def self.included: (untyped base) -> untyped
+
+    module ClassMethods
+      # Public: Default config for a feature's gate values.
+      def default_config: () -> { boolean: nil, groups: untyped, actors: untyped, percentage_of_actors: nil, percentage_of_time: nil }
+    end
+
+    # Public: Get all features and gate values in one call. Defaults to one call
+    # to features and another to get_multi. Feel free to override per adapter to
+    # make this more efficient.
+    def get_all: () -> untyped
+
+    # Public: Get multiple features in one call. Defaults to one get per
+    # feature. Feel free to override per adapter to make this more efficient and
+    # reduce network calls.
+    def get_multi: (untyped features) -> untyped
+
+    # Public: Ensure that adapter is in sync with source adapter provided.
+    #
+    # Returns result of Synchronizer#call.
+    def import: (untyped source_adapter) -> untyped
+
+    # Public: Default config for a feature's gate values.
+    def default_config: () -> untyped
+  end
+end
+
+module Flipper
+  module Adapters
+    class DualWrite
+      include ::Flipper::Adapter
+
+      # Public: The name of the adapter.
+      attr_reader name: untyped
+
+      # Public: Build a new sync instance.
+      #
+      # local - The local flipper adapter that should serve reads.
+      # remote - The remote flipper adapter that writes should go to first (in
+      #          addition to the local adapter).
+      def initialize: (untyped local, untyped remote, ?::Hash[untyped, untyped] options) -> void
+
+      def features: () -> untyped
+
+      def get: (untyped feature) -> untyped
+
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      def add: (untyped feature) -> untyped
+
+      def remove: (untyped feature) -> untyped
+
+      def clear: (untyped feature) -> untyped
+
+      def enable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      def disable: (untyped feature, untyped gate, untyped thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    class Http
+      include Flipper::Adapter
+
+      attr_reader name: untyped
+
+      def initialize: (?::Hash[untyped, untyped] options) -> void
+
+      def get: (untyped feature) -> untyped
+
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      def features: () -> untyped
+
+      def add: (untyped feature) -> ::TrueClass
+
+      def remove: (untyped feature) -> ::TrueClass
+
+      def enable: (untyped feature, untyped gate, untyped thing) -> ::TrueClass
+
+      def disable: (untyped feature, untyped gate, untyped thing) -> ::TrueClass
+
+      def clear: (untyped feature) -> ::TrueClass
+
+      private
+
+      def request_body_for_gate: (untyped gate, untyped value) -> untyped
+
+      def result_for_feature: (untyped feature, untyped api_gates) -> untyped
+
+      def value_for_gate: (untyped gate, untyped api_gate) -> untyped
+
+      def unsupported_data_type: (untyped data_type) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    class Http
+      class Client
+        DEFAULT_HEADERS: untyped
+
+        HTTPS_SCHEME: untyped
+
+        def initialize: (?::Hash[untyped, untyped] options) -> void
+
+        def get: (untyped path) -> untyped
+
+        def post: (untyped path, ?untyped? body) -> untyped
+
+        def delete: (untyped path, ?untyped? body) -> untyped
+
+        private
+
+        def perform: (untyped http_method, untyped path, ?::Hash[untyped, untyped] headers, ?::Hash[untyped, untyped] options) -> untyped
+
+        def uri_for_path: (untyped path) -> untyped
+
+        def build_http: (untyped uri) -> untyped
+
+        def build_request: (untyped http_method, untyped uri, untyped headers, untyped options) -> untyped
+
+        def apply_write_timeout: (untyped http) -> untyped
+      end
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    class Http
+      class Error < StandardError
+        attr_reader response: untyped
+
+        def initialize: (untyped response) -> void
+      end
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    # Internal: Adapter that wraps another adapter and instruments all adapter
+    # operations.
+    class Instrumented < SimpleDelegator
+      include ::Flipper::Adapter
+
+      # Private: The name of instrumentation events.
+      InstrumentationName: untyped
+
+      # Private: What is used to instrument all the things.
+      attr_reader instrumenter: untyped
+
+      # Public: The name of the adapter.
+      attr_reader name: untyped
+
+      # Internal: Initializes a new adapter instance.
+      #
+      # adapter - Vanilla adapter instance to wrap.
+      #
+      # options - The Hash of options.
+      #           :instrumenter - What to use to instrument all the things.
+      #
+      def initialize: (untyped adapter, ?::Hash[untyped, untyped] options) -> void
+
+      # Public
+      def features: () -> untyped
+
+      # Public
+      def add: (untyped feature) -> untyped
+
+      # Public
+      def remove: (untyped feature) -> untyped
+
+      # Public
+      def clear: (untyped feature) -> untyped
+
+      # Public
+      def get: (untyped feature) -> untyped
+
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      # Public
+      def enable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      # Public
+      def disable: (untyped feature, untyped gate, untyped thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    # Internal: Adapter that wraps another adapter with the ability to memoize
+    # adapter calls in memory. Used by flipper dsl and the memoizer middleware
+    # to make it possible to memoize adapter calls for the duration of a request.
+    class Memoizable < SimpleDelegator
+      include ::Flipper::Adapter
+
+      FeaturesKey: ::Symbol
+
+      GetAllKey: ::Symbol
+
+      # Internal
+      attr_reader cache: untyped
+
+      # Public: The name of the adapter.
+      attr_reader name: untyped
+
+      # Internal: The adapter this adapter is wrapping.
+      attr_reader adapter: untyped
+
+      # Private
+      def self.key_for: (untyped key) -> ::String
+
+      # Public
+      def initialize: (untyped adapter, ?untyped? cache) -> void
+
+      # Public
+      def features: () -> untyped
+
+      # Public
+      def add: (untyped feature) -> untyped
+
+      # Public
+      def remove: (untyped feature) -> untyped
+
+      # Public
+      def clear: (untyped feature) -> untyped
+
+      # Public
+      def get: (untyped feature) -> untyped
+
+      # Public
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      # Public
+      def enable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      # Public
+      def disable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      # Internal: Turns local caching on/off.
+      #
+      # value - The Boolean that decides if local caching is on.
+      def memoize=: (untyped value) -> untyped
+
+      # Internal: Returns true for using local cache, false for not.
+      def memoizing?: () -> untyped
+
+      private
+
+      def key_for: (untyped key) -> untyped
+
+      def expire_feature: (untyped feature) -> untyped
+
+      def expire_features_set: () -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    # Public: Adapter for storing everything in memory.
+    # Useful for tests/specs.
+    class Memory
+      include ::Flipper::Adapter
+
+      FeaturesKey: ::Symbol
+
+      # Public: The name of the adapter.
+      attr_reader name: untyped
+
+      # Public
+      def initialize: (?untyped? source) -> void
+
+      # Public: The set of known features.
+      def features: () -> untyped
+
+      # Public: Adds a feature to the set of known features.
+      def add: (untyped feature) -> ::TrueClass
+
+      # Public: Removes a feature from the set of known features and clears
+      # all the values for the feature.
+      def remove: (untyped feature) -> ::TrueClass
+
+      # Public: Clears all the gate values for a feature.
+      def clear: (untyped feature) -> ::TrueClass
+
+      # Public
+      def get: (untyped feature) -> untyped
+
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      # Public
+      def enable: (untyped feature, untyped gate, untyped thing) -> ::TrueClass
+
+      # Public
+      def disable: (untyped feature, untyped gate, untyped thing) -> ::TrueClass
+
+      # Public
+      def inspect: () -> ::String
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    # Public: Adapter that wraps another adapter and stores the operations.
+    #
+    # Useful in tests to verify calls and such. Never use outside of testing.
+    class OperationLogger < SimpleDelegator
+      include ::Flipper::Adapter
+
+      class Operation
+        attr_reader type: untyped
+
+        attr_reader args: untyped
+
+        def initialize: (untyped `type`, untyped args) -> void
+      end
+
+      OperationTypes: untyped
+
+      # Internal: An array of the operations that have happened.
+      attr_reader operations: untyped
+
+      # Internal: The name of the adapter.
+      attr_reader name: untyped
+
+      # Public
+      def initialize: (untyped adapter, ?untyped? operations) -> void
+
+      # Public: The set of known features.
+      def features: () -> untyped
+
+      # Public: Adds a feature to the set of known features.
+      def add: (untyped feature) -> untyped
+
+      # Public: Removes a feature from the set of known features and clears
+      # all the values for the feature.
+      def remove: (untyped feature) -> untyped
+
+      # Public: Clears all the gate values for a feature.
+      def clear: (untyped feature) -> untyped
+
+      # Public
+      def get: (untyped feature) -> untyped
+
+      # Public
+      def get_multi: (untyped features) -> untyped
+
+      # Public
+      def get_all: () -> untyped
+
+      # Public
+      def enable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      # Public
+      def disable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      # Public: Count the number of times a certain operation happened.
+      def count: (untyped `type`) -> untyped
+
+      # Public: Get all operations of a certain type.
+      def type: (untyped `type`) -> untyped
+
+      # Public: Get the last operation of a certain type.
+      def last: (untyped `type`) -> untyped
+
+      # Public: Resets the operation log to empty
+      def reset: () -> untyped
+
+      def inspect: () -> ::String
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    # Public: Adapter based on Ruby's pstore database. Perfect for when a local
+    # file is good enough for storing features.
+    class PStore
+      include ::Flipper::Adapter
+
+      FeaturesKey: ::Symbol
+
+      # Public: The name of the adapter.
+      attr_reader name: untyped
+
+      # Public: The path to where the file is stored.
+      attr_reader path: untyped
+
+      # Public: PStore's thread_safe option.
+      attr_reader thread_safe: untyped
+
+      # Public
+      def initialize: (?::String path, ?bool thread_safe) -> void
+
+      # Public: The set of known features.
+      def features: () -> untyped
+
+      # Public: Adds a feature to the set of known features.
+      def add: (untyped feature) -> ::TrueClass
+
+      # Public: Removes a feature from the set of known features and clears
+      # all the values for the feature.
+      def remove: (untyped feature) -> ::TrueClass
+
+      # Public: Clears all the gate values for a feature.
+      def clear: (untyped feature) -> ::TrueClass
+
+      # Public
+      def get: (untyped feature) -> untyped
+
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      # Public
+      def enable: (untyped feature, untyped gate, untyped thing) -> ::TrueClass
+
+      # Public
+      def disable: (untyped feature, untyped gate, untyped thing) -> ::TrueClass
+
+      # Public
+      def inspect: () -> ::String
+
+      private
+
+      def clear_gates: (untyped feature) -> untyped
+
+      def read_feature_keys: () -> untyped
+
+      def read_many_features: (untyped features) -> untyped
+
+      def result_for_feature: (untyped feature) -> untyped
+
+      # Private
+      def key: (untyped feature, untyped gate) -> ::String
+
+      # Private
+      def read: (untyped key) -> untyped
+
+      # Private
+      def write: (untyped key, untyped value) -> untyped
+
+      # Private
+      def delete: (untyped key) -> untyped
+
+      # Private
+      def set_add: (untyped key, untyped value) -> untyped
+
+      # Private
+      def set_delete: (untyped key, untyped value) -> untyped
+
+      # Private
+      def set_members: (untyped key) { (untyped) -> untyped } -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    # Public: Adapter that wraps another adapter and raises for any writes.
+    class ReadOnly
+      include ::Flipper::Adapter
+
+      class WriteAttempted < Error
+        def initialize: (?untyped? message) -> void
+      end
+
+      # Internal: The name of the adapter.
+      attr_reader name: untyped
+
+      # Public
+      def initialize: (untyped adapter) -> void
+
+      def features: () -> untyped
+
+      def get: (untyped feature) -> untyped
+
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      def add: (untyped _feature) -> untyped
+
+      def remove: (untyped _feature) -> untyped
+
+      def clear: (untyped _feature) -> untyped
+
+      def enable: (untyped _feature, untyped _gate, untyped _thing) -> untyped
+
+      def disable: (untyped _feature, untyped _gate, untyped _thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    # TODO: Syncing should happen in a background thread on a regular interval
+    # rather than in the main thread only when reads happen.
+    class Sync
+      include ::Flipper::Adapter
+
+      # Public: The name of the adapter.
+      attr_reader name: untyped
+
+      # Public: The synchronizer that will keep the local and remote in sync.
+      attr_reader synchronizer: untyped
+
+      # Public: Build a new sync instance.
+      #
+      # local - The local flipper adapter that should serve reads.
+      # remote - The remote flipper adapter that should serve writes and update
+      #          the local on an interval.
+      # interval - The Float or Integer number of seconds between syncs from
+      # remote to local. Default value is set in IntervalSynchronizer.
+      def initialize: (untyped local, untyped remote, ?::Hash[untyped, untyped] options) -> void
+
+      def features: () -> untyped
+
+      def get: (untyped feature) -> untyped
+
+      def get_multi: (untyped features) -> untyped
+
+      def get_all: () -> untyped
+
+      def add: (untyped feature) -> untyped
+
+      def remove: (untyped feature) -> untyped
+
+      def clear: (untyped feature) -> untyped
+
+      def enable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      def disable: (untyped feature, untyped gate, untyped thing) -> untyped
+
+      private
+
+      def synchronize: () -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    class Sync
+      # Internal: Given a feature, local gate values and remote gate values,
+      # makes the local equal to the remote.
+      class FeatureSynchronizer
+        extend Forwardable
+
+        def initialize: (untyped feature, untyped local_gate_values, untyped remote_gate_values) -> void
+
+        def call: () -> untyped
+
+        private
+
+        def sync_actors: () -> untyped
+
+        def sync_groups: () -> untyped
+
+        def sync_percentage_of_actors: () -> (nil | untyped)
+
+        def sync_percentage_of_time: () -> (nil | untyped)
+
+        def default_config: () -> untyped
+
+        def default_gate_values: () -> untyped
+
+        def default_gate_values?: (untyped gate_values) -> untyped
+
+        def local_disabled?: () -> untyped
+
+        def remote_disabled?: () -> untyped
+
+        def local_boolean_enabled?: () -> untyped
+
+        def remote_boolean_enabled?: () -> untyped
+      end
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    class Sync
+      # Internal: Wraps a Synchronizer instance and only invokes it every
+      # N seconds.
+      class IntervalSynchronizer
+        # Private: Number of seconds between syncs (default: 10).
+        DEFAULT_INTERVAL: ::Integer
+
+        # Private
+        def self.now: () -> untyped
+
+        # Public: The Float or Integer number of seconds between invocations of
+        # the wrapped synchronizer.
+        attr_reader interval: untyped
+
+        # Public: Initializes a new interval synchronizer.
+        #
+        # synchronizer - The Synchronizer to call when the interval has passed.
+        # interval - The Integer number of seconds between invocations of
+        #            the wrapped synchronizer.
+        def initialize: (untyped synchronizer, ?interval: untyped? interval) -> void
+
+        def call: () -> nil
+
+        private
+
+        def time_to_sync?: () -> untyped
+
+        def now: () -> untyped
+      end
+    end
+  end
+end
+
+module Flipper
+  module Adapters
+    class Sync
+      # Public: Given a local and remote adapter, it can update the local to
+      # match the remote doing only the necessary enable/disable operations.
+      class Synchronizer
+        # Public: Initializes a new synchronizer.
+        #
+        # local - The Flipper adapter to get in sync with the remote.
+        # remote - The Flipper adapter that is source of truth that the local
+        #          adapter should be brought in line with.
+        # options - The Hash of options.
+        #           :instrumenter - The instrumenter used to instrument.
+        #           :raise - Should errors be raised (default: true).
+        def initialize: (untyped local, untyped remote, ?::Hash[untyped, untyped] options) -> void
+
+        # Public: Forces a sync.
+        def call: () -> untyped
+
+        private
+
+        def sync: () -> untyped
+      end
+    end
+  end
+end
+
+module Flipper
+  class Configuration
+    def initialize: (?::Hash[untyped, untyped] options) -> void
+
+    # The default adapter to use.
+    #
+    # Pass a block to assign the adapter, and invoke without a block to
+    # return the configured adapter instance.
+    #
+    #   Flipper.configure do |config|
+    #     config.adapter # => instance of default Memory adapter
+    #
+    #     # Configure it to use the ActiveRecord adapter
+    #     config.adapter do
+    #       require "flipper/adapters/active_record"
+    #       Flipper::Adapters::ActiveRecord.new
+    #     end
+    #
+    #     config.adapter # => instance of ActiveRecord adapter
+    #  end
+    #
+    def adapter: () { () -> untyped } -> untyped
+
+    # Controls the default instance for flipper. When used with a block it
+    # assigns a new default block to use to generate an instance. When used
+    # without a block, it performs a block invocation and returns the result.
+    #
+    #   configuration = Flipper::Configuration.new
+    #   configuration.default # => Flipper::DSL instance using Memory adapter
+    #
+    #   # sets the default block to generate a new instance using ActiveRecord adapter
+    #   configuration.default do
+    #     require "flipper/adapters/active_record"
+    #     Flipper.new(Flipper::Adapters::ActiveRecord.new)
+    #   end
+    #
+    #   configuration.default # => Flipper::DSL instance using ActiveRecord adapter
+    #
+    # Returns result of default block invocation if called without block. If
+    # called with block, assigns the default block.
+    def default: () { () -> untyped } -> untyped
+  end
+end
+
+# Definitions from Flipper::DSL
+module Flipper
+  # Public: Check if a feature is enabled.
+  #
+  # name - The String or Symbol name of the feature.
+  # args - The args passed through to the enabled check.
+  #
+  # Returns true if feature is enabled, false if not.
+  def enabled?: (untyped name, *untyped args) -> untyped
+
+  # Public: Enable a feature.
+  #
+  # name - The String or Symbol name of the feature.
+  # args - The args passed through to the feature instance enable call.
+  #
+  # Returns the result of the feature instance enable call.
+  def enable: (untyped name, *untyped args) -> untyped
+
+  # Public: Enable a feature for an actor.
+  #
+  # name - The String or Symbol name of the feature.
+  # actor - a Flipper::Types::Actor instance or an object that responds
+  #         to flipper_id.
+  #
+  # Returns result of Feature#enable.
+  def enable_actor: (untyped name, untyped actor) -> untyped
+
+  # Public: Enable a feature for a group.
+  #
+  # name - The String or Symbol name of the feature.
+  # group - a Flipper::Types::Group instance or a String or Symbol name of a
+  #         registered group.
+  #
+  # Returns result of Feature#enable.
+  def enable_group: (untyped name, untyped group) -> untyped
+
+  # Public: Enable a feature a percentage of time.
+  #
+  # name - The String or Symbol name of the feature.
+  # percentage - a Flipper::Types::PercentageOfTime instance or an object
+  #              that responds to to_i.
+  #
+  # Returns result of Feature#enable.
+  def enable_percentage_of_time: (untyped name, untyped percentage) -> untyped
+
+  # Public: Enable a feature for a percentage of actors.
+  #
+  # name - The String or Symbol name of the feature.
+  # percentage - a Flipper::Types::PercentageOfActors instance or an object
+  #              that responds to to_i.
+  #
+  # Returns result of Feature#enable.
+  def enable_percentage_of_actors: (untyped name, untyped percentage) -> untyped
+
+  # Public: Disable a feature.
+  #
+  # name - The String or Symbol name of the feature.
+  # args - The args passed through to the feature instance enable call.
+  #
+  # Returns the result of the feature instance disable call.
+  def disable: (untyped name, *untyped args) -> untyped
+
+  # Public: Disable a feature for an actor.
+  #
+  # name - The String or Symbol name of the feature.
+  # actor - a Flipper::Types::Actor instance or an object that responds
+  #         to flipper_id.
+  #
+  # Returns result of disable.
+  def disable_actor: (untyped name, untyped actor) -> untyped
+
+  # Public: Disable a feature for a group.
+  #
+  # name - The String or Symbol name of the feature.
+  # group - a Flipper::Types::Group instance or a String or Symbol name of a
+  #         registered group.
+  #
+  # Returns result of disable.
+  def disable_group: (untyped name, untyped group) -> untyped
+
+  # Public: Disable a feature a percentage of time.
+  #
+  # name - The String or Symbol name of the feature.
+  # percentage - a Flipper::Types::PercentageOfTime instance or an object
+  #              that responds to to_i.
+  #
+  # Returns result of disable.
+  def disable_percentage_of_time: (untyped name) -> untyped
+
+  # Public: Disable a feature for a percentage of actors.
+  #
+  # name - The String or Symbol name of the feature.
+  # percentage - a Flipper::Types::PercentageOfActors instance or an object
+  #              that responds to to_i.
+  #
+  # Returns result of disable.
+  def disable_percentage_of_actors: (untyped name) -> untyped
+
+  # Public: Add a feature.
+  #
+  # name - The String or Symbol name of the feature.
+  #
+  # Returns result of add.
+  def add: (untyped name) -> untyped
+
+  # Public: Has a feature been added in the adapter.
+  #
+  # name - The String or Symbol name of the feature.
+  #
+  # Returns true if added else false.
+  def exist?: (untyped name) -> untyped
+
+  # Public: Remove a feature.
+  #
+  # name - The String or Symbol name of the feature.
+  #
+  # Returns result of remove.
+  def remove: (untyped name) -> untyped
+
+  # Public: Access a feature instance by name.
+  #
+  # name - The String or Symbol name of the feature.
+  #
+  # Returns an instance of Flipper::Feature.
+  def feature: (untyped name) -> untyped
+
+  # Public: Preload the features with the given names.
+  #
+  # names - An Array of String or Symbol names of the features.
+  #
+  # Returns an Array of Flipper::Feature.
+  def preload: (untyped names) -> untyped
+
+  # Public: Preload all the adapters features.
+  #
+  # Returns an Array of Flipper::Feature.
+  def preload_all: () -> untyped
+
+  # Public: Shortcut access to a feature instance by name.
+  #
+  # name - The String or Symbol name of the feature.
+  #
+  # Returns an instance of Flipper::Feature.
+  alias [] feature
+
+  # Public: Shortcut for getting a boolean type instance.
+  #
+  # value - The true or false value for the boolean.
+  #
+  # Returns a Flipper::Types::Boolean instance.
+  def boolean: (?bool value) -> untyped
+
+  # Public: Even shorter shortcut for getting a boolean type instance.
+  #
+  # value - The true or false value for the boolean.
+  #
+  # Returns a Flipper::Types::Boolean instance.
+  alias bool boolean
+
+  # Public: Wraps an object as a flipper actor.
+  #
+  # thing - The object that you would like to wrap.
+  #
+  # Returns an instance of Flipper::Types::Actor.
+  # Raises ArgumentError if thing does not respond to `flipper_id`.
+  def actor: (untyped thing) -> untyped
+
+  # Public: Shortcut for getting a percentage of time instance.
+  #
+  # number - The percentage of time that should be enabled.
+  #
+  # Returns Flipper::Types::PercentageOfTime.
+  def time: (untyped number) -> untyped
+
+  alias percentage_of_time time
+
+  # Public: Shortcut for getting a percentage of actors instance.
+  #
+  # number - The percentage of actors that should be enabled.
+  #
+  # Returns Flipper::Types::PercentageOfActors.
+  def actors: (untyped number) -> untyped
+
+  alias percentage_of_actors actors
+
+  # Public: Returns a Set of the known features for this adapter.
+  #
+  # Returns Set of Flipper::Feature instances.
+  def features: () -> untyped
+
+  def import: (untyped flipper) -> untyped
+
+  # Cloud DSL method that does nothing for open source version.
+  def sync: () -> nil
+
+  # Cloud DSL method that does nothing for open source version.
+  def sync_secret: () -> nil
+end
+
+module Flipper
+  class DSL
+    extend Forwardable
+
+    # Private
+    attr_reader adapter: untyped
+
+    # Private: What is being used to instrument all the things.
+    attr_reader instrumenter: untyped
+
+    # Public: Returns a new instance of the DSL.
+    #
+    # adapter - The adapter that this DSL instance should use.
+    # options - The Hash of options.
+    #           :instrumenter - What should be used to instrument all the things.
+    def initialize: (untyped adapter, ?::Hash[untyped, untyped] options) -> void
+
+    # Public: Check if a feature is enabled.
+    #
+    # name - The String or Symbol name of the feature.
+    # args - The args passed through to the enabled check.
+    #
+    # Returns true if feature is enabled, false if not.
+    def enabled?: (untyped name, *untyped args) -> untyped
+
+    # Public: Enable a feature.
+    #
+    # name - The String or Symbol name of the feature.
+    # args - The args passed through to the feature instance enable call.
+    #
+    # Returns the result of the feature instance enable call.
+    def enable: (untyped name, *untyped args) -> untyped
+
+    # Public: Enable a feature for an actor.
+    #
+    # name - The String or Symbol name of the feature.
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of Feature#enable.
+    def enable_actor: (untyped name, untyped actor) -> untyped
+
+    # Public: Enable a feature for a group.
+    #
+    # name - The String or Symbol name of the feature.
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of Feature#enable.
+    def enable_group: (untyped name, untyped group) -> untyped
+
+    # Public: Enable a feature a percentage of time.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of Feature#enable.
+    def enable_percentage_of_time: (untyped name, untyped percentage) -> untyped
+
+    # Public: Enable a feature for a percentage of actors.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfActors instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of Feature#enable.
+    def enable_percentage_of_actors: (untyped name, untyped percentage) -> untyped
+
+    # Public: Disable a feature.
+    #
+    # name - The String or Symbol name of the feature.
+    # args - The args passed through to the feature instance enable call.
+    #
+    # Returns the result of the feature instance disable call.
+    def disable: (untyped name, *untyped args) -> untyped
+
+    # Public: Disable a feature for an actor.
+    #
+    # name - The String or Symbol name of the feature.
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of disable.
+    def disable_actor: (untyped name, untyped actor) -> untyped
+
+    # Public: Disable a feature for a group.
+    #
+    # name - The String or Symbol name of the feature.
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of disable.
+    def disable_group: (untyped name, untyped group) -> untyped
+
+    # Public: Disable a feature a percentage of time.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_time: (untyped name) -> untyped
+
+    # Public: Disable a feature for a percentage of actors.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfActors instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_actors: (untyped name) -> untyped
+
+    # Public: Add a feature.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns result of add.
+    def add: (untyped name) -> untyped
+
+    # Public: Has a feature been added in the adapter.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns true if added else false.
+    def exist?: (untyped name) -> untyped
+
+    # Public: Remove a feature.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns result of remove.
+    def remove: (untyped name) -> untyped
+
+    # Public: Access a feature instance by name.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns an instance of Flipper::Feature.
+    def feature: (untyped name) -> untyped
+
+    # Public: Preload the features with the given names.
+    #
+    # names - An Array of String or Symbol names of the features.
+    #
+    # Returns an Array of Flipper::Feature.
+    def preload: (untyped names) -> untyped
+
+    # Public: Preload all the adapters features.
+    #
+    # Returns an Array of Flipper::Feature.
+    def preload_all: () -> untyped
+
+    # Public: Shortcut access to a feature instance by name.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns an instance of Flipper::Feature.
+    alias [] feature
+
+    # Public: Shortcut for getting a boolean type instance.
+    #
+    # value - The true or false value for the boolean.
+    #
+    # Returns a Flipper::Types::Boolean instance.
+    def boolean: (?bool value) -> untyped
+
+    # Public: Even shorter shortcut for getting a boolean type instance.
+    #
+    # value - The true or false value for the boolean.
+    #
+    # Returns a Flipper::Types::Boolean instance.
+    alias bool boolean
+
+    # Public: Access a flipper group by name.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns an instance of Flipper::Group.
+    def group: (untyped name) -> untyped
+
+    # Public: Wraps an object as a flipper actor.
+    #
+    # thing - The object that you would like to wrap.
+    #
+    # Returns an instance of Flipper::Types::Actor.
+    # Raises ArgumentError if thing does not respond to `flipper_id`.
+    def actor: (untyped thing) -> untyped
+
+    # Public: Shortcut for getting a percentage of time instance.
+    #
+    # number - The percentage of time that should be enabled.
+    #
+    # Returns Flipper::Types::PercentageOfTime.
+    def time: (untyped number) -> untyped
+
+    alias percentage_of_time time
+
+    # Public: Shortcut for getting a percentage of actors instance.
+    #
+    # number - The percentage of actors that should be enabled.
+    #
+    # Returns Flipper::Types::PercentageOfActors.
+    def actors: (untyped number) -> untyped
+
+    alias percentage_of_actors actors
+
+    # Public: Returns a Set of the known features for this adapter.
+    #
+    # Returns Set of Flipper::Feature instances.
+    def features: () -> untyped
+
+    def import: (untyped flipper) -> untyped
+
+    # Cloud DSL method that does nothing for open source version.
+    def sync: () -> nil
+
+    # Cloud DSL method that does nothing for open source version.
+    def sync_secret: () -> nil
+  end
+end
+
+module Flipper
+  # Top level error that all other errors inherit from.
+  class Error < StandardError
+  end
+
+  # Raised when gate can not be found for a thing.
+  class GateNotFound < Error
+    def initialize: (untyped thing) -> void
+  end
+
+  # Raised when attempting to declare a group name that has already been used.
+  class DuplicateGroup < Error
+  end
+
+  # Raised when default instance not configured but there is an attempt to
+  # use it.
+  class DefaultNotSet < Flipper::Error
+    def initialize: (?untyped? message) -> void
+  end
+
+  # Raised when an invalid value is set to a configuration property
+  class InvalidConfigurationValue < Flipper::Error
+    def initialize: (?untyped? message) -> void
+  end
+
+  # Raised when accessing a configuration property that has been deprecated
+  class ConfigurationDeprecated < Flipper::Error
+    def initialize: (?untyped? message) -> void
+  end
+end
+
+module Flipper
+  class Feature
+    # Private: The name of feature instrumentation events.
+    InstrumentationName: untyped
+
+    # Public: The name of the feature.
+    attr_reader name: untyped
+
+    # Public: Name converted to value safe for adapter.
+    attr_reader key: untyped
+
+    # Private: The adapter this feature should use.
+    attr_reader adapter: untyped
+
+    # Private: What is being used to instrument all the things.
+    attr_reader instrumenter: untyped
+
+    # Internal: Initializes a new feature instance.
+    #
+    # name - The Symbol or String name of the feature.
+    # adapter - The adapter that will be used to store details about this feature.
+    #
+    # options - The Hash of options.
+    #           :instrumenter - What to use to instrument all the things.
+    #
+    def initialize: (untyped name, untyped adapter, ?::Hash[untyped, untyped] options) -> void
+
+    # Public: Enable this feature for something.
+    #
+    # Returns the result of Adapter#enable.
+    def enable: (?bool thing) -> untyped
+
+    # Public: Disable this feature for something.
+    #
+    # Returns the result of Adapter#disable.
+    def disable: (?bool thing) -> untyped
+
+    # Public: Adds this feature.
+    #
+    # Returns the result of Adapter#add.
+    def add: () -> untyped
+
+    # Public: Does this feature exist in the adapter.
+    #
+    # Returns true if exists in adapter else false.
+    def exist?: () -> untyped
+
+    # Public: Removes this feature.
+    #
+    # Returns the result of Adapter#remove.
+    def remove: () -> untyped
+
+    # Public: Clears all gate values for this feature.
+    #
+    # Returns the result of Adapter#clear.
+    def clear: () -> untyped
+
+    # Public: Check if a feature is enabled for a thing.
+    #
+    # Returns true if enabled, false if not.
+    def enabled?: (?untyped? thing) -> untyped
+
+    # Public: Enables a feature for an actor.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of enable.
+    def enable_actor: (untyped actor) -> untyped
+
+    # Public: Enables a feature for a group.
+    #
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of enable.
+    def enable_group: (untyped group) -> untyped
+
+    # Public: Enables a feature a percentage of time.
+    #
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of enable.
+    def enable_percentage_of_time: (untyped percentage) -> untyped
+
+    # Public: Enables a feature for a percentage of actors.
+    #
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of enable.
+    def enable_percentage_of_actors: (untyped percentage) -> untyped
+
+    # Public: Disables a feature for an actor.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of disable.
+    def disable_actor: (untyped actor) -> untyped
+
+    # Public: Disables a feature for a group.
+    #
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of disable.
+    def disable_group: (untyped group) -> untyped
+
+    # Public: Disables a feature a percentage of time.
+    #
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_time: () -> untyped
+
+    # Public: Disables a feature for a percentage of actors.
+    #
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_actors: () -> untyped
+
+    # Public: Returns state for feature (:on, :off, or :conditional).
+    def state: () -> untyped
+
+    # Public: Is the feature fully enabled.
+    def on?: () -> untyped
+
+    # Public: Is the feature fully disabled.
+    def off?: () -> untyped
+
+    # Public: Is the feature conditionally enabled for a given actor, group,
+    # percentage of actors or percentage of the time.
+    def conditional?: () -> untyped
+
+    # Public: Returns the raw gate values stored by the adapter.
+    def gate_values: () -> untyped
+
+    # Public: Get groups enabled for this feature.
+    #
+    # Returns Set of Flipper::Types::Group instances.
+    def enabled_groups: () -> untyped
+
+    alias groups enabled_groups
+
+    # Public: Get groups not enabled for this feature.
+    #
+    # Returns Set of Flipper::Types::Group instances.
+    def disabled_groups: () -> untyped
+
+    # Public: Get the adapter value for the groups gate.
+    #
+    # Returns Set of String group names.
+    def groups_value: () -> untyped
+
+    # Public: Get the adapter value for the actors gate.
+    #
+    # Returns Set of String flipper_id's.
+    def actors_value: () -> untyped
+
+    # Public: Get the adapter value for the boolean gate.
+    #
+    # Returns true or false.
+    def boolean_value: () -> untyped
+
+    # Public: Get the adapter value for the percentage of actors gate.
+    #
+    # Returns Integer greater than or equal to 0 and less than or equal to 100.
+    def percentage_of_actors_value: () -> untyped
+
+    # Public: Get the adapter value for the percentage of time gate.
+    #
+    # Returns Integer greater than or equal to 0 and less than or equal to 100.
+    def percentage_of_time_value: () -> untyped
+
+    # Public: Get the gates that have been enabled for the feature.
+    #
+    # Returns an Array of Flipper::Gate instances.
+    def enabled_gates: () -> untyped
+
+    # Public: Get the names of the enabled gates.
+    #
+    # Returns an Array of gate names.
+    def enabled_gate_names: () -> untyped
+
+    # Public: Get the gates that have not been enabled for the feature.
+    #
+    # Returns an Array of Flipper::Gate instances.
+    def disabled_gates: () -> untyped
+
+    # Public: Get the names of the disabled gates.
+    #
+    # Returns an Array of gate names.
+    def disabled_gate_names: () -> untyped
+
+    # Public: Returns the string representation of the feature.
+    def to_s: () -> untyped
+
+    # Public: Identifier to be used in the url (a rails-ism).
+    def to_param: () -> untyped
+
+    # Public: Pretty string version for debugging.
+    def inspect: () -> ::String
+
+    # Public: Get all the gates used to determine enabled/disabled for the feature.
+    #
+    # Returns an array of gates
+    def gates: () -> untyped
+
+    # Public: Find a gate by name.
+    #
+    # Returns a Flipper::Gate if found, nil if not.
+    def gate: (untyped name) -> untyped
+
+    # Public: Find the gate that protects a thing.
+    #
+    # thing - The object for which you would like to find a gate
+    #
+    # Returns a Flipper::Gate.
+    # Raises Flipper::GateNotFound if no gate found for thing
+    def gate_for: (untyped thing) -> untyped
+
+    private
+
+    # Private: Instrument a feature operation.
+    def instrument: (untyped operation) { (untyped) -> untyped } -> untyped
+  end
+end
+
+module Flipper
+  class FeatureCheckContext
+    # Public: The name of the feature.
+    attr_reader feature_name: untyped
+
+    # Public: The GateValues instance that keeps track of the values for the
+    # gates for the feature.
+    attr_reader values: untyped
+
+    # Public: The thing we want to know if a feature is enabled for.
+    attr_reader thing: untyped
+
+    def initialize: (?::Hash[untyped, untyped] options) -> void
+
+    # Public: Convenience method for groups value like Feature has.
+    def groups_value: () -> untyped
+
+    # Public: Convenience method for actors value value like Feature has.
+    def actors_value: () -> untyped
+
+    # Public: Convenience method for boolean value value like Feature has.
+    def boolean_value: () -> untyped
+
+    # Public: Convenience method for percentage of actors value like Feature has.
+    def percentage_of_actors_value: () -> untyped
+
+    # Public: Convenience method for percentage of time value like Feature has.
+    def percentage_of_time_value: () -> untyped
+  end
+end
+
+module Flipper
+  class Gate
+    # Public
+    def initialize: (?::Hash[untyped, untyped] options) -> void
+
+    # Public: The name of the gate. Implemented in subclass.
+    def name: () -> untyped
+
+    # Private: Name converted to value safe for adapter. Implemented in subclass.
+    def key: () -> untyped
+
+    def data_type: () -> untyped
+
+    def enabled?: (untyped _value) -> untyped
+
+    # Internal: Check if a gate is open for a thing. Implemented in subclass.
+    #
+    # Returns true if gate open for thing, false if not.
+    def open?: (untyped _thing, untyped _value, ?::Hash[untyped, untyped] _options) -> ::FalseClass
+
+    # Internal: Check if a gate is protects a thing. Implemented in subclass.
+    #
+    # Returns true if gate protects thing, false if not.
+    def protects?: (untyped _thing) -> ::FalseClass
+
+    # Internal: Allows gate to wrap thing using one of the supported flipper
+    # types so adapters always get something that responds to value.
+    def wrap: (untyped thing) -> untyped
+
+    # Public: Pretty string version for debugging.
+    def inspect: () -> ::String
+  end
+end
+
+module Flipper
+  class GateValues
+    # Private: Array of instance variables that are readable through the []
+    # instance method.
+    LegitIvars: untyped
+
+    attr_reader boolean: untyped
+
+    attr_reader actors: untyped
+
+    attr_reader groups: untyped
+
+    attr_reader percentage_of_actors: untyped
+
+    attr_reader percentage_of_time: untyped
+
+    def initialize: (untyped adapter_values) -> void
+
+    def []: (untyped key) -> untyped
+
+    def eql?: (untyped other) -> untyped
+
+    alias == eql?
+  end
+end
+
+module Flipper
+  module Gates
+    class Actor < Gate
+      # Internal: The name of the gate. Used for instrumentation, etc.
+      def name: () -> :actor
+
+      # Internal: Name converted to value safe for adapter.
+      def key: () -> :actors
+
+      def data_type: () -> :set
+
+      def enabled?: (untyped value) -> untyped
+
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if gate open for thing, false if not.
+      def open?: (untyped context) -> untyped
+
+      def wrap: (untyped thing) -> untyped
+
+      def protects?: (untyped thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Gates
+    class Boolean < Gate
+      # Internal: The name of the gate. Used for instrumentation, etc.
+      def name: () -> :boolean
+
+      # Internal: Name converted to value safe for adapter.
+      def key: () -> :boolean
+
+      def data_type: () -> :boolean
+
+      def enabled?: (untyped value) -> untyped
+
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if explicitly set to true, false if explicitly set to false
+      # or nil if not explicitly set.
+      def open?: (untyped context) -> untyped
+
+      def wrap: (untyped thing) -> untyped
+
+      def protects?: (untyped thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Gates
+    class Group < Gate
+      # Internal: The name of the gate. Used for instrumentation, etc.
+      def name: () -> :group
+
+      # Internal: Name converted to value safe for adapter.
+      def key: () -> :groups
+
+      def data_type: () -> :set
+
+      def enabled?: (untyped value) -> untyped
+
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if gate open for thing, false if not.
+      def open?: (untyped context) -> untyped
+
+      def wrap: (untyped thing) -> untyped
+
+      def protects?: (untyped thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Gates
+    class PercentageOfActors < Gate
+      # Internal: The name of the gate. Used for instrumentation, etc.
+      def name: () -> :percentage_of_actors
+
+      # Internal: Name converted to value safe for adapter.
+      def key: () -> :percentage_of_actors
+
+      def data_type: () -> :integer
+
+      def enabled?: (untyped value) -> untyped
+
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if gate open for thing, false if not.
+      def open?: (untyped context) -> untyped
+
+      def protects?: (untyped thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Gates
+    class PercentageOfTime < Gate
+      # Internal: The name of the gate. Used for instrumentation, etc.
+      def name: () -> :percentage_of_time
+
+      # Internal: Name converted to value safe for adapter.
+      def key: () -> :percentage_of_time
+
+      def data_type: () -> :integer
+
+      def enabled?: (untyped value) -> untyped
+
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if gate open for thing, false if not.
+      def open?: (untyped context) -> untyped
+
+      def protects?: (untyped thing) -> untyped
+    end
+  end
+end
+
+module Flipper
+  # A default implementation of `#flipper_id` for actors.
+  #
+  #   class User < Struct.new(:id)
+  #     include Flipper::Identifier
+  #   end
+  #
+  #   user = User.new(99)
+  #   Flipper.enable :thing, user
+  #   Flipper.enabled? :thing, user #=> true
+  #
+  module Identifier
+    def flipper_id: () -> ::String
+  end
+end
+
+module Flipper
+  module Instrumentation
+    class LogSubscriber < ::ActiveSupport::LogSubscriber
+      # Logs a feature operation.
+      #
+      # Example Output
+      #
+      #   flipper[:search].enabled?(user)
+      #   # Flipper feature(search) enabled? false (1.2ms)  [ thing=... ]
+      #
+      # Returns nothing.
+      def feature_operation: (untyped event) -> (nil | untyped)
+
+      # Logs an adapter operation. If operation is for a feature, then that
+      # feature is included in log output.
+      #
+      # Example Output
+      #
+      #   # log output for adapter operation with feature
+      #   # Flipper feature(search) adapter(memory) enable  (0.0ms)  [ result=...]
+      #
+      #   # log output for adapter operation with no feature
+      #   # Flipper adapter(memory) features (0.0ms)  [ result=... ]
+      #
+      # Returns nothing.
+      def adapter_operation: (untyped event) -> (nil | untyped)
+
+      def logger: () -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Instrumentation
+    class StatsdSubscriber < Subscriber
+      attr_accessor self.client: untyped
+
+      def update_timer: (untyped metric) -> untyped
+
+      def update_counter: (untyped metric) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Instrumentation
+    class Subscriber
+      # Public: Use this as the subscribed block.
+      def self.call: (untyped name, untyped start, untyped ending, untyped transaction_id, untyped payload) -> untyped
+
+      # Private: Initializes a new event processing instance.
+      def initialize: (untyped name, untyped start, untyped ending, untyped transaction_id, untyped payload) -> void
+
+      # Internal: Override in subclass.
+      def update_timer: (untyped _metric) -> untyped
+
+      # Internal: Override in subclass.
+      def update_counter: (untyped _metric) -> untyped
+
+      # Private
+      def update: () -> untyped
+
+      # Private
+      def update_feature_operation_metrics: () -> untyped
+
+      # Private
+      def update_adapter_operation_metrics: () -> untyped
+
+      QUESTION_MARK: untyped
+
+      # Private
+      def strip_trailing_question_mark: (untyped operation) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Instrumenters
+    # Instrumentor that is useful for tests as it stores each of the events that
+    # are instrumented.
+    class Memory
+      Event: untyped
+
+      attr_reader events: untyped
+
+      def initialize: () -> void
+
+      def instrument: (untyped name, ?::Hash[untyped, untyped] payload) { (untyped) -> untyped } -> untyped
+
+      def events_by_name: (untyped name) -> untyped
+
+      def event_by_name: (untyped name) -> untyped
+
+      def reset: () -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Instrumenters
+    class Noop
+      def self.instrument: (untyped _name, ?::Hash[untyped, untyped] payload) { (untyped) -> untyped } -> untyped
+    end
+  end
+end
+
+module Flipper
+  METADATA: untyped
+end
+
+module Flipper
+  module Middleware
+    class Memoizer
+      # Public: Initializes an instance of the Memoizer middleware. Flipper must
+      # be configured with a default instance or the flipper instance must be
+      # setup in the env of the request. You can do this by using the
+      # Flipper::Middleware::SetupEnv middleware.
+      #
+      # app - The app this middleware is included in.
+      # opts - The Hash of options.
+      #        :preload - Boolean to preload all features or Array of Symbol feature names to preload.
+      #
+      # Examples
+      #
+      #   use Flipper::Middleware::Memoizer
+      #
+      #   # using with preload_all features
+      #   use Flipper::Middleware::Memoizer, preload: true
+      #
+      #   # using with preload specific features
+      #   use Flipper::Middleware::Memoizer, preload: [:stats, :search, :some_feature]
+      #
+      def initialize: (untyped app, ?::Hash[untyped, untyped] opts) -> void
+
+      def call: (untyped env) -> untyped
+
+      private
+
+      def memoize?: (untyped request) -> untyped
+
+      def memoized_call: (untyped env) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Middleware
+    class SetupEnv
+      # Public: Initializes an instance of the SetupEnv middleware. Allows for
+      # lazy initialization of the flipper instance being set in the env by
+      # providing a block.
+      #
+      # app - The app this middleware is included in.
+      # flipper_or_block - The Flipper::DSL instance or a block that yields a
+      #                    Flipper::DSL instance to use for all operations
+      #                    (optional, default: Flipper).
+      #
+      # Examples
+      #
+      #   flipper = Flipper.new(...)
+      #
+      #   # using with a normal flipper instance
+      #   use Flipper::Middleware::SetupEnv, flipper
+      #
+      #   # using with a block that yields a flipper instance
+      #   use Flipper::Middleware::SetupEnv, lambda { Flipper.new(...) }
+      #
+      #   # using default configured Flipper instance
+      #   Flipper.configure do |config|
+      #     config.default { Flipper.new(...) }
+      #   end
+      #   use Flipper::Middleware::SetupEnv
+      def initialize: (untyped app, ?untyped? flipper_or_block, ?::Hash[untyped, untyped] options) -> void
+
+      def call: (untyped env) -> untyped
+
+      def call!: (untyped env) -> untyped
+
+      private
+
+      def flipper: () -> untyped
+    end
+  end
+end
+
+module Flipper
+  class Railtie < Rails::Railtie
+  end
+end
+
+module Flipper
+  # Internal: Used to store registry of groups by name.
+  class Registry
+    class Error < StandardError
+    end
+
+    class DuplicateKey < Error
+    end
+
+    class KeyNotFound < Error
+      # Public: The key that was not found
+      attr_reader key: untyped
+
+      def initialize: (untyped key) -> void
+    end
+
+    def initialize: (?::Hash[untyped, untyped] source) -> void
+
+    def keys: () -> untyped
+
+    def values: () -> untyped
+
+    def add: (untyped key, untyped value) -> untyped
+
+    def get: (untyped key) -> untyped
+
+    def key?: (untyped key) -> untyped
+
+    def each: () { () -> untyped } -> untyped
+
+    def clear: () -> untyped
+  end
+end
+
+module Flipper
+  module Test
+    module SharedAdapterTests
+      def setup: () -> untyped
+
+      def teardown: () -> untyped
+
+      def test_has_name_that_is_a_symbol: () -> untyped
+
+      def test_has_included_the_flipper_adapter_module: () -> untyped
+
+      def test_returns_correct_default_values_for_gates_if_none_are_enabled: () -> untyped
+
+      def test_can_enable_disable_and_get_value_for_boolean_gate: () -> untyped
+
+      def test_fully_disables_all_enabled_things_when_boolean_gate_disabled: () -> untyped
+
+      def test_can_enable_disable_get_value_for_group_gate: () -> untyped
+
+      def test_can_enable_disable_and_get_value_for_an_actor_gate: () -> untyped
+
+      def test_can_enable_disable_get_value_for_percentage_of_actors_gate: () -> untyped
+
+      def test_can_enable_percentage_of_actors_gate_many_times_and_consistently_return_values: () -> untyped
+
+      def test_can_disable_percentage_of_actors_gate_many_times_and_consistently_return_values: () -> untyped
+
+      def test_can_enable_disable_and_get_value_for_percentage_of_time_gate: () -> untyped
+
+      def test_can_enable_percentage_of_time_gate_many_times_and_consistently_return_values: () -> untyped
+
+      def test_can_disable_percentage_of_time_gate_many_times_and_consistently_return_values: () -> untyped
+
+      def test_converts_boolean_value_to_a_string: () -> untyped
+
+      def test_converts_the_actor_value_to_a_string: () -> untyped
+
+      def test_converts_group_value_to_a_string: () -> untyped
+
+      def test_converts_percentage_of_time_integer_value_to_a_string: () -> untyped
+
+      def test_converts_percentage_of_actors_integer_value_to_a_string: () -> untyped
+
+      def test_can_add_remove_and_list_known_features: () -> untyped
+
+      def test_clears_all_the_gate_values_for_the_feature_on_remove: () -> untyped
+
+      def test_can_clear_all_the_gate_values_for_a_feature: () -> untyped
+
+      def test_does_not_complain_clearing_a_feature_that_does_not_exist_in_adapter: () -> untyped
+
+      def test_can_get_multiple_features: () -> untyped
+
+      def test_can_get_all_features: () -> untyped
+
+      def test_includes_explicitly_disabled_features_when_getting_all_features: () -> untyped
+
+      def test_can_double_enable_an_actor_without_error: () -> untyped
+
+      def test_can_double_enable_a_group_without_error: () -> untyped
+
+      def test_can_double_enable_percentage_without_error: () -> untyped
+
+      def test_can_double_enable_without_error: () -> untyped
+
+      def test_can_get_all_features_when_there_are_none: () -> untyped
+
+      def test_clears_other_gate_values_on_enable: () -> untyped
+    end
+  end
+end
+
+module Flipper
+  # Internal: Root class for all flipper types. You should never need to use this.
+  class Type
+    def self.wrap: (untyped value_or_instance) -> untyped
+
+    attr_reader value: untyped
+
+    def eql?: (untyped other) -> untyped
+
+    alias == eql?
+  end
+end
+
+module Flipper
+  module Typecast
+    TruthMap: untyped
+
+    # Internal: Convert value to a boolean.
+    #
+    # Returns true or false.
+    def self.to_boolean: (untyped value) -> untyped
+
+    # Internal: Convert value to an integer.
+    #
+    # Returns an Integer representation of the value.
+    # Raises ArgumentError if conversion is not possible.
+    def self.to_integer: (untyped value) -> untyped
+
+    # Internal: Convert value to a float.
+    #
+    # Returns a Float representation of the value.
+    # Raises ArgumentError if conversion is not possible.
+    def self.to_float: (untyped value) -> untyped
+
+    # Internal: Convert value to a percentage.
+    #
+    # Returns a Integer or Float representation of the value.
+    # Raises ArgumentError if conversion is not possible.
+    def self.to_percentage: (untyped value) -> untyped
+
+    # Internal: Convert value to a set.
+    #
+    # Returns a Set representation of the value.
+    # Raises ArgumentError if conversion is not possible.
+    def self.to_set: (untyped value) -> untyped
+  end
+end
+
+module Flipper
+  module Types
+    class Actor < Type
+      def self.wrappable?: (untyped thing) -> (::FalseClass | untyped)
+
+      attr_reader thing: untyped
+
+      def initialize: (untyped thing) -> void
+
+      def respond_to?: (*untyped args) -> untyped
+
+      def method_missing: (untyped name, *untyped args) { () -> untyped } -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Types
+    class Boolean < Type
+      def initialize: (?untyped? value) -> void
+    end
+  end
+end
+
+module Flipper
+  module Types
+    class Group < Type
+      def self.wrap: (untyped group_or_name) -> untyped
+
+      attr_reader name: untyped
+
+      def initialize: (untyped name) { () -> untyped } -> void
+
+      def match?: (untyped thing, untyped context) -> untyped
+    end
+  end
+end
+
+module Flipper
+  module Types
+    class Percentage < Type
+      def initialize: (untyped value) -> void
+    end
+  end
+end
+
+module Flipper
+  module Types
+    class PercentageOfActors < Percentage
+    end
+  end
+end
+
+module Flipper
+  module Types
+    class PercentageOfTime < Percentage
+    end
+  end
+end
+
+module Flipper
+  VERSION: untyped
+end

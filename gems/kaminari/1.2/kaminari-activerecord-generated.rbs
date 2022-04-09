@@ -1,0 +1,64 @@
+module Kaminari
+  module ActiveRecordExtension
+    extend ActiveSupport::Concern
+
+    module ClassMethods
+      def inherited: (untyped kls) -> untyped
+    end
+  end
+end
+
+module Kaminari
+  module ActiveRecordModelExtension
+    extend ActiveSupport::Concern
+
+    include Kaminari::ConfigurationMethods
+  end
+end
+
+module Kaminari
+  # Active Record specific page scope methods implementations
+  module ActiveRecordRelationMethods
+    # Used for page_entry_info
+    def entry_name: (?::Hash[untyped, untyped] options) -> untyped
+
+    def reset: () -> untyped
+
+    def total_count: (?::Symbol column_name, ?untyped? _options) -> untyped
+
+    # Turn this Relation to a "without count mode" Relation.
+    # Note that the "without count mode" is supposed to be performant but has a feature limitation.
+    #   Pro: paginates without casting an extra SELECT COUNT query
+    #   Con: unable to know the total number of records/pages
+    def without_count: () -> untyped
+  end
+
+  # A module that makes AR::Relation paginatable without having to cast another SELECT COUNT query
+  module PaginatableWithoutCount
+    module LimitValueSetter
+    end
+  end
+end
+
+module Kaminari
+  module PaginatableWithoutCount
+    # Overwrite AR::Relation#load to actually load one more record to judge if the page has next page
+    # then store the result in @_has_next ivar
+    def load: () -> untyped
+
+    # The page wouldn't be the last page if there's "limit + 1" record
+    def last_page?: () -> untyped
+
+    # Empty relation needs no pagination
+    def out_of_range?: () -> untyped
+
+    # Force to raise an exception if #total_count is called explicitly.
+    def total_count: () -> untyped
+  end
+end
+
+module Kaminari
+  module Activerecord
+    VERSION: ::String
+  end
+end

@@ -1,0 +1,288 @@
+module Ancestry
+  def self.default_update_strategy: () -> untyped
+
+  def self.default_update_strategy=: (untyped value) -> untyped
+end
+
+module Ancestry
+  module ClassMethods
+    # Fetch tree node if necessary
+    def to_node: (untyped object) -> untyped
+
+    # Scope on relative depth options
+    def scope_depth: (untyped depth_options, untyped depth) -> untyped
+
+    # Orphan strategy writer
+    def orphan_strategy=: (untyped orphan_strategy) -> untyped
+
+    # Get all nodes and sort them into an empty hash
+    def arrange: (?::Hash[untyped, untyped] options) -> untyped
+
+    # Arrange array of nodes into a nested hash of the form
+    # {node => children}, where children = {} if the node has no children
+    # If a node's parent is not included, the node will be included as if it is a top level node
+    def arrange_nodes: (untyped nodes) -> untyped
+
+    # Arrangement to nested array for serialization
+    # You can also supply your own serialization logic using blocks
+    # also allows you to pass the order just as you can pass it to the arrange method
+    def arrange_serializable: (?::Hash[untyped, untyped] options, ?untyped? nodes) { (untyped, untyped) -> untyped } -> untyped
+
+    # Pseudo-preordered array of nodes.  Children will always follow parents,
+    def sort_by_ancestry: (untyped nodes) { (untyped, untyped) -> untyped } -> untyped
+
+    # Integrity checking
+    # compromised tree integrity is unlikely without explicitly setting cyclic parents or invalid ancestry and circumventing validation
+    # just in case, raise an AncestryIntegrityException if issues are detected
+    # specify :report => :list to return an array of exceptions or :report => :echo to echo any error messages
+    def check_ancestry_integrity!: (?::Hash[untyped, untyped] options) -> untyped
+
+    # Integrity restoration
+    def restore_ancestry_integrity!: () -> untyped
+
+    # Build ancestry from parent ids for migration purposes
+    def build_ancestry_from_parent_ids!: (?::Symbol column, ?untyped? parent_id, ?untyped ancestor_ids) -> untyped
+
+    # Rebuild depth cache if it got corrupted or if depth caching was just turned on
+    def rebuild_depth_cache!: () -> untyped
+
+    def unscoped_where: () { (untyped) -> untyped } -> untyped
+
+    ANCESTRY_UNCAST_TYPES: untyped
+
+    def primary_key_is_an_integer?: () -> untyped
+  end
+end
+
+module Ancestry
+  class AncestryException < RuntimeError
+  end
+
+  class AncestryIntegrityException < AncestryException
+  end
+end
+
+module Ancestry
+  module HasAncestry
+    def has_ancestry: (?::Hash[untyped, untyped] options) -> untyped
+
+    def acts_as_tree: (*untyped args) -> untyped
+
+    private
+
+    def derive_ancestry_pattern: (untyped primary_key_format, ?::String delimiter) -> untyped
+  end
+end
+
+module Ancestry
+  module InstanceMethods
+    # Validate that the ancestors don't include itself
+    def ancestry_exclude_self: () -> untyped
+
+    # Update descendants with new ancestry (before save)
+    def update_descendants_with_new_ancestry: () -> untyped
+
+    # Apply orphan strategy (before destroy - no changes)
+    def apply_orphan_strategy: () -> untyped
+
+    # Touch each of this record's ancestors (after save)
+    def touch_ancestors_callback: () -> untyped
+
+    # Counter Cache
+    def increase_parent_counter_cache: () -> untyped
+
+    def decrease_parent_counter_cache: () -> (nil | untyped)
+
+    def update_parent_counter_cache: () -> (nil | untyped)
+
+    def _counter_cache_column: () -> untyped
+
+    def has_parent?: () -> untyped
+
+    alias ancestors? has_parent?
+
+    def ancestry_changed?: () -> untyped
+
+    def sane_ancestor_ids?: () -> untyped
+
+    def ancestors: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def path_ids: () -> untyped
+
+    def path_ids_in_database: () -> untyped
+
+    def path: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def depth: () -> untyped
+
+    def cache_depth: () -> untyped
+
+    def ancestor_of?: (untyped node) -> untyped
+
+    # currently parent= does not work in after save callbacks
+    # assuming that parent hasn't changed
+    def parent=: (untyped parent) -> untyped
+
+    def parent_id=: (untyped new_parent_id) -> untyped
+
+    def parent_id: () -> untyped
+
+    alias parent_id? ancestors?
+
+    def parent: () -> untyped
+
+    def parent_of?: (untyped node) -> untyped
+
+    def root_id: () -> untyped
+
+    def root: () -> untyped
+
+    def is_root?: () -> untyped
+
+    alias root? is_root?
+
+    def root_of?: (untyped node) -> untyped
+
+    def children: () -> untyped
+
+    def child_ids: () -> untyped
+
+    def has_children?: () -> untyped
+
+    alias children? has_children?
+
+    def is_childless?: () -> untyped
+
+    alias childless? is_childless?
+
+    def child_of?: (untyped node) -> untyped
+
+    def siblings: () -> untyped
+
+    # NOTE: includes self
+    def sibling_ids: () -> untyped
+
+    def has_siblings?: () -> untyped
+
+    alias siblings? has_siblings?
+
+    def is_only_child?: () -> untyped
+
+    alias only_child? is_only_child?
+
+    def sibling_of?: (untyped node) -> untyped
+
+    def descendants: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def descendant_ids: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def descendant_of?: (untyped node) -> untyped
+
+    def indirects: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def indirect_ids: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def indirect_of?: (untyped node) -> untyped
+
+    def subtree: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def subtree_ids: (?::Hash[untyped, untyped] depth_options) -> untyped
+
+    def without_ancestry_callbacks: () { () -> untyped } -> untyped
+
+    def ancestry_callbacks_disabled?: () -> untyped
+
+    private
+
+    def unscoped_descendants: () -> untyped
+
+    # works with after save context (hence before_last_save)
+    def unscoped_current_and_previous_ancestors: () -> untyped
+
+    def unscoped_find: (untyped id) -> untyped
+
+    def unscoped_where: () { (untyped) -> untyped } -> untyped
+  end
+end
+
+module Ancestry
+  module MaterializedPath
+    BEFORE_LAST_SAVE_SUFFIX: untyped
+
+    IN_DATABASE_SUFFIX: untyped
+
+    ANCESTRY_DELIMITER: untyped
+
+    def self.extended: (untyped base) -> untyped
+
+    def path_of: (untyped object) -> untyped
+
+    def roots: () -> untyped
+
+    def ancestors_of: (untyped object) -> untyped
+
+    def inpath_of: (untyped object) -> untyped
+
+    def children_of: (untyped object) -> untyped
+
+    # indirect = anyone who is a descendant, but not a child
+    def indirects_of: (untyped object) -> untyped
+
+    def descendants_of: (untyped object) -> untyped
+
+    # deprecated
+    def descendant_conditions: (untyped object) -> untyped
+
+    def subtree_of: (untyped object) -> untyped
+
+    def siblings_of: (untyped object) -> untyped
+
+    def ordered_by_ancestry: (?untyped? order) -> untyped
+
+    def ordered_by_ancestry_and: (untyped order) -> untyped
+
+    module InstanceMethods
+      # optimization - better to go directly to column and avoid parsing
+      def ancestors?: () -> untyped
+
+      alias has_parent? ancestors?
+
+      def ancestor_ids=: (untyped value) -> untyped
+
+      def ancestor_ids: () -> untyped
+
+      def ancestor_ids_in_database: () -> untyped
+
+      def ancestor_ids_before_last_save: () -> untyped
+
+      def parent_id_before_last_save: () -> (nil | untyped)
+
+      # optimization - better to go directly to column and avoid parsing
+      def sibling_of?: (untyped node) -> untyped
+
+      # private (public so class methods can find it)
+      # The ancestry value for this record's children (before save)
+      # This is technically child_ancestry_was
+      def child_ancestry: () -> untyped
+
+      private
+
+      def parse_ancestry_column: (untyped obj) -> (::Array[untyped] | untyped)
+    end
+  end
+end
+
+module Ancestry
+  module MaterializedPathPg
+    # Update descendants with new ancestry (before save)
+    def update_descendants_with_new_ancestry: () -> untyped
+  end
+end
+
+module Ancestry
+  VERSION: ::String
+end
+
+class Object
+  extend Ancestry::HasAncestry
+end

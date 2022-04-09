@@ -1,0 +1,15 @@
+module SecureRandom
+  extend Random::Formatter
+
+  def self.bytes: (untyped n) -> untyped
+
+  private
+
+  def self.gen_random_openssl: (untyped n) -> untyped
+
+  def self.gen_random_urandom: (untyped n) -> untyped
+
+  alias self.gen_random self.gen_random_openssl
+
+  # alias self.gen_random self.gen_random_urandom
+end

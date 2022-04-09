@@ -1,0 +1,1606 @@
+module Sentry
+  META: untyped
+
+  CAPTURED_SIGNATURE: ::Symbol
+
+  LOGGER_PROGNAME: untyped
+
+  SENTRY_TRACE_HEADER_NAME: untyped
+
+  THREAD_LOCAL: ::Symbol
+
+  # @!visibility private
+  def self.exception_locals_tp: () -> untyped
+
+  # @!visibility private
+  def self.register_patch: () { () -> untyped } -> untyped
+
+  # @!visibility private
+  def self.apply_patches: (untyped config) -> untyped
+
+  # @!visibility private
+  def self.registered_patches: () -> untyped
+
+  # Returns a hash that contains all the integrations that have been registered to the main SDK.
+  #
+  # @return [Hash{String=>Hash}]
+  def self.integrations: () -> untyped
+
+  # Registers the SDK integration with its name and version.
+  #
+  # @param name [String] name of the integration
+  # @param version [String] version of the integration
+  def self.register_integration: (untyped name, untyped version) -> untyped
+
+  extend Forwardable
+
+  # @!method configuration
+  #   @!macro configuration
+  def self.configuration: () -> (nil | untyped)
+
+  # Returns true if the SDK is initialized.
+  #
+  # @return [Boolean]
+  def self.initialized?: () -> untyped
+
+  # Returns an uri for security policy reporting that's generated from the given DSN
+  # (To learn more about security policy reporting: https://docs.sentry.io/product/security-policy-reporting/)
+  #
+  # It returns nil if
+  # - The SDK is not initialized yet.
+  # - The DSN is not provided or is invalid.
+  #
+  # @return [String, nil]
+  def self.csp_report_uri: () -> (nil | untyped)
+
+  # Returns the main thread's active hub.
+  #
+  # @return [Hub]
+  def self.get_main_hub: () -> untyped
+
+  # Takes an instance of Sentry::Breadcrumb and stores it to the current active scope.
+  #
+  # @return [Breadcrumb, nil]
+  def self.add_breadcrumb: (untyped breadcrumb, **untyped options) -> (nil | untyped)
+
+  # Returns the current active hub.
+  # If the current thread doesn't have an active hub, it will clone the main thread's active hub,
+  # stores it in the current thread, and then returns it.
+  #
+  # @return [Hub]
+  def self.get_current_hub: () -> untyped
+
+  # Returns the current active client.
+  # @return [Client, nil]
+  def self.get_current_client: () -> (nil | untyped)
+
+  # Returns the current active scope.
+  #
+  # @return [Scope, nil]
+  def self.get_current_scope: () -> (nil | untyped)
+
+  # Clones the main thread's active hub and stores it to the current thread.
+  #
+  # @return [void]
+  def self.clone_hub_to_current_thread: () -> untyped
+
+  # Wrap a given block with session tracking.
+  # Aggregate sessions in minutely buckets will be recorded
+  # around this block and flushed every minute.
+  #
+  # @example
+  #   Sentry.with_session_tracking do
+  #     a = 1 + 1 # new session recorded with :exited status
+  #   end
+  #
+  #   Sentry.with_session_tracking do
+  #     1 / 0
+  #   rescue => e
+  #     Sentry.capture_exception(e) # new session recorded with :errored status
+  #   end
+  # @return [void]
+  def self.with_session_tracking: () { () -> untyped } -> untyped
+
+  # Takes or initializes a new Sentry::Transaction and makes a sampling decision for it.
+  #
+  # @return [Transaction, nil]
+  def self.start_transaction: (**untyped options) -> (nil | untyped)
+
+  # Returns the id of the lastly reported Sentry::Event.
+  #
+  # @return [String, nil]
+  def self.last_event_id: () -> (nil | untyped)
+
+  # Checks if the exception object has been captured by the SDK.
+  #
+  # @return [Boolean]
+  def self.exception_captured?: (untyped exc) -> (::FalseClass | untyped)
+
+  # @!visibility private
+  def self.sys_command: (untyped command) -> (nil | untyped)
+
+  # @!visibility private
+  def self.logger: () -> untyped
+
+  # @!visibility private
+  def self.sdk_meta: () -> untyped
+
+  # @!visibility private
+  def self.utc_now: () -> untyped
+end
+
+module Sentry
+  # @api private
+  class Backtrace
+    # Handles backtrace parsing line by line
+    class Line
+      RB_EXTENSION: ::String
+
+      # regexp (optional leading X: on windows, or JRuby9000 class-prefix)
+      RUBY_INPUT_FORMAT: untyped
+
+      # org.jruby.runtime.callsite.CachingCallSite.call(CachingCallSite.java:170)
+      JAVA_INPUT_FORMAT: untyped
+
+      # The file portion of the line (such as app/models/user.rb)
+      attr_reader file: untyped
+
+      # The line number portion of the line
+      attr_reader number: untyped
+
+      # The method of the line (such as index)
+      attr_reader method: untyped
+
+      # The module name (JRuby)
+      attr_reader module_name: untyped
+
+      attr_reader in_app_pattern: untyped
+
+      # Parses a single line of a given backtrace
+      # @param [String] unparsed_line The raw line from +caller+ or some backtrace
+      # @return [Line] The parsed backtrace line
+      def self.parse: (untyped unparsed_line, untyped in_app_pattern) -> untyped
+
+      def initialize: (untyped file, untyped number, untyped method, untyped module_name, untyped in_app_pattern) -> void
+
+      def in_app: () -> untyped
+
+      # Reconstructs the line in a readable fashion
+      def to_s: () -> ::String
+
+      def ==: (untyped other) -> untyped
+
+      def inspect: () -> ::String
+    end
+
+    APP_DIRS_PATTERN: untyped
+
+    # holder for an Array of Backtrace::Line instances
+    attr_reader lines: untyped
+
+    def self.parse: (untyped backtrace, untyped project_root, untyped app_dirs_pattern) { () -> untyped } -> untyped
+
+    def initialize: (untyped lines) -> void
+
+    def inspect: () -> untyped
+
+    def to_s: () -> untyped
+
+    def ==: (untyped other) -> untyped
+  end
+end
+
+module Sentry
+  class Breadcrumb
+    DATA_SERIALIZATION_ERROR_MESSAGE: ::String
+
+    # @return [String, nil]
+    attr_accessor category: untyped
+
+    # @return [Hash, nil]
+    attr_accessor data: untyped
+
+    # @return [String, nil]
+    attr_accessor level: untyped
+
+    # @return [Time, Integer, nil]
+    attr_accessor timestamp: untyped
+
+    # @return [String, nil]
+    attr_accessor type: untyped
+
+    # @return [String, nil]
+    attr_reader message: untyped
+
+    # @param category [String, nil]
+    # @param data [Hash, nil]
+    # @param message [String, nil]
+    # @param timestamp [Time, Integer, nil]
+    # @param level [String, nil]
+    # @param type [String, nil]
+    def initialize: (?category: untyped? category, ?data: untyped? data, ?message: untyped? message, ?timestamp: untyped? timestamp, ?level: untyped? level, ?type: untyped? `type`) -> void
+
+    # @return [Hash]
+    def to_hash: () -> { category: untyped, data: untyped, level: untyped, message: untyped, timestamp: untyped, type: untyped }
+
+    # @param message [String]
+    # @return [void]
+    def message=: (untyped message) -> untyped
+
+    private
+
+    def serialized_data: () -> untyped
+  end
+end
+
+module Sentry
+  class Breadcrumb
+    module SentryLogger
+      LEVELS: untyped
+
+      def add: (*untyped args) { () -> untyped } -> nil
+
+      def add_breadcrumb: (untyped severity, ?untyped? message, ?untyped? progname) { () -> untyped } -> (nil | untyped)
+
+      private
+
+      def ignored_logger?: (untyped progname) -> untyped
+
+      def current_breadcrumbs: () -> untyped
+    end
+  end
+end
+
+module Sentry
+  class BreadcrumbBuffer
+    DEFAULT_SIZE: ::Integer
+
+    # @return [Array]
+    attr_accessor buffer: untyped
+
+    # @param size [Integer, nil] If it's not provided, it'll fallback to DEFAULT_SIZE
+    def initialize: (?untyped? size) -> void
+
+    # @param crumb [Breadcrumb]
+    # @return [void]
+    def record: (untyped crumb) { (untyped) -> untyped } -> untyped
+
+    # @return [Array]
+    def members: () -> untyped
+
+    # Returns the last breadcrumb stored in the buffer. If the buffer it's empty, it returns nil.
+    # @return [Breadcrumb, nil]
+    def peek: () -> untyped
+
+    # Iterates through all breadcrumbs.
+    # @param block [Proc]
+    # @yieldparam crumb [Breadcrumb]
+    # @return [Array]
+    def each: () { () -> untyped } -> untyped
+
+    # @return [Boolean]
+    def empty?: () -> untyped
+
+    # @return [Hash]
+    def to_hash: () -> { values: untyped }
+
+    # @return [BreadcrumbBuffer]
+    def dup: () -> untyped
+  end
+end
+
+module Sentry
+  class Client
+    include LoggingHelper
+
+    # The Transport object that'll send events for the client.
+    # @return [Transport]
+    attr_reader transport: untyped
+
+    # @!macro configuration
+    attr_reader configuration: untyped
+
+    # @deprecated Use Sentry.logger to retrieve the current logger instead.
+    attr_reader logger: untyped
+
+    # @param configuration [Configuration]
+    def initialize: (untyped configuration) -> void
+
+    # Applies the given scope's data to the event and sends it to Sentry.
+    # @param event [Event] the event to be sent.
+    # @param scope [Scope] the scope with contextual data that'll be applied to the event before it's sent.
+    # @param hint [Hash] the hint data that'll be passed to `before_send` callback and the scope's event processors.
+    # @return [Event, nil]
+    def capture_event: (untyped event, untyped scope, ?::Hash[untyped, untyped] hint) -> untyped
+
+    # Initializes an Event object with the given exception. Returns `nil` if the exception's class is excluded from reporting.
+    # @param exception [Exception] the exception to be reported.
+    # @param hint [Hash] the hint data that'll be passed to `before_send` callback and the scope's event processors.
+    # @return [Event, nil]
+    def event_from_exception: (untyped exception, ?::Hash[untyped, untyped] hint) -> (nil | untyped)
+
+    # Initializes an Event object with the given message.
+    # @param message [String] the message to be reported.
+    # @param hint [Hash] the hint data that'll be passed to `before_send` callback and the scope's event processors.
+    # @return [Event]
+    def event_from_message: (untyped message, ?::Hash[untyped, untyped] hint, ?backtrace: untyped? backtrace) -> (nil | untyped)
+
+    # Initializes an Event object with the given Transaction object.
+    # @param transaction [Transaction] the transaction to be recorded.
+    # @return [TransactionEvent]
+    def event_from_transaction: (untyped transaction) -> untyped
+
+    # @!macro send_event
+    def send_event: (untyped event, ?untyped? hint) -> untyped
+
+    # Generates a Sentry trace for distribted tracing from the given Span.
+    # Returns `nil` if `config.propagate_traces` is `false`.
+    # @param span [Span] the span to generate trace from.
+    # @return [String, nil]
+    def generate_sentry_trace: (untyped span) -> (nil | untyped)
+
+    private
+
+    def dispatch_background_event: (untyped event, untyped hint) -> untyped
+
+    def dispatch_async_event: (untyped async_block, untyped event, untyped hint) -> untyped
+  end
+end
+
+module Sentry
+  class Configuration
+    # @api private
+    def stacktrace_builder: () -> untyped
+
+    # @api private
+    def detect_release: () -> untyped
+
+    # @api private
+    def error_messages: () -> untyped
+
+    private
+
+    def check_callable!: (untyped name, untyped value) -> untyped
+
+    def init_dsn: (untyped dsn_string) -> (nil | untyped)
+
+    def excluded_exception?: (untyped incoming_exception) -> untyped
+
+    def excluded_exception_classes: () -> untyped
+
+    def get_exception_class: (untyped x) -> untyped
+
+    def matches_exception?: (untyped excluded_exception_class, untyped incoming_exception) -> untyped
+
+    def safe_const_get: (untyped x) -> untyped
+
+    def capture_in_environment?: () -> (::TrueClass | ::FalseClass)
+
+    def valid?: () -> untyped
+
+    def environment_from_env: () -> untyped
+
+    def server_name_from_env: () -> untyped
+
+    def running_on_heroku?: () -> untyped
+
+    def run_post_initialization_callbacks: () -> untyped
+
+    # allow extensions to add their hooks to the Configuration class
+    def self.add_post_initialization_callback: () { () -> untyped } -> untyped
+
+    def self.post_initialization_callbacks: () -> untyped
+  end
+end
+
+module Sentry
+  class DSN
+    PORT_MAP: untyped
+
+    REQUIRED_ATTRIBUTES: untyped
+
+    def initialize: (untyped dsn_string) -> void
+
+    def valid?: () -> untyped
+
+    def to_s: () -> untyped
+
+    def server: () -> untyped
+
+    def csp_report_uri: () -> ::String
+
+    def envelope_endpoint: () -> ::String
+  end
+end
+
+module Sentry
+  # @api private
+  class Envelope
+    class Item
+      attr_accessor headers: untyped
+
+      attr_accessor payload: untyped
+
+      def initialize: (untyped headers, untyped payload) -> void
+
+      def type: () -> untyped
+
+      def to_s: () -> ::String
+    end
+
+    attr_accessor headers: untyped
+
+    attr_accessor items: untyped
+
+    def initialize: (?::Hash[untyped, untyped] headers) -> void
+
+    def add_item: (untyped headers, untyped payload) -> untyped
+
+    def item_types: () -> untyped
+
+    def event_id: () -> untyped
+  end
+end
+
+module Sentry
+  class Event
+    # These are readable attributes.
+    SERIALIZEABLE_ATTRIBUTES: ::Array[untyped]
+
+    # These are writable attributes.
+    WRITER_ATTRIBUTES: untyped
+
+    MAX_MESSAGE_SIZE_IN_BYTES: untyped
+
+    MAX_SERIALIZED_PAYLOAD_SIZE: untyped
+
+    SKIP_INSPECTION_ATTRIBUTES: ::Array[untyped]
+
+    include CustomInspection
+
+    # @return [RequestInterface]
+    attr_reader request: untyped
+
+    # @return [ExceptionInterface]
+    attr_reader exception: untyped
+
+    # @return [ThreadsInterface]
+    attr_reader threads: untyped
+
+    # @param configuration [Configuration]
+    # @param integration_meta [Hash, nil]
+    # @param message [String, nil]
+    def initialize: (configuration: untyped configuration, ?integration_meta: untyped? integration_meta, ?message: untyped? message) -> void
+
+    # @!visibility private
+    def self.get_log_message: (untyped event_hash) -> (untyped | "<no message value>")
+
+    # @!visibility private
+    def self.get_message_from_exception: (untyped event_hash) -> untyped
+
+    # @deprecated This method will be removed in v5.0.0. Please just use Sentry.configuration
+    # @return [Configuration]
+    def configuration: () -> untyped
+
+    # Sets the event's timestamp.
+    # @param time [Time, Float]
+    # @return [void]
+    def timestamp=: (untyped time) -> untyped
+
+    def level=: (untyped level) -> untyped
+
+    # Sets the event's request environment data with RequestInterface.
+    # @see RequestInterface
+    # @param env [Hash]
+    # @return [void]
+    def rack_env=: (untyped env) -> untyped
+
+    # @return [Hash]
+    def to_hash: () -> untyped
+
+    # @return [Hash]
+    def to_json_compatible: () -> untyped
+
+    # @!visibility private
+    def add_threads_interface: (?backtrace: untyped? backtrace, **untyped options) -> untyped
+
+    # @!visibility private
+    def add_exception_interface: (untyped exception) -> untyped
+
+    private
+
+    def add_request_interface: (untyped env) -> untyped
+
+    def serialize_attributes: () -> untyped
+
+    # When behind a proxy (or if the user is using a proxy), we can't use
+    # REMOTE_ADDR to determine the Event IP, and must use other headers instead.
+    def calculate_real_ip_from_rack: (untyped env) -> untyped
+  end
+end
+
+module Sentry
+  class Error < StandardError
+  end
+
+  class ExternalError < Error
+  end
+end
+
+module Sentry
+  class Hub
+    include ArgumentCheckingHelper
+
+    attr_reader last_event_id: untyped
+
+    def initialize: (untyped client, untyped scope) -> void
+
+    def new_from_top: () -> untyped
+
+    def current_client: () -> untyped
+
+    def configuration: () -> untyped
+
+    def current_scope: () -> untyped
+
+    def clone: () -> untyped
+
+    def bind_client: (untyped client) -> untyped
+
+    def configure_scope: () { () -> untyped } -> untyped
+
+    def with_scope: () { (untyped) -> untyped } -> untyped
+
+    def push_scope: () -> untyped
+
+    def pop_scope: () -> untyped
+
+    def start_transaction: (?transaction: untyped? transaction, ?custom_sampling_context: ::Hash[untyped, untyped] custom_sampling_context, **untyped options) -> (nil | untyped)
+
+    def capture_exception: (untyped exception, **untyped options) { () -> untyped } -> (nil | untyped)
+
+    def capture_message: (untyped message, **untyped options) { () -> untyped } -> (nil | untyped)
+
+    def capture_event: (untyped event, **untyped options) { () -> untyped } -> (nil | untyped)
+
+    def add_breadcrumb: (untyped breadcrumb, ?hint: ::Hash[untyped, untyped] hint) -> (nil | untyped)
+
+    # this doesn't do anything to the already initialized background worker
+    # but it temporarily disables dispatching events to it
+    def with_background_worker_disabled: () { () -> untyped } -> untyped
+
+    def start_session: () -> (nil | untyped)
+
+    def end_session: () -> (nil | untyped)
+
+    def with_session_tracking: () { () -> untyped } -> untyped
+
+    private
+
+    def current_layer: () -> untyped
+
+    class Layer
+      attr_accessor client: untyped
+
+      attr_reader scope: untyped
+
+      def initialize: (untyped client, untyped scope) -> void
+    end
+  end
+end
+
+module Sentry
+  module Integrable
+    def register_integration: (name: untyped name, version: untyped version) -> untyped
+
+    def integration_name: () -> untyped
+
+    def capture_exception: (untyped exception, **untyped options) { () -> untyped } -> untyped
+
+    def capture_message: (untyped message, **untyped options) { () -> untyped } -> untyped
+  end
+end
+
+module Sentry
+  class Interface
+    # @return [Hash]
+    def to_hash: () -> untyped
+  end
+end
+
+module Sentry
+  class ExceptionInterface < Interface
+    # @param exceptions [Array<SingleExceptionInterface>]
+    def initialize: (exceptions: untyped exceptions) -> void
+
+    # @return [Hash]
+    def to_hash: () -> untyped
+
+    # Builds ExceptionInterface with given exception and stacktrace_builder.
+    # @param exception [Exception]
+    # @param stacktrace_builder [StacktraceBuilder]
+    # @see SingleExceptionInterface#build_with_stacktrace
+    # @see SingleExceptionInterface#initialize
+    # @return [ExceptionInterface]
+    def self.build: (exception: untyped exception, stacktrace_builder: untyped stacktrace_builder) -> untyped
+  end
+end
+
+module Sentry
+  class RequestInterface < Interface
+    REQUEST_ID_HEADERS: untyped
+
+    CONTENT_HEADERS: untyped
+
+    IP_HEADERS: untyped
+
+    # See Sentry server default limits at
+    # https://github.com/getsentry/sentry/blob/master/src/sentry/conf/server.py
+    MAX_BODY_LIMIT: untyped
+
+    # @return [String]
+    attr_accessor url: untyped
+
+    # @return [String]
+    attr_accessor method: untyped
+
+    # @return [Hash]
+    attr_accessor data: untyped
+
+    # @return [String]
+    attr_accessor query_string: untyped
+
+    # @return [String]
+    attr_accessor cookies: untyped
+
+    # @return [Hash]
+    attr_accessor headers: untyped
+
+    # @return [Hash]
+    attr_accessor env: untyped
+
+    # @param env [Hash]
+    # @param send_default_pii [Boolean]
+    # @param rack_env_whitelist [Array]
+    # @see Configuration#send_default_pii
+    # @see Configuration#rack_env_whitelist
+    def initialize: (env: untyped env, send_default_pii: untyped send_default_pii, rack_env_whitelist: untyped rack_env_whitelist) -> void
+
+    private
+
+    def read_data_from: (untyped request) -> untyped
+
+    def filter_and_format_headers: (untyped env, untyped send_default_pii) -> untyped
+
+    def encode_to_utf_8: (untyped value) -> untyped
+
+    def is_skippable_header?: (untyped key) -> untyped
+
+    # Rack adds in an incorrect HTTP_VERSION key, which causes downstream
+    # to think this is a Version header. Instead, this is mapped to
+    # env['SERVER_PROTOCOL']. But we don't want to ignore a valid header
+    # if the request has legitimately sent a Version header themselves.
+    # See: https://github.com/rack/rack/blob/028438f/lib/rack/handler/cgi.rb#L29
+    # NOTE: This will be removed in version 3.0+
+    def is_server_protocol?: (untyped key, untyped value, untyped protocol_version) -> untyped
+
+    def filter_and_format_env: (untyped env, untyped rack_env_whitelist) -> untyped
+  end
+end
+
+module Sentry
+  class SingleExceptionInterface < Interface
+    include CustomInspection
+
+    SKIP_INSPECTION_ATTRIBUTES: ::Array[untyped]
+
+    PROBLEMATIC_LOCAL_VALUE_REPLACEMENT: untyped
+
+    OMISSION_MARK: untyped
+
+    MAX_LOCAL_BYTES: ::Integer
+
+    attr_reader type: untyped
+
+    attr_reader value: untyped
+
+    attr_reader module: untyped
+
+    attr_reader thread_id: untyped
+
+    attr_reader stacktrace: untyped
+
+    def initialize: (exception: untyped exception, ?stacktrace: untyped? stacktrace) -> void
+
+    def to_hash: () -> untyped
+
+    # patch this method if you want to change an exception's stacktrace frames
+    # also see `StacktraceBuilder.build`.
+    def self.build_with_stacktrace: (exception: untyped exception, stacktrace_builder: untyped stacktrace_builder) -> untyped
+  end
+end
+
+module Sentry
+  class StacktraceInterface
+    # @return [<Array[Frame]>]
+    attr_reader frames: untyped
+
+    # @param frames [<Array[Frame]>]
+    def initialize: (frames: untyped frames) -> void
+
+    # @return [Hash]
+    def to_hash: () -> { frames: untyped }
+
+    # @return [String]
+    def inspect: () -> untyped
+
+    private
+
+    # Not actually an interface, but I want to use the same style
+    class Frame < Interface
+      attr_accessor abs_path: untyped
+
+      attr_accessor context_line: untyped
+
+      attr_accessor function: untyped
+
+      attr_accessor in_app: untyped
+
+      attr_accessor filename: untyped
+
+      attr_accessor lineno: untyped
+
+      attr_accessor module: untyped
+
+      attr_accessor pre_context: untyped
+
+      attr_accessor post_context: untyped
+
+      attr_accessor vars: untyped
+
+      def initialize: (untyped project_root, untyped line) -> void
+
+      def to_s: () -> ::String
+
+      def compute_filename: () -> (nil | untyped)
+
+      def set_context: (untyped linecache, untyped context_lines) -> (nil | untyped)
+
+      def to_hash: (*untyped args) -> untyped
+
+      private
+
+      def under_project_root?: () -> untyped
+
+      def longest_load_path: () -> untyped
+    end
+  end
+end
+
+module Sentry
+  class StacktraceBuilder
+    # @return [String]
+    attr_reader project_root: untyped
+
+    # @return [Regexp, nil]
+    attr_reader app_dirs_pattern: untyped
+
+    # @return [LineCache]
+    attr_reader linecache: untyped
+
+    # @return [Integer, nil]
+    attr_reader context_lines: untyped
+
+    # @return [Proc, nil]
+    attr_reader backtrace_cleanup_callback: untyped
+
+    # @param project_root [String]
+    # @param app_dirs_pattern [Regexp, nil]
+    # @param linecache [LineCache]
+    # @param context_lines [Integer, nil]
+    # @param backtrace_cleanup_callback [Proc, nil]
+    # @see Configuration#project_root
+    # @see Configuration#app_dirs_pattern
+    # @see Configuration#linecache
+    # @see Configuration#context_lines
+    # @see Configuration#backtrace_cleanup_callback
+    def initialize: (project_root: untyped project_root, app_dirs_pattern: untyped app_dirs_pattern, linecache: untyped linecache, context_lines: untyped context_lines, ?backtrace_cleanup_callback: untyped? backtrace_cleanup_callback) -> void
+
+    # Generates a StacktraceInterface with the given backtrace.
+    # You can pass a block to customize/exclude frames:
+    #
+    # @example
+    #   builder.build(backtrace) do |frame|
+    #     if frame.module.match?(/a_gem/)
+    #       nil
+    #     else
+    #       frame
+    #     end
+    #   end
+    # @param backtrace [Array<String>]
+    # @param frame_callback [Proc]
+    # @yieldparam frame [StacktraceInterface::Frame]
+    # @return [StacktraceInterface]
+    def build: (backtrace: untyped backtrace) { () -> untyped } -> untyped
+
+    private
+
+    def convert_parsed_line_into_frame: (untyped line) -> untyped
+
+    def parse_backtrace_lines: (untyped backtrace) -> untyped
+  end
+end
+
+module Sentry
+  class ThreadsInterface
+    # @param crashed [Boolean]
+    # @param stacktrace [Array]
+    def initialize: (?crashed: bool crashed, ?stacktrace: untyped? stacktrace) -> void
+
+    # @return [Hash]
+    def to_hash: () -> { values: ::Array[{ id: untyped, name: untyped, crashed: untyped, current: untyped, stacktrace: untyped }] }
+
+    # Builds the ThreadsInterface with given backtrace and stacktrace_builder.
+    # Patch this method if you want to change a threads interface's stacktrace frames.
+    # @see StacktraceBuilder.build
+    # @param backtrace [Array]
+    # @param stacktrace_builder [StacktraceBuilder]
+    # @param crashed [Hash]
+    # @return [ThreadsInterface]
+    def self.build: (backtrace: untyped backtrace, stacktrace_builder: untyped stacktrace_builder, **untyped options) -> untyped
+  end
+end
+
+module Sentry
+  # @api private
+  class LineCache
+    def initialize: () -> void
+
+    # Any linecache you provide to Sentry must implement this method.
+    # Returns an Array of Strings representing the lines in the source
+    # file. The number of lines retrieved is (2 * context) + 1, the middle
+    # line should be the line requested by lineno. See specs for more information.
+    def get_file_context: (untyped filename, untyped lineno, untyped context) -> (untyped | ::Array[untyped])
+
+    private
+
+    def valid_path?: (untyped path) -> untyped
+
+    def getlines: (untyped path) -> untyped
+
+    def getline: (untyped path, untyped n) -> (nil | untyped)
+  end
+end
+
+module Sentry
+  class Logger < ::Logger
+    LOG_PREFIX: ::String
+
+    PROGNAME: ::String
+
+    def initialize: () -> void
+  end
+end
+
+module Sentry
+  # @api private
+  module Net
+    module HTTP
+      OP_NAME: ::String
+
+      BREADCRUMB_CATEGORY: ::String
+
+      # To explain how the entire thing works, we need to know how the original Net::HTTP#request works
+      # Here's part of its definition. As you can see, it usually calls itself inside a #start block
+      #
+      # ```
+      # def request(req, body = nil, &block)
+      #   unless started?
+      #     start {
+      #       req['connection'] ||= 'close'
+      #       return request(req, body, &block) # <- request will be called for the second time from the first call
+      #     }
+      #   end
+      #   # .....
+      # end
+      # ```
+      #
+      # So we're only instrumenting request when `Net::HTTP` is already started
+      def request: (untyped req, ?untyped? body) { () -> untyped } -> untyped
+
+      private
+
+      def set_sentry_trace_header: (untyped req, untyped sentry_span) -> (nil | untyped)
+
+      def record_sentry_breadcrumb: (untyped req, untyped res) -> (nil | untyped)
+
+      def record_sentry_span: (untyped req, untyped res, untyped sentry_span) -> (nil | untyped)
+
+      def start_sentry_span: () -> (nil | untyped)
+
+      def finish_sentry_span: (untyped sentry_span) -> (nil | untyped)
+
+      def from_sentry_sdk?: () -> untyped
+
+      def extract_request_info: (untyped req) -> untyped
+    end
+  end
+end
+
+module Sentry
+  module Rack
+    class CaptureExceptions
+
+      private
+
+      def collect_exception: (untyped env) -> untyped
+
+      def transaction_op: () -> untyped
+
+      def capture_exception: (untyped exception) -> untyped
+
+      def start_transaction: (untyped env, untyped scope) -> untyped
+
+      def finish_transaction: (untyped transaction, untyped status_code) -> (nil | untyped)
+    end
+  end
+end
+
+module Sentry
+  module Rake
+    module Application
+      # @api private
+      def display_error_message: (untyped ex) -> untyped
+    end
+
+    module Task
+      # @api private
+      def execute: (?untyped? args) -> untyped
+    end
+  end
+end
+
+# @api private
+module Rake
+  class Application
+    prepend Sentry::Rake::Application
+  end
+
+  class Task
+    prepend Sentry::Rake::Task
+  end
+end
+
+module Sentry
+  # @api private
+  class Redis
+    OP_NAME: ::String
+
+    LOGGER_NAME: ::Symbol
+
+    def initialize: (untyped commands, untyped host, untyped port, untyped db) -> void
+
+    def instrument: () { () -> untyped } -> untyped
+
+    private
+
+    attr_reader commands: untyped
+
+    attr_reader host: untyped
+
+    attr_reader port: untyped
+
+    attr_reader db: untyped
+
+    def record_span: () { () -> untyped } -> untyped
+
+    def record_breadcrumb: () -> (nil | untyped)
+
+    def commands_description: () -> untyped
+
+    def parsed_commands: () -> untyped
+
+    def server_description: () -> ::String
+
+    module Client
+      def logging: (untyped commands) { () -> untyped } -> untyped
+    end
+  end
+end
+
+module Sentry
+  # @api private
+  class ReleaseDetector
+    def self.detect_release: (project_root: untyped project_root, running_on_heroku: untyped running_on_heroku) -> untyped
+
+    def self.detect_release_from_heroku: (untyped running_on_heroku) -> (nil | untyped)
+
+    def self.detect_release_from_capistrano: (untyped project_root) -> untyped
+
+    def self.detect_release_from_git: () -> untyped
+
+    def self.detect_release_from_env: () -> untyped
+  end
+end
+
+module Sentry
+  class Scope
+    include ArgumentCheckingHelper
+
+    ATTRIBUTES: ::Array[untyped]
+
+    # @param max_breadcrumbs [Integer] the maximum number of breadcrumbs to be stored in the scope.
+    def initialize: (?max_breadcrumbs: untyped? max_breadcrumbs) -> void
+
+    # Resets the scope's attributes to defaults.
+    # @return [void]
+    def clear: () -> untyped
+
+    # Applies stored attributes and event processors to the given event.
+    # @param event [Event]
+    # @param hint [Hash] the hint data that'll be passed to event processors.
+    # @return [Event]
+    def apply_to_event: (untyped event, ?untyped? hint) -> untyped
+
+    # Adds the breadcrumb to the scope's breadcrumbs buffer.
+    # @param breadcrumb [Breadcrumb]
+    # @return [void]
+    def add_breadcrumb: (untyped breadcrumb) -> untyped
+
+    # Clears the scope's breadcrumbs buffer
+    # @return [void]
+    def clear_breadcrumbs: () -> untyped
+
+    # @return [Scope]
+    def dup: () -> untyped
+
+    # Updates the scope's data from a given scope.
+    # @param scope [Scope]
+    # @return [void]
+    def update_from_scope: (untyped scope) -> untyped
+
+    # Updates the scope's data from the given options.
+    # @param contexts [Hash]
+    # @param extras [Hash]
+    # @param tags [Hash]
+    # @param user [Hash]
+    # @param level [String, Symbol]
+    # @param fingerprint [Array]
+    # @return [void]
+    def update_from_options: (?contexts: untyped? contexts, ?extra: untyped? extra, ?tags: untyped? tags, ?user: untyped? user, ?level: untyped? level, ?fingerprint: untyped? fingerprint) -> untyped
+
+    # Sets the scope's rack_env attribute.
+    # @param env [Hash]
+    # @return [Hash]
+    def set_rack_env: (untyped env) -> untyped
+
+    # Sets the scope's span attribute.
+    # @param span [Span]
+    # @return [Span]
+    def set_span: (untyped span) -> untyped
+
+    # @!macro set_user
+    def set_user: (untyped user_hash) -> untyped
+
+    # @!macro set_extras
+    def set_extras: (untyped extras_hash) -> untyped
+
+    # Adds a new key-value pair to current extras.
+    # @param key [String, Symbol]
+    # @param value [Object]
+    # @return [Hash]
+    def set_extra: (untyped key, untyped value) -> untyped
+
+    # @!macro set_tags
+    def set_tags: (untyped tags_hash) -> untyped
+
+    # Adds a new key-value pair to current tags.
+    # @param key [String, Symbol]
+    # @param value [Object]
+    # @return [Hash]
+    def set_tag: (untyped key, untyped value) -> untyped
+
+    # Updates the scope's contexts attribute by merging with the old value.
+    # @param contexts [Hash]
+    # @return [Hash]
+    def set_contexts: (untyped contexts_hash) -> untyped
+
+    # @!macro set_context
+    def set_context: (untyped key, untyped value) -> untyped
+
+    # Sets the scope's level attribute.
+    # @param level [String, Symbol]
+    # @return [void]
+    def set_level: (untyped level) -> untyped
+
+    # Appends a new transaction name to the scope.
+    # The "transaction" here does not refer to `Transaction` objects.
+    # @param transaction_name [String]
+    # @return [void]
+    def set_transaction_name: (untyped transaction_name) -> untyped
+
+    # Sets the currently active session on the scope.
+    # @param session [Session, nil]
+    # @return [void]
+    def set_session: (untyped session) -> untyped
+
+    # Returns current transaction name.
+    # The "transaction" here does not refer to `Transaction` objects.
+    # @return [String, nil]
+    def transaction_name: () -> untyped
+
+    # Returns the associated Transaction object.
+    # @return [Transaction, nil]
+    def get_transaction: () -> untyped
+
+    # Returns the associated Span object.
+    # @return [Span, nil]
+    def get_span: () -> untyped
+
+    # Sets the scope's fingerprint attribute.
+    # @param fingerprint [Array]
+    # @return [Array]
+    def set_fingerprint: (untyped fingerprint) -> untyped
+
+    # Adds a new event processor [Proc] to the scope.
+    # @param block [Proc]
+    # @return [void]
+    def add_event_processor: () { () -> untyped } -> untyped
+
+    private
+
+    def set_default_value: () -> untyped
+
+    def set_new_breadcrumb_buffer: () -> untyped
+
+    # @return [Hash]
+    def self.os_context: () -> untyped
+
+    # @return [Hash]
+    def self.runtime_context: () -> untyped
+  end
+end
+
+module Sentry
+  class Session
+    attr_reader started: untyped
+
+    attr_reader status: untyped
+
+    # TODO-neel add :crashed after adding handled mechanism
+    STATUSES: ::Array[untyped]
+
+    AGGREGATE_STATUSES: ::Array[untyped]
+
+    def initialize: () -> void
+
+    # TODO-neel add :crashed after adding handled mechanism
+    def update_from_exception: (?untyped? _exception) -> untyped
+
+    def close: () -> untyped
+
+    # truncate seconds from the timestamp since we only care about
+    # minute level granularity for aggregation
+    def aggregation_key: () -> untyped
+
+    def deep_dup: () -> untyped
+  end
+end
+
+module Sentry
+  class SessionFlusher
+
+    private
+
+    def init_aggregates: (untyped aggregation_key) -> untyped
+
+    def pending_envelope: () -> untyped
+
+    def attrs: () -> { release: untyped, environment: untyped }
+
+    def ensure_thread: () -> (nil | untyped)
+  end
+end
+
+module Sentry
+  class Span
+    STATUS_MAP: ::Hash[untyped, untyped]
+
+    # An uuid that can be used to identify a trace.
+    # @return [String]
+    attr_reader trace_id: untyped
+
+    # An uuid that can be used to identify the span.
+    # @return [String]
+    attr_reader span_id: untyped
+
+    # Span parent's span_id.
+    # @return [String]
+    attr_reader parent_span_id: untyped
+
+    # Sampling result of the span.
+    # @return [Boolean, nil]
+    attr_reader sampled: untyped
+
+    # Starting timestamp of the span.
+    # @return [Float]
+    attr_reader start_timestamp: untyped
+
+    # Finishing timestamp of the span.
+    # @return [Float]
+    attr_reader timestamp: untyped
+
+    # Span description
+    # @return [String]
+    attr_reader description: untyped
+
+    # Span operation
+    # @return [String]
+    attr_reader op: untyped
+
+    # Span status
+    # @return [String]
+    attr_reader status: untyped
+
+    # Span tags
+    # @return [Hash]
+    attr_reader tags: untyped
+
+    # Span data
+    # @return [Hash]
+    attr_reader data: untyped
+
+    # The SpanRecorder the current span belongs to.
+    # SpanRecorder holds all spans under the same Transaction object (including the Transaction itself).
+    # @return [SpanRecorder]
+    attr_accessor span_recorder: untyped
+
+    # The Transaction object the Span belongs to.
+    # Every span needs to be attached to a Transaction and their child spans will also inherit the same transaction.
+    # @return [Transaction]
+    attr_accessor transaction: untyped
+
+    def initialize: (?description: untyped? description, ?op: untyped? op, ?status: untyped? status, ?trace_id: untyped? trace_id, ?parent_span_id: untyped? parent_span_id, ?sampled: untyped? sampled, ?start_timestamp: untyped? start_timestamp, ?timestamp: untyped? timestamp) -> void
+
+    # Finishes the span by adding a timestamp.
+    # @return [self]
+    def finish: () -> (nil | untyped)
+
+    # Generates a trace string that can be used to connect other transactions.
+    # @return [String]
+    def to_sentry_trace: () -> ::String
+
+    # @return [Hash]
+    def to_hash: () -> { trace_id: untyped, span_id: untyped, parent_span_id: untyped, start_timestamp: untyped, timestamp: untyped, description: untyped, op: untyped, status: untyped, tags: untyped, data: untyped }
+
+    # Returns the span's context that can be used to embed in an Event.
+    # @return [Hash]
+    def get_trace_context: () -> { trace_id: untyped, span_id: untyped, parent_span_id: untyped, description: untyped, op: untyped, status: untyped }
+
+    # Starts a child span with given attributes.
+    # @param attributes [Hash] the attributes for the child span.
+    def start_child: (**untyped attributes) -> untyped
+
+    # Starts a child span, yield it to the given block, and then finish the span after the block is executed.
+    # @example
+    #   span.with_child_span do |child_span|
+    #     # things happen here will be recorded in a child span
+    #   end
+    #
+    # @param attributes [Hash] the attributes for the child span.
+    # @param block [Proc] the action to be recorded in the child span.
+    # @yieldparam child_span [Span]
+    def with_child_span: (**untyped attributes) { (untyped) -> untyped } -> untyped
+
+    def deep_dup: () -> untyped
+
+    # Sets the span's operation.
+    # @param op [String] operation of the span.
+    def set_op: (untyped op) -> untyped
+
+    # Sets the span's description.
+    # @param description [String] description of the span.
+    def set_description: (untyped description) -> untyped
+
+    # Sets the span's status.
+    # @param satus [String] status of the span.
+    def set_status: (untyped status) -> untyped
+
+    # Sets the span's finish timestamp.
+    # @param timestamp [Float] finished time in float format (most precise).
+    def set_timestamp: (untyped timestamp) -> untyped
+
+    # Sets the span's status with given http status code.
+    # @param status_code [String] example: "500".
+    def set_http_status: (untyped status_code) -> untyped
+
+    # Inserts a key-value pair to the span's data payload.
+    # @param key [String, Symbol]
+    # @param value [Object]
+    def set_data: (untyped key, untyped value) -> untyped
+
+    # Sets a tag to the span.
+    # @param key [String, Symbol]
+    # @param value [String]
+    def set_tag: (untyped key, untyped value) -> untyped
+  end
+end
+
+module Sentry
+  class Transaction < Span
+    SENTRY_TRACE_REGEXP: untyped
+
+    UNLABELD_NAME: untyped
+
+    MESSAGE_PREFIX: ::String
+
+    include LoggingHelper
+
+    # The name of the transaction.
+    # @return [String]
+    attr_reader name: untyped
+
+    # The sampling decision of the parent transaction, which will be considered when making the current transaction's sampling decision.
+    # @return [String]
+    attr_reader parent_sampled: untyped
+
+    # @deprecated Use Sentry.get_current_hub instead.
+    attr_reader hub: untyped
+
+    # @deprecated Use Sentry.configuration instead.
+    attr_reader configuration: untyped
+
+    # @deprecated Use Sentry.logger instead.
+    attr_reader logger: untyped
+
+    def initialize: (hub: untyped hub, ?name: untyped? name, ?parent_sampled: untyped? parent_sampled, **untyped options) -> void
+
+    # Initalizes a Transaction instance with a Sentry trace string from another transaction (usually from an external request).
+    #
+    # The original transaction will become the parent of the new Transaction instance. And they will share the same `trace_id`.
+    #
+    # The child transaction will also store the parent's sampling decision in its `parent_sampled` attribute.
+    # @param sentry_trace [String] the trace string from the previous transaction.
+    # @param hub [Hub] the hub that'll be responsible for sending this transaction when it's finished.
+    # @param options [Hash] the options you want to use to initialize a Transaction instance.
+    # @return [Transaction, nil]
+    def self.from_sentry_trace: (untyped sentry_trace, ?hub: untyped hub, **untyped options) -> (nil | untyped)
+
+    # @return [Hash]
+    def to_hash: () -> untyped
+
+    # @return [Transaction]
+    def deep_dup: () -> untyped
+
+    # Sets initial sampling decision of the transaction.
+    # @param sampling_context [Hash] a context Hash that'll be passed to `traces_sampler` (if provided).
+    # @return [void]
+    def set_initial_sample_decision: (sampling_context: untyped sampling_context) -> (nil | untyped)
+
+    # Finishes the transaction's recording and send it to Sentry.
+    # @param hub [Hub] the hub that'll send this transaction. (Deprecated)
+    # @return [TransactionEvent]
+    def finish: (?hub: untyped? hub) -> untyped
+
+    def init_span_recorder: (?::Integer limit) -> untyped
+
+    private
+
+    def generate_transaction_description: () -> untyped
+
+    class SpanRecorder
+      attr_reader max_length: untyped
+
+      attr_reader spans: untyped
+
+      def initialize: (untyped max_length) -> void
+
+      def add: (untyped span) -> untyped
+    end
+  end
+end
+
+module Sentry
+  class TransactionEvent < Event
+    TYPE: ::String
+
+    SERIALIZEABLE_ATTRIBUTES: ::Array[untyped]
+
+    WRITER_ATTRIBUTES: untyped
+
+    # @return [<Array[Span]>]
+    attr_accessor spans: untyped
+
+    # @param configuration [Configuration]
+    # @param integration_meta [Hash, nil]
+    # @param message [String, nil]
+    def initialize: (configuration: untyped configuration, ?integration_meta: untyped? integration_meta, ?message: untyped? message) -> void
+
+    # Sets the event's start_timestamp.
+    # @param time [Time, Float]
+    # @return [void]
+    def start_timestamp=: (untyped time) -> untyped
+
+    # @return [Hash]
+    def to_hash: () -> untyped
+  end
+end
+
+module Sentry
+  class Transport
+    PROTOCOL_VERSION: ::String
+
+    USER_AGENT: ::String
+
+    CLIENT_REPORT_INTERVAL: ::Integer
+
+    # https://develop.sentry.dev/sdk/client-reports/#envelope-item-payload
+    CLIENT_REPORT_REASONS: ::Array[untyped]
+
+    include LoggingHelper
+
+    attr_reader rate_limits: untyped
+
+    attr_reader discarded_events: untyped
+
+    attr_reader last_client_report_sent: untyped
+
+    # @deprecated Use Sentry.logger to retrieve the current logger instead.
+    attr_reader logger: untyped
+
+    def initialize: (untyped configuration) -> void
+
+    def send_data: (untyped data, ?::Hash[untyped, untyped] options) -> untyped
+
+    def send_event: (untyped event) -> untyped
+
+    def send_envelope: (untyped envelope) -> (nil | untyped)
+
+    def serialize_envelope: (untyped envelope) -> ::Array[untyped]
+
+    def is_rate_limited?: (untyped item_type) -> untyped
+
+    def generate_auth_header: () -> untyped
+
+    def envelope_from_event: (untyped event) -> untyped
+
+    def record_lost_event: (untyped reason, untyped item_type) -> (nil | untyped)
+
+    private
+
+    def get_item_type: (untyped event_hash) -> untyped
+
+    def fetch_pending_client_report: () -> (nil | ::Array[untyped])
+
+    def reject_rate_limited_items: (untyped envelope) -> untyped
+  end
+end
+
+module Sentry
+  class Transport
+    class Configuration
+      attr_accessor timeout: untyped
+
+      attr_accessor open_timeout: untyped
+
+      attr_accessor proxy: untyped
+
+      attr_accessor ssl: untyped
+
+      attr_accessor ssl_ca_file: untyped
+
+      attr_accessor ssl_verification: untyped
+
+      attr_accessor encoding: untyped
+
+      attr_reader transport_class: untyped
+
+      def initialize: () -> void
+
+      def transport_class=: (untyped klass) -> untyped
+    end
+  end
+end
+
+module Sentry
+  class DummyTransport < Transport
+    attr_accessor events: untyped
+
+    attr_accessor envelopes: untyped
+
+    def initialize: () -> void
+
+    def send_event: (untyped event) -> untyped
+
+    def send_envelope: (untyped envelope) -> untyped
+  end
+end
+
+module Sentry
+  class HTTPTransport < Transport
+    GZIP_ENCODING: ::String
+
+    GZIP_THRESHOLD: untyped
+
+    CONTENT_TYPE: ::String
+
+    DEFAULT_DELAY: ::Integer
+
+    RETRY_AFTER_HEADER: ::String
+
+    RATE_LIMIT_HEADER: ::String
+
+    USER_AGENT: ::String
+
+    def initialize: (*untyped args) -> void
+
+    def send_data: (untyped data) -> untyped
+
+    private
+
+    def has_rate_limited_header?: (untyped headers) -> untyped
+
+    def handle_rate_limited_response: (untyped headers) -> untyped
+
+    def parse_rate_limit_header: (untyped rate_limit_header) -> untyped
+
+    def should_compress?: (untyped data) -> untyped
+
+    def conn: () -> untyped
+
+    def ssl_configuration: () -> untyped
+  end
+end
+
+module Sentry
+  module ArgumentCheckingHelper
+    private
+
+    def check_argument_type!: (untyped argument, untyped expected_type) -> untyped
+  end
+end
+
+module Sentry
+  module Utils
+    module ExceptionCauseChain
+      def self.exception_to_array: (untyped exception) -> untyped
+    end
+  end
+end
+
+# Based on ActionDispatch::RemoteIp. All security-related precautions from that
+# middleware have been removed, because the Event IP just needs to be accurate,
+# and spoofing an IP here only makes data inaccurate, not insecure. Don't re-use
+# this module if you have to *trust* the IP address.
+module Sentry
+  module Utils
+    class RealIp
+      LOCAL_ADDRESSES: ::Array[untyped]
+
+      attr_reader ip: untyped
+
+      def initialize: (?remote_addr: untyped? remote_addr, ?client_ip: untyped? client_ip, ?real_ip: untyped? real_ip, ?forwarded_for: untyped? forwarded_for, ?trusted_proxies: untyped trusted_proxies) -> void
+
+      def calculate_ip: () -> untyped
+
+      def ips_from: (untyped header) -> untyped
+
+      def filter_trusted_proxy_addresses: (untyped ips) -> untyped
+    end
+  end
+end
+
+module Sentry
+  module Utils
+    module RequestId
+      REQUEST_ID_HEADERS: untyped
+
+      # Request ID based on ActionDispatch::RequestId
+      def self.read_from: (untyped env) -> (untyped | nil)
+    end
+  end
+end
+
+module Sentry
+  VERSION: ::String
+end

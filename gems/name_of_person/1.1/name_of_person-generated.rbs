@@ -1,0 +1,57 @@
+module NameOfPerson
+end
+
+module NameOfPerson
+  module AssignableName
+    # Assigns first_name and last_name attributes as extracted from a supplied full name.
+    def name=: (String name) -> untyped
+
+    # Returns a PersonName object created from the first_name and last_name attributes.
+    def name: () -> NameOfPerson::PersonName
+  end
+end
+
+module NameOfPerson
+  module HasPersonName
+    extend ActiveSupport::Concern
+
+    # Defines the instance methods name/name= from AssignableName.
+    def has_person_name: () -> untyped
+  end
+end
+
+module NameOfPerson
+  class PersonName < String
+    attr_reader first: untyped
+
+    attr_reader last: untyped
+
+    def self.full: (untyped full_name) -> String
+
+    def initialize: (untyped first, ?untyped? last) -> void
+
+    # Returns first + last, such as "Jason Fried".
+    def full: () -> String
+
+    # Returns first + last initial, such as "Jason F.".
+    def familiar: () -> String
+
+    # Returns first initial + last, such as "J. Fried".
+    def abbreviated: () -> String
+
+    # Returns last + first for sorting.
+    def sorted: () -> String
+
+    # Returns full name with with trailing 's or ' if name ends in s.
+    def possessive: () -> String
+
+    # Returns just the initials.
+    def initials: () -> String
+
+    # Returns a mentionable version of the familiar name
+    def mentionable: () -> String
+
+    # Override to_yaml to serialize as a plain string.
+    def encode_with: (untyped coder) -> String
+  end
+end

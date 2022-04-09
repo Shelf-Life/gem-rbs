@@ -1,0 +1,1543 @@
+module Browser
+  class AcceptLanguage
+    def self.languages: () -> untyped
+
+    def self.parse: (untyped accept_language) -> (::Array[untyped] | untyped)
+
+    attr_reader part: untyped
+
+    def initialize: (untyped part) -> void
+
+    def full: () -> untyped
+
+    def name: () -> untyped
+
+    def code: () -> untyped
+
+    def region: () -> untyped
+
+    def quality: () -> untyped
+
+    private
+
+    def quality_value: () -> untyped
+  end
+end
+
+module Browser
+  module ActionController
+    extend ActiveSupport::Concern
+
+    private
+
+    def browser: () -> untyped
+  end
+end
+
+module Browser
+  module Aliases
+    PLATFORM_ALIASES: untyped
+
+    DEVICE_ALIASES: untyped
+
+    def self.included: (untyped target) -> untyped
+  end
+end
+
+module Browser
+  class Alipay < Base
+    def id: () -> :alipay
+
+    def name: () -> "Alipay"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Base
+    include DetectVersion
+
+    attr_reader ua: untyped
+
+    def initialize: (untyped ua, ?accept_language: untyped? accept_language) -> void
+
+    # Return a meta info about this browser.
+    def meta: () -> untyped
+
+    # Return an array with all preferred languages that this browser accepts.
+    def accept_language: () -> untyped
+
+    alias to_a meta
+
+    # Return meta representation as string.
+    def to_s: () -> untyped
+
+    def version: () -> untyped
+
+    # Return the platform.
+    def platform: () -> untyped
+
+    # Return the bot info.
+    def bot: () -> untyped
+
+    # Detect if current user agent is from a bot.
+    def bot?: () -> untyped
+
+    # Return the device info.
+    def device: () -> untyped
+
+    # Detect if browser is Microsoft Internet Explorer.
+    def ie?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Microsoft Edge.
+    def edge?: (?untyped? expected_version) -> untyped
+
+    def compatibility_view?: () -> ::FalseClass
+
+    def msie_full_version: () -> "0.0"
+
+    def msie_version: () -> "0"
+
+    # Detect if browser is Instagram.
+    def instagram?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Snapchat.
+    def snapchat?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser if Facebook.
+    def facebook?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Otter.
+    def otter?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is WebKit-based.
+    def webkit?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is QuickTime
+    def quicktime?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Apple CoreMedia.
+    def core_media?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is PhantomJS
+    def phantom_js?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Safari.
+    def safari?: (?untyped? expected_version) -> untyped
+
+    def safari_webapp_mode?: () -> untyped
+
+    # Detect if browser is Firefox.
+    def firefox?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Chrome.
+    def chrome?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Opera.
+    def opera?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Sputnik.
+    def sputnik?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Yandex.
+    def yandex?: (?untyped? expected_version) -> untyped
+
+    alias yandex_browser? yandex?
+
+    # Detect if browser is UCBrowser.
+    def uc_browser?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Nokia S40 Ovi Browser.
+    def nokia?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is MicroMessenger.
+    def micro_messenger?: (?untyped? expected_version) -> untyped
+
+    alias wechat? micro_messenger?
+
+    def weibo?: (?untyped? expected_version) -> untyped
+
+    def alipay?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Opera Mini.
+    def opera_mini?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is DuckDuckGo.
+    def duck_duck_go?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Samsung.
+    def samsung_browser?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Huawei.
+    def huawei_browser?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Xiaomi Miui.
+    def miui_browser?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Maxthon.
+    def maxthon?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is QQ.
+    def qq?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Sougou.
+    def sougou_browser?: (?untyped? expected_version) -> untyped
+
+    # Detect if browser is Google Search App
+    def google_search_app?: (?untyped? expected_version) -> untyped
+
+    def webkit_full_version: () -> untyped
+
+    def known?: () -> untyped
+
+    def unknown?: () -> untyped
+
+    # Detect if browser is a proxy browser.
+    def proxy?: () -> untyped
+
+    # Detect if the browser is Electron.
+    def electron?: (?untyped? expected_version) -> untyped
+
+    private
+
+    def validate_size: (untyped subject, untyped input) -> (nil | untyped)
+  end
+end
+
+module Browser
+  class BlackBerry < Base
+    def id: () -> :blackberry
+
+    def name: () -> "BlackBerry"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Bot
+    GENERIC_NAME: ::String
+
+    def self.matchers: () -> untyped
+
+    def self.default_matchers: () -> ::Array[untyped]
+
+    def self.load_yaml: (untyped path) -> untyped
+
+    def self.bots: () -> untyped
+
+    def self.bot_exceptions: () -> untyped
+
+    def self.search_engines: () -> untyped
+
+    def self.why?: (untyped ua) -> untyped
+
+    private
+
+    attr_reader ua: untyped
+
+    attr_reader browser: untyped
+
+    public
+
+    def initialize: (untyped ua) -> void
+
+    def bot?: () -> untyped
+
+    def why?: () -> untyped
+
+    def search_engine?: () -> untyped
+
+    def name: () -> (nil | untyped)
+
+    private
+
+    def bot_exception?: () -> untyped
+
+    def detect_bot?: () -> untyped
+  end
+end
+
+module Browser
+  class Bot
+    class EmptyUserAgentMatcher
+      def self.call: (untyped ua, untyped _browser) -> untyped
+    end
+  end
+end
+
+module Browser
+  class Bot
+    class KeywordMatcher
+      def self.call: (untyped ua, untyped _browser) -> untyped
+    end
+  end
+end
+
+module Browser
+  class Bot
+    class KnownBotsMatcher
+      def self.call: (untyped ua, untyped _browser) -> untyped
+    end
+  end
+end
+
+module Browser
+  EMPTY_STRING: ::String
+
+  Error: untyped
+
+  def self.root: () -> untyped
+
+  attr_accessor self.user_agent_size_limit: untyped
+
+  attr_accessor self.accept_language_size_limit: untyped
+
+  # Hold the list of browser matchers.
+  # Order is important.
+  def self.matchers: () -> untyped
+
+  def self.new: (untyped user_agent, **untyped kwargs) -> untyped
+end
+
+module Browser
+  class Chrome < Base
+    def id: () -> :chrome
+
+    def name: () -> "Chrome"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  module DetectVersion
+    private
+
+    def detect_version?: (untyped actual_version, untyped expected_version) -> untyped
+
+    def parse_version: (untyped version) -> untyped
+  end
+end
+
+module Browser
+  class Device
+    private
+
+    attr_reader ua: untyped
+
+    public
+
+    # Hold the list of device matchers.
+    # Order is important.
+    def self.matchers: () -> untyped
+
+    def initialize: (untyped ua) -> void
+
+    private
+
+    def subject: () -> untyped
+
+    public
+
+    def id: () -> untyped
+
+    def name: () -> untyped
+
+    # Detect if browser is tablet (currently iPad, Android, Surface or
+    # Playbook).
+    def tablet?: () -> untyped
+
+    # Detect if browser is mobile.
+    def mobile?: () -> untyped
+
+    def ipad?: () -> untyped
+
+    def unknown?: () -> untyped
+
+    def ipod_touch?: () -> untyped
+
+    alias ipod? ipod_touch?
+
+    def iphone?: () -> untyped
+
+    def ps3?: () -> untyped
+
+    alias playstation3? ps3?
+
+    def ps4?: () -> untyped
+
+    alias playstation4? ps4?
+
+    def psp?: () -> untyped
+
+    def playstation_vita?: () -> untyped
+
+    alias vita? playstation_vita?
+
+    alias psp_vita? playstation_vita?
+
+    def kindle?: () -> untyped
+
+    def kindle_fire?: () -> untyped
+
+    def nintendo_wii?: () -> untyped
+
+    alias wii? nintendo_wii?
+
+    def nintendo_wiiu?: () -> untyped
+
+    alias wiiu? nintendo_wiiu?
+
+    def nintendo_switch?: () -> untyped
+
+    alias switch? nintendo_switch?
+
+    def blackberry_playbook?: () -> untyped
+
+    alias playbook? blackberry_playbook?
+
+    def surface?: () -> untyped
+
+    def tv?: () -> untyped
+
+    # Detect if browser is Silk.
+    def silk?: () -> untyped
+
+    # Detect if browser is running under Xbox.
+    def xbox?: () -> untyped
+
+    # Detect if browser is running under Xbox 360.
+    def xbox_360?: () -> untyped
+
+    # Detect if browser is running under Xbox One.
+    def xbox_one?: () -> untyped
+
+    # Detect if browser is running under PlayStation.
+    def playstation?: () -> untyped
+
+    # Detect if browser is Nintendo.
+    def nintendo?: () -> untyped
+
+    # Detect if browser is console (currently Xbox, PlayStation, or Nintendo).
+    def console?: () -> untyped
+
+    # Detect if device is a Samsung.
+    def samsung?: () -> untyped
+
+    private
+
+    # Regex taken from http://detectmobilebrowsers.com
+    # rubocop:disable Layout/LineLength
+    def detect_mobile?: () -> untyped
+
+    def platform: () -> untyped
+  end
+end
+
+module Browser
+  class Device
+    class Android < Base
+      def id: () -> :unknown
+
+      def name: () -> untyped
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Base
+      attr_reader ua: untyped
+
+      def initialize: (untyped ua) -> void
+    end
+  end
+end
+
+module Browser
+  class Device
+    class BlackBerryPlaybook < Base
+      def id: () -> :playbook
+
+      def name: () -> "BlackBerry Playbook"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Ipad < Base
+      def id: () -> :ipad
+
+      def name: () -> "iPad"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Iphone < Base
+      def id: () -> :iphone
+
+      def name: () -> "iPhone"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class IpodTouch < Base
+      def id: () -> :ipod_touch
+
+      def name: () -> "iPod Touch"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Kindle < Base
+      def id: () -> :kindle
+
+      def name: () -> "Kindle"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class KindleFire < Base
+      def id: () -> :kindle_fire
+
+      def name: () -> "Kindle Fire"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class PlayStation3 < Base
+      def id: () -> :ps3
+
+      def name: () -> "PlayStation 3"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class PlayStation4 < Base
+      def id: () -> :ps4
+
+      def name: () -> "PlayStation 4"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class PSP < Base
+      def id: () -> :psp
+
+      def name: () -> "PlayStation Portable"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class PSVita < Base
+      def id: () -> :psvita
+
+      def name: () -> "PlayStation Vita"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Samsung < Base
+      REGEX: untyped
+
+      def self.names: () -> untyped
+
+      def id: () -> :samsung
+
+      def name: () -> ::String
+
+      def code: () -> untyped
+
+      def matches: () -> untyped
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Surface < Base
+      def id: () -> :surface
+
+      def name: () -> "Microsoft Surface"
+
+      def match?: () -> untyped
+
+      private
+
+      def platform: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Switch < Base
+      def id: () -> :switch
+
+      def name: () -> "Nintendo Switch"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class TV < Base
+      def id: () -> :tv
+
+      def name: () -> "TV"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Unknown < Base
+      def id: () -> :unknown_device
+
+      def name: () -> "Unknown"
+
+      def match?: () -> ::TrueClass
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Wii < Base
+      def id: () -> :wii
+
+      def name: () -> "Nintendo Wii"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class WiiU < Base
+      def id: () -> :wiiu
+
+      def name: () -> "Nintendo WiiU"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class Xbox360 < Base
+      def id: () -> :xbox_360
+
+      def name: () -> "Xbox 360"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Device
+    class XboxOne < Base
+      def id: () -> :xbox_one
+
+      def name: () -> "Xbox One"
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class DuckDuckGo < Base
+    def id: () -> :duckduckgo
+
+    def name: () -> "DuckDuckGo"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Edge < InternetExplorer
+    def id: () -> :edge
+
+    def name: () -> "Microsoft Edge"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+
+    def chrome_based?: () -> untyped
+  end
+end
+
+module Browser
+  class Electron < Base
+    def id: () -> :electron
+
+    def name: () -> "Electron"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Facebook < Base
+    def id: () -> :facebook
+
+    def name: () -> "Facebook"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Firefox < Base
+    def id: () -> :firefox
+
+    def name: () -> "Firefox"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class GoogleSearchApp < Chrome
+    def id: () -> :google_search_app
+
+    def name: () -> "Google Search App"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class HuaweiBrowser < Base
+    def id: () -> :huawei_browser
+
+    def name: () -> "Huawei Browser"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Instagram < Base
+    def id: () -> :instagram
+
+    def name: () -> "Instagram"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class InternetExplorer < Base
+    # https://msdn.microsoft.com/en-us/library/ms537503(v=vs.85).aspx#TriToken
+    TRIDENT_MAPPING: untyped
+
+    def id: () -> :ie
+
+    def name: () -> "Internet Explorer"
+
+    def full_version: () -> ::String
+
+    def msie_full_version: () -> untyped
+
+    def msie_version: () -> untyped
+
+    def match?: () -> untyped
+
+    # Detect if IE is running in compatibility mode.
+    def compatibility_view?: () -> untyped
+
+    private
+
+    def ie_version: () -> untyped
+
+    # Return the trident version.
+    def trident_version: () -> untyped
+
+    def msie?: () -> untyped
+
+    def modern_ie?: () -> untyped
+  end
+end
+
+module Browser
+  class Maxthon < Base
+    def id: () -> :maxthon
+
+    def name: () -> "Maxthon"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  module Meta
+    def self.rules: () -> untyped
+
+    def self.get: (untyped browser) -> untyped
+
+    class Base
+      # Set the browser instance.
+      attr_reader browser: untyped
+
+      def initialize: (untyped browser) -> void
+
+      def meta: () -> nil
+
+      def to_a: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Device < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class GenericBrowser < Base
+      def meta: () -> untyped
+
+      private
+
+      def generic?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Id < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class IE < Base
+      def version: () -> untyped
+
+      def meta: () -> (nil | untyped)
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class IOS < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Mobile < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Platform < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Proxy < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Safari < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Tablet < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  module Meta
+    class Webkit < Base
+      def meta: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class MicroMessenger < Base
+    def id: () -> :micro_messenger
+
+    def name: () -> "MicroMessenger"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Middleware
+    # Detect the most common assets.
+    ASSETS_REGEX: untyped
+
+    # Detect the ACCEPT header. IE8 send */*.
+    ACCEPT_REGEX: untyped
+
+    def initialize: (untyped app) { () -> untyped } -> void
+
+    def call: (untyped env) -> untyped
+
+    def resolve_redirection: (untyped env, untyped current_path, untyped path) -> untyped
+
+    def redirect: (untyped path) -> ::Array[302 | ::Hash[::String, "text/html" | untyped] | ::Array[untyped]]
+
+    def run_app: (untyped env) -> untyped
+
+    def process?: (untyped request) -> untyped
+
+    def html?: (untyped request) -> untyped
+
+    def assets?: (untyped request) -> untyped
+  end
+end
+
+module Browser
+  class Middleware
+    class Context
+      attr_reader browser: untyped
+
+      attr_reader request: untyped
+
+      def initialize: (untyped request) -> void
+
+      def redirect_to: (untyped path) -> untyped
+    end
+  end
+end
+
+module Browser
+  class Middleware
+    class Context
+      module Additions
+        extend ActiveSupport::Concern
+
+        include UrlMethods
+      end
+    end
+  end
+end
+
+module Browser
+  class Middleware
+    class Context
+      module UrlMethods
+        def default_url_options: () -> untyped
+      end
+    end
+  end
+end
+
+module Browser
+  class MiuiBrowser < Base
+    def id: () -> :miui_browser
+
+    def name: () -> "Miui Browser"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Nokia < Base
+    def id: () -> :nokia
+
+    def name: () -> "Nokia S40 Ovi Browser"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Opera < Base
+    def id: () -> :opera
+
+    def name: () -> "Opera"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Otter < Base
+    def id: () -> :otter
+
+    def name: () -> "Otter"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class PhantomJS < Base
+    def id: () -> :phantom_js
+
+    def name: () -> "PhantomJS"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Platform
+    include DetectVersion
+
+    private
+
+    attr_reader ua: untyped
+
+    public
+
+    # Hold the list of platform matchers.
+    # Order is important.
+    def self.matchers: () -> untyped
+
+    def initialize: (untyped ua) -> void
+
+    private
+
+    def subject: () -> untyped
+
+    public
+
+    def adobe_air?: (?untyped? expected_version) -> untyped
+
+    def chrome_os?: (?untyped? expected_version) -> untyped
+
+    def android?: (?untyped? expected_version) -> untyped
+
+    def unknown?: () -> untyped
+
+    def linux?: () -> untyped
+
+    def mac?: (?untyped? expected_version) -> untyped
+
+    def windows?: (?untyped? expected_version) -> untyped
+
+    def firefox_os?: () -> untyped
+
+    def kai_os?: () -> untyped
+
+    def ios?: (?untyped? expected_version) -> untyped
+
+    def blackberry?: (?untyped? expected_version) -> untyped
+
+    def windows_phone?: (?untyped? expected_version) -> untyped
+
+    def windows_mobile?: (?untyped? expected_version) -> untyped
+
+    def id: () -> untyped
+
+    def version: () -> untyped
+
+    def name: () -> untyped
+
+    def to_s: () -> untyped
+
+    def ==: (untyped other) -> untyped
+
+    # Detect if running on iOS app webview.
+    def ios_app?: () -> untyped
+
+    # Detect if is iOS webview.
+    def ios_webview?: () -> untyped
+
+    # Detect if in an Android app webview (Lollipop and newer)
+    # https://developer.chrome.com/multidevice/user-agent#webview_user_agent
+    def android_app?: () -> untyped
+
+    alias android_webview? android_app?
+
+    # http://msdn.microsoft.com/fr-FR/library/ms537503.aspx#PltToken
+    def windows_xp?: () -> untyped
+
+    def windows_vista?: () -> untyped
+
+    def windows7?: () -> untyped
+
+    def windows8?: () -> untyped
+
+    def windows8_1?: () -> untyped
+
+    def windows10?: () -> untyped
+
+    def windows_rt?: () -> untyped
+
+    # Detect if current platform is Windows in 64-bit architecture.
+    def windows_x64?: () -> untyped
+
+    def windows_wow64?: () -> untyped
+
+    def windows_x64_inclusive?: () -> untyped
+
+    def windows_touchscreen_desktop?: () -> untyped
+  end
+end
+
+module Browser
+  class Platform
+    class AdobeAir < Base
+      def match?: () -> untyped
+
+      def version: () -> untyped
+
+      def name: () -> "Adobe AIR"
+
+      def id: () -> :adobe_air
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class Android < Base
+      def match?: () -> untyped
+
+      def name: () -> "Android"
+
+      def id: () -> :android
+
+      def version: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class Base
+      attr_reader ua: untyped
+
+      attr_reader platform: untyped
+
+      def initialize: (untyped ua, ?untyped? platform) -> void
+
+      def match?: () -> ::FalseClass
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class BlackBerry < Base
+      def match?: () -> untyped
+
+      def name: () -> "BlackBerry"
+
+      def id: () -> :blackberry
+
+      def version: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class ChromeOS < Base
+      def match?: () -> untyped
+
+      def name: () -> "Chrome OS"
+
+      def id: () -> :chrome_os
+
+      def version: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class FirefoxOS < Base
+      def version: () -> "0"
+
+      def name: () -> "Firefox OS"
+
+      def id: () -> :firefox_os
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class IOS < Base
+      MATCHER: untyped
+
+      VERSION_MATCHER: untyped
+
+      def version: () -> ("0" | untyped)
+
+      def name: () -> ::String
+
+      def id: () -> :ios
+
+      def match?: () -> untyped
+
+      def device: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class KaiOS < Base
+      def version: () -> untyped
+
+      def name: () -> "KaiOS"
+
+      def id: () -> :kai_os
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class Linux < Base
+      def version: () -> "0"
+
+      def name: () -> "Generic Linux"
+
+      def id: () -> :linux
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class Mac < Base
+      def version: () -> untyped
+
+      def name: () -> ("macOS" | "Mac OS X")
+
+      def id: () -> :mac
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class Unknown < Base
+      def version: () -> "0"
+
+      def name: () -> "Unknown"
+
+      def id: () -> :unknown_platform
+
+      def match?: () -> ::TrueClass
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class Windows < Base
+      def version: () -> untyped
+
+      def name: () -> "Windows"
+
+      def id: () -> :windows
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class WindowsMobile < Base
+      def version: () -> "0"
+
+      def name: () -> "Windows Mobile"
+
+      def id: () -> :windows_mobile
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class Platform
+    class WindowsPhone < Base
+      def version: () -> untyped
+
+      def name: () -> "Windows Phone"
+
+      def id: () -> :windows_phone
+
+      def match?: () -> untyped
+    end
+  end
+end
+
+module Browser
+  class QQ < Base
+    def id: () -> :qq
+
+    def name: () -> "QQ Browser"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Railtie < Rails::Railtie
+  end
+end
+
+module Browser
+  class Safari < Base
+    def id: () -> :safari
+
+    def name: () -> "Safari"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class SamsungBrowser < Chrome
+    def id: () -> :samsung_browser
+
+    def name: () -> "Samsung Browser"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Snapchat < Base
+    def id: () -> :snapchat
+
+    def name: () -> "Snapchat"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class SougouBrowser < Base
+    def id: () -> :sougou_browser
+
+    def name: () -> "Sougou Browser"
+
+    # We can't get the real version on desktop device from the ua string
+    def full_version: () -> untyped
+
+    # SogouMobileBrowser for mobile device
+    # SE for desktop device
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Sputnik < Base
+    def id: () -> :sputnik
+
+    def name: () -> "Sputnik"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  def self.user_agents: () -> untyped
+
+  def self.browser_user_agents: () -> untyped
+
+  def self.bot_user_agents: () -> untyped
+
+  def self.search_engine_user_agents: () -> untyped
+
+  def self.[]: (untyped key) -> untyped
+end
+
+module Browser
+  class UCBrowser < Base
+    def id: () -> :uc_browser
+
+    def name: () -> "UCBrowser"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Unknown < Base
+    NAMES: untyped
+
+    def id: () -> :unknown_browser
+
+    def name: () -> untyped
+
+    def full_version: () -> untyped
+
+    def match?: () -> ::TrueClass
+
+    private
+
+    def infer_name: () -> untyped
+  end
+end
+
+module Browser
+  VERSION: ::String
+end
+
+module Browser
+  class Weibo < Base
+    def id: () -> :weibo
+
+    def name: () -> "Weibo"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end
+
+module Browser
+  class Yandex < Base
+    def id: () -> :yandex
+
+    def name: () -> "Yandex"
+
+    def full_version: () -> untyped
+
+    def match?: () -> untyped
+  end
+end

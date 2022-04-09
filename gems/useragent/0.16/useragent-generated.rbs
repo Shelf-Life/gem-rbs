@@ -1,0 +1,629 @@
+class UserAgent
+  # http://www.texsoft.it/index.php?m=sw.php.useragent
+  MATCHER: untyped
+
+  DEFAULT_USER_AGENT: ::String
+
+  def self.parse: (untyped string) -> untyped
+
+  attr_reader product: untyped
+
+  attr_reader version: untyped
+
+  attr_reader comment: untyped
+
+  def initialize: (untyped product, ?untyped? version, ?untyped? comment) -> void
+
+  include Comparable
+
+  def detect_comment: () { () -> untyped } -> untyped
+
+  # Any comparison between two user agents with different products will
+  # always return false.
+  def <=>: (untyped other) -> untyped
+
+  def eql?: (untyped other) -> untyped
+
+  def to_s: () -> untyped
+
+  def to_str: () -> untyped
+end
+
+class UserAgent
+  module Browsers
+    Security: untyped
+
+    ALL: untyped
+
+    def self.all: () -> untyped
+
+    def self.extend: (untyped array) -> untyped
+  end
+end
+
+class UserAgent
+  module Browsers
+    # CoreMedia is a framework on iOS and is used by various iOS apps to playback media.
+    class AppleCoreMedia < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> "AppleCoreMedia"
+
+      def application: () -> untyped
+
+      def platform: () -> (nil | untyped)
+
+      def security: () -> untyped
+
+      def os: () -> (nil | untyped)
+
+      def localization: () -> (nil | untyped)
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class Base < Array[untyped]
+      include Comparable
+
+      def <=>: (untyped other) -> untyped
+
+      def eql?: (untyped other) -> untyped
+
+      def to_s: () -> untyped
+
+      def to_str: () -> untyped
+
+      def application: () -> untyped
+
+      def browser: () -> untyped
+
+      def version: () -> untyped
+
+      def platform: () -> nil
+
+      def os: () -> nil
+
+      def respond_to?: (untyped symbol, ?bool include_all) -> untyped
+
+      def method_missing: (untyped method, *untyped args) { () -> untyped } -> untyped
+
+      def mobile?: () -> untyped
+
+      def bot?: () -> untyped
+
+      def to_h: () -> (nil | untyped)
+
+      private
+
+      def detect_product: (untyped product) -> untyped
+
+      def detect_comment: (untyped comment) -> untyped
+
+      def detect_comment_match: (untyped regexp) -> untyped
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class Chrome < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      ChromeBrowsers: untyped
+
+      def browser: () -> untyped
+
+      def build: () -> untyped
+
+      # Prior to Safari 3, the user agent did not include a version number
+      def version: () -> untyped
+
+      def application: () -> untyped
+
+      def platform: () -> (nil | untyped)
+
+      def webkit: () -> untyped
+
+      def os: () -> (nil | untyped)
+
+      def localization: () -> (nil | untyped)
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class Edge < Base
+      OS_REGEXP: untyped
+
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> "Edge"
+
+      def version: () -> untyped
+
+      def platform: () -> "Windows"
+
+      def os: () -> untyped
+
+      private
+
+      def os_comment: () -> untyped
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class Gecko < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      GeckoBrowsers: untyped
+
+      def browser: () -> untyped
+
+      def version: () -> untyped
+
+      def platform: () -> untyped
+
+      def security: () -> untyped
+
+      def os: () -> untyped
+
+      def localization: () -> untyped
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class InternetExplorer < Base
+      TRIDENT_ENGINES: untyped
+
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> "Internet Explorer"
+
+      def version: () -> untyped
+
+      def trident_version: () -> untyped
+
+      def real_version: () -> untyped
+
+      def compatibility_view?: () -> untyped
+
+      # Before version 4.0, Chrome Frame declared itself (unversioned) in a comment;
+      # as of 4.0 it can declare itself versioned in a comment
+      # or as a separate product with a version
+      def chromeframe: () -> untyped
+
+      def platform: () -> "Windows"
+
+      def os: () -> untyped
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    # The user agent for iTunes
+    #
+    # Some user agents:
+    # iTunes/10.6.1 (Macintosh; Intel Mac OS X 10.7.3) AppleWebKit/534.53.11
+    # iTunes/12.0.1 (Macintosh; OS X 10.10) AppleWebKit/0600.1.25
+    # iTunes/11.1.5 (Windows; Microsoft Windows 7 x64 Business Edition Service Pack 1 (Build 7601)) AppleWebKit/537.60.15
+    # iTunes/12.0.1 (Windows; Microsoft Windows 8 x64 Home Premium Edition (Build 9200)) AppleWebKit/7600.1017.0.24
+    # iTunes/12.0.1 (Macintosh; OS X 10.10.1) AppleWebKit/0600.1.25
+    class ITunes < Webkit
+      def self.extend?: (untyped agent) -> untyped
+
+      # @return ["iTunes"] Always return iTunes as the browser
+      def browser: () -> "iTunes"
+
+      # @return [Version] The version of iTunes in use
+      def version: () -> untyped
+
+      # @return [nil] nil - not included in the user agent
+      def security: () -> nil
+
+      # @return [nil, Version] The WebKit version in use if we have it
+      def build: () -> untyped
+
+      # Parses the operating system in use.
+      #
+      # @return [String] The operating system
+      def os: () -> untyped
+
+      # Parses the operating system in use.
+      #
+      # @return [String] The operating system
+      def full_os: () -> untyped
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    # The user agent utilized by ffmpeg or other projects utilizing libavformat
+    class Libavformat < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      # @return ["libavformat"] To make it easy to pick it out, all of the UAs that Lavf uses have this browser.
+      def browser: () -> "libavformat"
+
+      # @return [nil, Version] If the product is NSPlayer, we don't have a version
+      def version: () -> untyped
+
+      # @return [nil] Lavf doesn't return us anything here
+      def os: () -> nil
+
+      # @return [nil] Lavf doesn't return us anything here
+      def platform: () -> nil
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class Opera < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> "Opera"
+
+      def version: () -> untyped
+
+      def platform: () -> (nil | untyped)
+
+      def security: () -> untyped
+
+      def mobile?: () -> untyped
+
+      def os: () -> (nil | untyped)
+
+      def localization: () -> (nil | untyped)
+
+      private
+
+      def mini?: () -> untyped
+
+      def macintosh?: () -> untyped
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    # Mozilla/5.0 (PLAYSTATION 3 4.75) AppleWebKit/531.22.8 (KHTML, like Gecko)
+    # Mozilla/5.0 (PLAYSTATION 3 4.76) AppleWebKit/531.22.8 (KHTML, like Gecko)
+    # Mozilla/5.0 (PLAYSTATION 3; 1.00)
+    # Mozilla/5.0 (PlayStation Vita 3.52) AppleWebKit/537.73 (KHTML, like Gecko) Silk/3.2
+    # Mozilla/5.0 (PlayStation 4 2.57) AppleWebKit/537.73 (KHTML, like Gecko)
+    class PlayStation < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      # Returns the name of the browser in use.
+      #
+      # @return [nil, String] the name of the browser
+      def browser: () -> untyped
+
+      # PS Vita is mobile, others are not.
+      #
+      # @return [true, false] is this a mobile browser?
+      def mobile?: () -> untyped
+
+      # Returns the operating system in use.
+      #
+      # @return [String] the operating system in use
+      def os: () -> untyped
+
+      # Returns the platform in use.
+      #
+      # @return [nil, "PlayStation 3", "PlayStation 4", "PlayStation Vita"] the platform in use
+      def platform: () -> untyped
+
+      # Returns the browser version in use. If Silk, returns the version of Silk.
+      # Otherwise, returns the PS3/PS4 firmware version.
+      #
+      # @return [nil, Version] the version
+      def version: () -> untyped
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    # Podcast Addict - Dalvik/1.6.0 (Linux; U; Android 4.4.2; LG-D631 Build/KOT49I.D63110b)
+    # Podcast Addict - Dalvik/2.1.0 (Linux; U; Android 5.1; XT1093 Build/LPE23.32-21.3)
+    # Podcast Addict - Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; ALCATEL ONE TOUCH Fierce Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.2 Mobile Safari/534.30
+    # Podcast Addict - Mozilla/5.0 (Linux; U; Android 4.2.2; en-ca; ALCATEL ONE TOUCH 6040A Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.2 Mobile Safari/534.30
+    # Podcast Addict - Dalvik/2.1.0 (Linux; U; Android M Build/MPZ79M)
+    class PodcastAddict < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> "Podcast Addict"
+
+      # If we can figure out the device, return it.
+      #
+      # @return [nil, String] the device model
+      def device: () -> (nil | untyped)
+
+      # If we can figure out the device build, return it.
+      #
+      # @return [nil, String] the device build
+      def device_build: () -> (nil | untyped)
+
+      # Returns the localization, if known. We currently only know this for certain devices.
+      #
+      # @return [nil, String] the localization
+      def localization: () -> (nil | untyped)
+
+      # This is a mobile app, always return true.
+      #
+      # @return [true]
+      def mobile?: () -> ::TrueClass
+
+      # Gets the operating system (some variant of Android, if we're certain that is the case)
+      #
+      # @return [nil, String] the operating system
+      def os: () -> (nil | untyped)
+
+      # Gets the platform (Android, if we're certain)
+      #
+      # @return [nil, "Android"] the platform
+      def platform: () -> untyped
+
+      # Get the security level reported
+      #
+      # @return [:weak, :strong, :none] the security level
+      def security: () -> (nil | untyped)
+
+      # We aren't provided with the version :(
+      #
+      # @return [nil]
+      def version: () -> nil
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class Vivaldi < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> "Vivaldi"
+
+      def build: () -> untyped
+
+      def version: () -> untyped
+
+      def application: () -> untyped
+
+      def platform: () -> (nil | untyped)
+
+      def webkit: () -> untyped
+
+      def os: () -> (nil | untyped)
+
+      def localization: () -> (nil | untyped)
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class Webkit < Base
+      WEBKIT_PRODUCT_REGEXP: untyped
+
+      WEBKIT_VERSION_REGEXP: untyped
+
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> untyped
+
+      def build: () -> untyped
+
+      BuildVersions: untyped
+
+      # Prior to Safari 3, the user agent did not include a version number
+      def version: () -> untyped
+
+      def application: () -> untyped
+
+      def platform: () -> (nil | untyped)
+
+      def webkit: () -> untyped
+
+      def security: () -> untyped
+
+      def os: () -> (nil | untyped)
+
+      def localization: () -> (nil | untyped)
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    class WechatBrowser < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      def browser: () -> "Wechat Browser"
+
+      def version: () -> untyped
+
+      def platform: () -> (nil | untyped)
+
+      def os: () -> (nil | untyped)
+    end
+  end
+end
+
+class UserAgent
+  module Browsers
+    # The user agent used by Windows Media Player or applications which utilize the
+    # Windows Media SDK.
+    #
+    # @note Both VLC and libavformat impersonate Windows Media Player when they think they
+    #       are using MMS (Microsoft Media Services/Windows Media Server).
+    class WindowsMediaPlayer < Base
+      def self.extend?: (untyped agent) -> untyped
+
+      # The Windows Media Format SDK version
+      #
+      # @return [Version, nil] The WMFSDK version
+      def wmfsdk_version: () -> untyped
+
+      # Check if the client supports the WMFSDK version passed in.
+      #
+      # @param [String] version
+      #   The WMFSDK version to check for. For example, "9.0", "11.0", "12.0"
+      # @return [true, false] Is this media player compatible with the passed WMFSDK version?
+      def has_wmfsdk?: (untyped version) -> untyped
+
+      # @return ["Windows Media Player"] All of the user agents we parse are Windows Media Player
+      def browser: () -> "Windows Media Player"
+
+      # @return ["Windows"] All of the user agents we parse are on Windows
+      def platform: () -> "Windows"
+
+      # @return [true, false] Is this Windows Media Player 6.4 (NSPlayer 4.1) or Media Player 6.0 (NSPlayer 3.2)?
+      def classic?: () -> untyped
+
+      # Check if our parsed OS is a mobile OS
+      #
+      # @return [true, false] Is this a mobile Windows Media Player?
+      def mobile?: () -> untyped
+
+      # Parses the Windows Media Player version to figure out the host OS version
+      #
+      # User agents I have personally found:
+      #
+      # Windows 95 with Windows Media Player 6.4::
+      #   NSPlayer/4.1.0.3857
+      #
+      # Windows 98 SE with Windows Media Player 6.01::
+      #   NSPlayer/3.2.0.3564
+      #
+      # Womdpws 98 SE with Windows Media Player 6.4::
+      #   NSPlayer/4.1.0.3857
+      #   NSPlayer/4.1.0.3925
+      #
+      # Windows 98 SE with Windows Media Player 7.1::
+      #   NSPlayer/7.1.0.3055
+      #
+      # Windows 98 SE with Windows Media Player 9.0::
+      #   Windows-Media-Player/9.00.00.2980
+      #   NSPlayer/9.0.0.2980 WMFSDK/9.0
+      #
+      # Windows 2000 with Windows Media Player 6.4::
+      #   NSPlayer/4.1.0.3938
+      #
+      # Windows 2000 with Windows Media Player 7.1 (downgraded from WMP9)::
+      #   NSPlayer/9.0.0.3268
+      #   NSPlayer/9.0.0.3268 WMFSDK/9.0
+      #   NSPlayer/9.0.0.3270 WMFSDK/9.0
+      #   NSPlayer/9.0.0.2980
+      #
+      # Windows 2000 with Windows Media Player 9.0::
+      #   NSPlayer/9.0.0.3270 WMFSDK/9.0
+      #   Windows-Media-Player/9.00.00.3367
+      #
+      # Windows XP with Windows Media Player 6.4::
+      #   NSPlayer/4.1.0.3936
+      #
+      # Windows XP with Windows Media Player 9::
+      #   NSPlayer/9.0.0.4503
+      #   NSPlayer/9.0.0.4503 WMFSDK/9.0
+      #   Windows-Media-Player/9.00.00.4503
+      #
+      # Windows XP with Windows Media Player 10::
+      #   NSPlayer/10.0.0.3802
+      #   NSPlayer/10.0.0.3802 WMFSDK/10.0
+      #   Windows-Media-Player/10.00.00.3802
+      #
+      # Windows XP with Windows Media Player 11::
+      #   NSPlayer/11.0.5721.5262
+      #   NSPlayer/11.0.5721.5262 WMFSDK/11.0
+      #   Windows-Media-Player/11.0.5721.5262
+      #
+      # Windows Vista with Windows Media Player 11::
+      #   NSPlayer/11.00.6002.18392 WMFSDK/11.00.6002.18392
+      #   NSPlayer/11.0.6002.18005
+      #   NSPlayer/11.0.6002.18049 WMFSDK/11.0
+      #   Windows-Media-Player/11.0.6002.18311
+      #
+      # Windows 8.1 with Windows Media Player 12::
+      #   NSPlayer/12.00.9600.17031 WMFSDK/12.00.9600.17031
+      #
+      # Windows 10 with Windows Media Player 12::
+      #   Windows-Media-Player/12.0.9841.0
+      #   NSPlayer/12.00.9841.0000 WMFSDK/12.00.9841.0000
+      #
+      # Windows Phone 8.1 (Podcasts app)::
+      #   NSPlayer/12.00.9651.0000 WMFSDK/12.00.9651.0000
+      def os: () -> untyped
+    end
+  end
+end
+
+class UserAgent
+  # A custom Comparable module that will always return false
+  # if the <=> returns false
+  module Comparable
+    def <: (untyped other) -> untyped
+
+    def <=: (untyped other) -> untyped
+
+    def ==: (untyped other) -> untyped
+
+    def >: (untyped other) -> untyped
+
+    def >=: (untyped other) -> untyped
+  end
+end
+
+class UserAgent
+  module OperatingSystems
+    IOS_VERSION_REGEX: untyped
+
+    Windows: untyped
+
+    def self.normalize_os: (untyped os) -> untyped
+
+    private
+
+    def self.normalize_chrome_os: (untyped os) -> untyped
+
+    def self.normalize_ios: (untyped os) -> untyped
+
+    def self.normalize_mac_os_x: (untyped os) -> untyped
+  end
+end
+
+class UserAgent
+  class Version
+    include ::Comparable
+
+    def self.new: (?untyped? obj) -> untyped
+
+    def initialize: (untyped str) -> void
+
+    def nil?: () -> untyped
+
+    def to_a: () -> untyped
+
+    def to_str: () -> untyped
+
+    def eql?: (untyped other) -> untyped
+
+    def ==: (untyped other) -> untyped
+
+    def <=>: (untyped other) -> untyped
+
+    def to_s: () -> untyped
+
+    def inspect: () -> ::String
+  end
+end

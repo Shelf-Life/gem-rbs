@@ -1,0 +1,2719 @@
+module Stripe
+  DEFAULT_CA_BUNDLE_PATH: untyped
+
+  # map to the same values as the standard library's logger
+  LEVEL_DEBUG: untyped
+
+  LEVEL_ERROR: untyped
+
+  LEVEL_INFO: untyped
+
+  extend Forwardable
+
+  attr_reader self.config: untyped
+
+  # Gets the application for a plugin that's identified some. See
+  # #set_app_info.
+  def self.app_info: () -> untyped
+
+  def self.app_info=: (untyped info) -> untyped
+
+  # Sets some basic information about the running application that's sent along
+  # with API requests. Useful for plugin authors to identify their plugin when
+  # communicating with Stripe.
+  #
+  # Takes a name and optional  partner program ID, plugin URL, and version.
+  def self.set_app_info: (untyped name, ?partner_id: untyped? partner_id, ?url: untyped? url, ?version: untyped? version) -> untyped
+end
+
+module Stripe
+  module APIOperations
+    module Create
+      def create: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+    end
+  end
+end
+
+module Stripe
+  module APIOperations
+    module Delete
+      module ClassMethods
+        # Deletes an API resource
+        #
+        # Deletes the identified resource with the passed in parameters.
+        #
+        # ==== Attributes
+        #
+        # * +id+ - ID of the resource to delete.
+        # * +params+ - A hash of parameters to pass to the API
+        # * +opts+ - A Hash of additional options (separate from the params /
+        #   object values) to be added to the request. E.g. to allow for an
+        #   idempotency_key to be passed in the request headers, or for the
+        #   api_key to be overwritten. See
+        #   {APIOperations::Request.execute_resource_request}.
+        def delete: (untyped id, ?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+      end
+
+      def delete: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+      def self.included: (untyped base) -> untyped
+    end
+  end
+end
+
+module Stripe
+  module APIOperations
+    module List
+      def list: (?::Hash[untyped, untyped] filters, ?::Hash[untyped, untyped] opts) -> untyped
+    end
+  end
+end
+
+module Stripe
+  module APIOperations
+    # Adds methods to help manipulate a subresource from its parent resource so
+    # that it's possible to do so from a static context (i.e. without a
+    # pre-existing collection of subresources on the parent).
+    #
+    # For example, a transfer gains the static methods for reversals so that the
+    # methods `.create_reversal`, `.retrieve_reversal`, `.update_reversal`,
+    # etc. all become available.
+    module NestedResource
+      def nested_resource_class_methods: (untyped resource, ?path: untyped? path, ?operations: untyped? operations, ?resource_plural: untyped? resource_plural) -> untyped
+    end
+  end
+end
+
+module Stripe
+  module APIOperations
+    module Request
+      module ClassMethods
+        def execute_resource_request: (untyped method, untyped url, ?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+        def execute_resource_request_stream: (untyped method, untyped url, ?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) { () -> untyped } -> untyped
+
+        private
+
+        def execute_resource_request_internal: (untyped client_request_method_sym, untyped method, untyped url, untyped params, untyped opts) { () -> untyped } -> ::Array[untyped]
+
+        public
+
+        # This method used to be called `request`, but it's such a short name
+        # that it eventually conflicted with the name of a field on an API
+        # resource (specifically, `Event#request`), so it was renamed to
+        # something more unique.
+        #
+        # The former name had been around for just about forever though, and
+        # although all internal uses have been renamed, I've left this alias in
+        # place for backwards compatibility. Consider removing it on the next
+        # major.
+        alias request execute_resource_request
+
+        private
+
+        def error_on_non_string_user_opts: (untyped opts) -> untyped
+
+        def error_on_invalid_params: (untyped params) -> (nil | untyped)
+
+        def warn_on_opts_in_params: (untyped params) -> untyped
+      end
+
+      def self.included: (untyped base) -> untyped
+
+      def execute_resource_request: (untyped method, untyped url, ?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+      def execute_resource_request_stream: (untyped method, untyped url, ?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) { () -> untyped } -> untyped
+
+      # See notes on `alias` above.
+      alias request execute_resource_request
+    end
+  end
+end
+
+module Stripe
+  module APIOperations
+    module Save
+      module ClassMethods
+        # Updates an API resource
+        #
+        # Updates the identified resource with the passed in parameters.
+        #
+        # ==== Attributes
+        #
+        # * +id+ - ID of the resource to update.
+        # * +params+ - A hash of parameters to pass to the API
+        # * +opts+ - A Hash of additional options (separate from the params /
+        #   object values) to be added to the request. E.g. to allow for an
+        #   idempotency_key to be passed in the request headers, or for the
+        #   api_key to be overwritten. See
+        #   {APIOperations::Request.execute_resource_request}.
+        def update: (untyped id, ?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+      end
+
+      # Creates or updates an API resource.
+      #
+      # If the resource doesn't yet have an assigned ID and the resource is one
+      # that can be created, then the method attempts to create the resource.
+      # The resource is updated otherwise.
+      #
+      # ==== Attributes
+      #
+      # * +params+ - Overrides any parameters in the resource's serialized data
+      #   and includes them in the create or update. If +:req_url:+ is included
+      #   in the list, it overrides the update URL used for the create or
+      #   update.
+      # * +opts+ - A Hash of additional options (separate from the params /
+      #   object values) to be added to the request. E.g. to allow for an
+      #   idempotency_key to be passed in the request headers, or for the
+      #   api_key to be overwritten. See
+      #   {APIOperations::Request.execute_resource_request}.
+      def save: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+      def self.included: (untyped base) -> untyped
+
+      private
+
+      def save_url: () -> untyped
+    end
+  end
+end
+
+module Stripe
+  class APIResource < StripeObject
+    include Stripe::APIOperations::Request
+
+    # A flag that can be set a behavior that will cause this resource to be
+    # encoded and sent up along with an update of its parent resource. This is
+    # usually not desirable because resources are updated individually on their
+    # own endpoints, but there are certain cases, replacing a customer's source
+    # for example, where this is allowed.
+    attr_accessor save_with_parent: untyped
+
+    def self.class_name: () -> untyped
+
+    def self.resource_url: () -> ::String
+
+    # A metaprogramming call that specifies that a field of a resource can be
+    # its own type of API resource (say a nested card under an account for
+    # example), and if that resource is set, it should be transmitted to the
+    # API on a create or update. Doing so is not the default behavior because
+    # API resources should normally be persisted on their own RESTful
+    # endpoints.
+    def self.save_nested_resource: (untyped name) -> untyped
+
+    # Adds a custom method to a resource class. This is used to add support for
+    # non-CRUDL API requests, e.g. capturing charges. custom_method takes the
+    # following parameters:
+    # - name: the name of the custom method to create (as a symbol)
+    # - http_verb: the HTTP verb for the API request (:get, :post, or :delete)
+    # - http_path: the path to append to the resource's URL. If not provided,
+    #              the name is used as the path
+    #
+    # For example, this call:
+    #     custom_method :capture, http_verb: post
+    # adds a `capture` class method to the resource class that, when called,
+    # will send a POST request to `/v1/<object_name>/capture`.
+    def self.custom_method: (untyped name, http_verb: untyped http_verb, ?http_path: untyped? http_path) -> untyped
+
+    def resource_url: () -> ::String
+
+    def refresh: () -> untyped
+
+    def self.retrieve: (untyped id, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def request_stripe_object: (method: untyped method, path: untyped path, params: untyped params, ?opts: ::Hash[untyped, untyped] opts) -> untyped
+
+    def request_stream: (method: untyped method, path: untyped path, params: untyped params, ?opts: ::Hash[untyped, untyped] opts) { () -> untyped } -> untyped
+  end
+end
+
+module Stripe
+  # Manages connections across multiple hosts which is useful because the
+  # library may connect to multiple hosts during a typical session (main API,
+  # Connect, Uploads). Ruby doesn't provide an easy way to make this happen
+  # easily, so this class is designed to track what we're connected to and
+  # manage the lifecycle of those connections.
+  #
+  # Note that this class in itself is *not* thread safe. We expect it to be
+  # instantiated once per thread.
+  class ConnectionManager
+    # Timestamp (in seconds procured from the system's monotonic clock)
+    # indicating when the connection manager last made a request. This is used
+    # by `StripeClient` to determine whether a connection manager should be
+    # garbage collected or not.
+    attr_reader last_used: untyped
+
+    attr_reader config: untyped
+
+    def initialize: (?untyped config) -> void
+
+    # Finishes any active connections by closing their TCP connection and
+    # clears them from internal tracking.
+    def clear: () -> untyped
+
+    # Gets a connection for a given URI. This is for internal use only as it's
+    # subject to change (we've moved between HTTP client schemes in the past
+    # and may do it again).
+    #
+    # `uri` is expected to be a string.
+    def connection_for: (untyped uri) -> untyped
+
+    # Executes an HTTP request to the given URI with the given method. Also
+    # allows a request body, headers, and query string to be specified.
+    def execute_request: (untyped method, untyped uri, ?body: untyped? body, ?headers: untyped? headers, ?query: untyped? query) { () -> untyped } -> untyped
+
+    private
+
+    # `uri` should be a parsed `URI` object.
+    def create_connection: (untyped uri) -> untyped
+
+    # `Net::HTTP` somewhat awkwardly requires each component of a proxy URI
+    # (host, port, etc.) rather than the URI itself. This method simply parses
+    # out those pieces to make passing them into a new connection a little less
+    # ugly.
+    def proxy_parts: () -> untyped
+
+    def warn_ssl_verify_none: () -> (nil | untyped)
+  end
+end
+
+module Stripe
+  # Represents an error object as returned by the API.
+  #
+  # @see https://stripe.com/docs/api/errors
+  class ErrorObject < StripeObject
+    # For card errors, the ID of the failed charge.
+    def charge: () -> untyped
+
+    # For some errors that could be handled programmatically, a short string
+    # indicating the error code reported.
+    def code: () -> untyped
+
+    # For card errors resulting from a card issuer decline, a short string
+    # indicating the card issuer's reason for the decline if they provide one.
+    def decline_code: () -> untyped
+
+    # A URL to more information about the error code reported.
+    def doc_url: () -> untyped
+
+    # A human-readable message providing more details about the error. For card
+    # errors, these messages can be shown to your users.
+    def message: () -> untyped
+
+    # If the error is parameter-specific, the parameter related to the error.
+    # For example, you can use this to display a message near the correct form
+    # field.
+    def param: () -> untyped
+
+    # The PaymentIntent object for errors returned on a request involving a
+    # PaymentIntent.
+    def payment_intent: () -> untyped
+
+    # The PaymentMethod object for errors returned on a request involving a
+    # PaymentMethod.
+    def payment_method: () -> untyped
+
+    # The SetupIntent object for errors returned on a request involving a
+    # SetupIntent.
+    def setup_intent: () -> untyped
+
+    # The source object for errors returned on a request involving a source.
+    def source: () -> untyped
+
+    # The type of error returned. One of `api_connection_error`, `api_error`,
+    # `authentication_error`, `card_error`, `idempotency_error`,
+    # `invalid_request_error`, or `rate_limit_error`.
+    def type: () -> untyped
+  end
+
+  # Represents on OAuth error returned by the OAuth API.
+  #
+  # @see https://stripe.com/docs/connect/oauth-reference#post-token-errors
+  class OAuthErrorObject < StripeObject
+    # A unique error code per error type.
+    def error: () -> untyped
+
+    # A human readable description of the error.
+    def error_description: () -> untyped
+  end
+end
+
+module Stripe
+  # StripeError is the base error from which all other more specific Stripe
+  # errors derive.
+  class StripeError < StandardError
+    attr_reader message: untyped
+
+    # Response contains a StripeResponse object that has some basic information
+    # about the response that conveyed the error.
+    attr_accessor response: untyped
+
+    attr_reader code: untyped
+
+    attr_reader error: untyped
+
+    attr_reader http_body: untyped
+
+    attr_reader http_headers: untyped
+
+    attr_reader http_status: untyped
+
+    attr_reader json_body: untyped
+
+    # equivalent to #data
+    attr_reader request_id: untyped
+
+    # Initializes a StripeError.
+    def initialize: (?untyped? message, ?http_status: untyped? http_status, ?http_body: untyped? http_body, ?json_body: untyped? json_body, ?http_headers: untyped? http_headers, ?code: untyped? code) -> void
+
+    def construct_error_object: () -> (nil | untyped)
+
+    # Whether the error was the result of an idempotent replay, meaning that it
+    # originally occurred on a previous request and is being replayed back
+    # because the user sent the same idempotency key for this one.
+    def idempotent_replayed?: () -> untyped
+
+    def to_s: () -> ::String
+  end
+
+  # AuthenticationError is raised when invalid credentials are used to connect
+  # to Stripe's servers.
+  class AuthenticationError < StripeError
+  end
+
+  # APIConnectionError is raised in the event that the SDK can't connect to
+  # Stripe's servers. That can be for a variety of different reasons from a
+  # downed network to a bad TLS certificate.
+  class APIConnectionError < StripeError
+  end
+
+  # APIError is a generic error that may be raised in cases where none of the
+  # other named errors cover the problem. It could also be raised in the case
+  # that a new error has been introduced in the API, but this version of the
+  # Ruby SDK doesn't know how to handle it.
+  class APIError < StripeError
+  end
+
+  # CardError is raised when a user enters a card that can't be charged for
+  # some reason.
+  class CardError < StripeError
+    attr_reader param: untyped
+
+    def initialize: (untyped message, untyped param, ?code: untyped? code, ?http_status: untyped? http_status, ?http_body: untyped? http_body, ?json_body: untyped? json_body, ?http_headers: untyped? http_headers) -> void
+  end
+
+  # IdempotencyError is raised in cases where an idempotency key was used
+  # improperly.
+  class IdempotencyError < StripeError
+  end
+
+  # InvalidRequestError is raised when a request is initiated with invalid
+  # parameters.
+  class InvalidRequestError < StripeError
+    attr_accessor param: untyped
+
+    def initialize: (untyped message, untyped param, ?http_status: untyped? http_status, ?http_body: untyped? http_body, ?json_body: untyped? json_body, ?http_headers: untyped? http_headers, ?code: untyped? code) -> void
+  end
+
+  # PermissionError is raised in cases where access was attempted on a resource
+  # that wasn't allowed.
+  class PermissionError < StripeError
+  end
+
+  # RateLimitError is raised in cases where an account is putting too much load
+  # on Stripe's API servers (usually by performing too many requests). Please
+  # back off on request rate.
+  class RateLimitError < StripeError
+  end
+
+  # SignatureVerificationError is raised when the signature verification for a
+  # webhook fails
+  class SignatureVerificationError < StripeError
+    attr_accessor sig_header: untyped
+
+    def initialize: (untyped message, untyped sig_header, ?http_body: untyped? http_body) -> void
+  end
+
+  module OAuth
+    # OAuthError is raised when the OAuth API returns an error.
+    class OAuthError < StripeError
+      def initialize: (untyped code, untyped description, ?http_status: untyped? http_status, ?http_body: untyped? http_body, ?json_body: untyped? json_body, ?http_headers: untyped? http_headers) -> void
+
+      def construct_error_object: () -> (nil | untyped)
+    end
+
+    # InvalidClientError is raised when the client doesn't belong to you, or
+    # the API key mode (live or test) doesn't match the client mode. Or the
+    # stripe_user_id doesn't exist or isn't connected to your application.
+    class InvalidClientError < OAuthError
+    end
+
+    # InvalidGrantError is raised when a specified code doesn't exist, is
+    # expired, has been used, or doesn't belong to you; a refresh token doesn't
+    # exist, or doesn't belong to you; or if an API key's mode (live or test)
+    # doesn't match the mode of a code or refresh token.
+    class InvalidGrantError < OAuthError
+    end
+
+    # InvalidRequestError is raised when a code, refresh token, or grant type
+    # parameter is not provided, but was required.
+    class InvalidRequestError < OAuthError
+    end
+
+    # InvalidScopeError is raised when an invalid scope parameter is provided.
+    class InvalidScopeError < OAuthError
+    end
+
+    # UnsupportedGrantTypeError is raised when an unuspported grant type
+    # parameter is specified.
+    class UnsupportedGrantTypeError < OAuthError
+    end
+
+    # UnsupportedResponseTypeError is raised when an unsupported response type
+    # parameter is specified.
+    class UnsupportedResponseTypeError < OAuthError
+    end
+  end
+end
+
+module Stripe
+  class Instrumentation
+    # Event emitted on `request_begin` callback.
+    class RequestBeginEvent
+      attr_reader method: untyped
+
+      attr_reader path: untyped
+
+      # Arbitrary user-provided data in the form of a Ruby hash that's passed
+      # from subscribers on `request_begin` to subscribers on `request_end`.
+      # `request_begin` subscribers can set keys which will then be available
+      # in `request_end`.
+      #
+      # Note that all subscribers of `request_begin` share the same object, so
+      # they must be careful to set unique keys so as to not conflict with data
+      # set by other subscribers.
+      attr_reader user_data: untyped
+
+      def initialize: (method: untyped method, path: untyped path, user_data: untyped user_data) -> void
+    end
+
+    # Event emitted on `request_end` callback.
+    class RequestEndEvent
+      attr_reader duration: untyped
+
+      attr_reader http_status: untyped
+
+      attr_reader method: untyped
+
+      attr_reader num_retries: untyped
+
+      attr_reader path: untyped
+
+      # Arbitrary user-provided data in the form of a Ruby hash that's passed
+      # from subscribers on `request_begin` to subscribers on `request_end`.
+      # `request_begin` subscribers can set keys which will then be available
+      # in `request_end`.
+      attr_reader user_data: untyped
+
+      def initialize: (duration: untyped duration, http_status: untyped http_status, method: untyped method, num_retries: untyped num_retries, path: untyped path, ?user_data: untyped? user_data) -> void
+    end
+
+    # This class was renamed for consistency. This alias is here for backwards
+    # compatibility.
+    RequestEvent: untyped
+
+    # Returns true if there are a non-zero number of subscribers on the given
+    # topic, and false otherwise.
+    def self.any_subscribers?: (untyped topic) -> untyped
+
+    def self.subscribe: (untyped topic, ?untyped name) { () -> untyped } -> untyped
+
+    def self.unsubscribe: (untyped topic, untyped name) -> untyped
+
+    def self.notify: (untyped topic, untyped event) -> untyped
+
+    def self.subscribers: () -> untyped
+  end
+end
+
+module Stripe
+  class ListObject < StripeObject
+    # include Enumerable[Stripe::ListObject]
+
+    include Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Request
+
+    include Stripe::APIOperations::Create
+
+    OBJECT_NAME: ::String
+
+    # This accessor allows a `ListObject` to inherit various filters that were
+    # given to a predecessor. This allows for things like consistent limits,
+    # expansions, and predicates as a user pages through resources.
+    attr_accessor filters: untyped
+
+    # An empty list object. This is returned from +next+ when we know that
+    # there isn't a next page in order to replicate the behavior of the API
+    # when it attempts to return a page beyond the last.
+    def self.empty_list: (?::Hash[untyped, untyped] opts) -> untyped
+
+    def initialize: (*untyped args) -> void
+
+    def []: (untyped key) -> untyped
+
+    # Iterates through each resource in the page represented by the current
+    # `ListObject`.
+    #
+    # Note that this method makes no effort to fetch a new page when it gets to
+    # the end of the current page's resources. See also +auto_paging_each+.
+    def each: () { () -> untyped } -> untyped
+
+    # Iterates through each resource in all pages, making additional fetches to
+    # the API as necessary.
+    #
+    # The default iteration direction is forwards according to Stripe's API
+    # "natural" ordering direction -- newer objects first, and moving towards
+    # older objects.
+    #
+    # However, if the initial list object was fetched using an `ending_before`
+    # cursor (and only `ending_before`, `starting_after` cannot also be
+    # included), the method assumes that the user is trying to iterate
+    # backwards compared to natural ordering and returns results that way --
+    # older objects first, and moving towards newer objects.
+    #
+    # Note that this method will make as many API calls as necessary to fetch
+    # all resources. For more granular control, please see +each+ and
+    # +next_page+.
+    def auto_paging_each: () { () -> untyped } -> untyped
+
+    # Returns true if the page object contains no elements.
+    def empty?: () -> untyped
+
+    def retrieve: (untyped id, ?::Hash[untyped, untyped] opts) -> untyped
+
+    # Fetches the next page in the resource list (if there is one).
+    #
+    # This method will try to respect the limit of the current page. If none
+    # was given, the default limit will be fetched again.
+    def next_page: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    # Fetches the previous page in the resource list (if there is one).
+    #
+    # This method will try to respect the limit of the current page. If none
+    # was given, the default limit will be fetched again.
+    def previous_page: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def resource_url: () -> untyped
+
+    # Iterates through each resource in the page represented by the current
+    # `ListObject` in reverse.
+    def reverse_each: () { () -> untyped } -> untyped
+  end
+end
+
+module Stripe
+  # Encodes parameters into a `multipart/form-data` payload as described by RFC
+  # 2388:
+  #
+  #     https://tools.ietf.org/html/rfc2388
+  #
+  # This is most useful for transferring file-like objects.
+  #
+  # Parameters should be added with `#encode`. When ready, use `#body` to get
+  # the encoded result and `#content_type` to get the value that should be
+  # placed in the `Content-Type` header of a subsequent request (which includes
+  # a boundary value).
+  class MultipartEncoder
+    MULTIPART_FORM_DATA: ::String
+
+    # A shortcut for encoding a single set of parameters and finalizing a
+    # result.
+    #
+    # Returns an encoded body and the value that should be set in the content
+    # type header of a subsequent request.
+    def self.encode: (untyped params) -> ::Array[untyped]
+
+    # Gets the object's randomly generated boundary string.
+    attr_reader boundary: untyped
+
+    # Initializes a new multipart encoder.
+    def initialize: () -> void
+
+    # Gets the encoded body. `#close` must be called first.
+    def body: () -> untyped
+
+    # Finalizes the object by writing the final boundary.
+    def close: () -> nil
+
+    # Gets the value including boundary that should be put into a multipart
+    # request's `Content-Type`.
+    def content_type: () -> ::String
+
+    # Encodes a set of parameters to the body.
+    #
+    # Note that parameters are expected to be a hash, but a "flat" hash such
+    # that complex substructures like hashes and arrays have already been
+    # appropriately Stripe-encoded. Pass a complex structure through
+    # `Util.flatten_params` first before handing it off to this method.
+    def encode: (untyped params) -> nil
+
+    private
+
+    # Escapes double quotes so that the given value can be used in a
+    # double-quoted string and replaces any linebreak characters with spaces.
+    def escape: (untyped str) -> untyped
+
+    def write_field: (untyped name, untyped data, filename: untyped filename) -> untyped
+  end
+end
+
+module Stripe
+  module OAuth
+    module OAuthOperations
+      extend APIOperations::Request::ClassMethods
+
+      def self.execute_resource_request: (untyped method, untyped url, untyped params, untyped opts) -> untyped
+    end
+
+    def self.get_client_id: (?::Hash[untyped, untyped] params) -> untyped
+
+    def self.authorize_url: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> ::String
+
+    def self.token: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def self.deauthorize: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  module ObjectTypes
+    def self.object_names_to_classes: () -> ::Hash[untyped, untyped]
+  end
+end
+
+module Stripe
+  class Account < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    extend Stripe::APIOperations::NestedResource
+
+    OBJECT_NAME: ::String
+
+    def reject: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def resource_url: () -> untyped
+
+    # @override To make id optional
+    def self.retrieve: (?untyped? id, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def persons: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    # Somewhat unfortunately, we attempt to do a special encoding trick when
+    # serializing `additional_owners` under an account: when updating a value,
+    # we actually send the update parameters up as an integer-indexed hash
+    # rather than an array. So instead of this:
+    #
+    #     field[]=item1&field[]=item2&field[]=item3
+    #
+    # We send this:
+    #
+    #     field[0]=item1&field[1]=item2&field[2]=item3
+    #
+    # There are two major problems with this technique:
+    #
+    #     * Entities are addressed by array index, which is not stable and can
+    #       easily result in unexpected results between two different requests.
+    #
+    #     * A replacement of the array's contents is ambiguous with setting a
+    #       subset of the array. Because of this, the only way to shorten an
+    #       array is to unset it completely by making sure it goes into the
+    #       server as an empty string, then setting its contents again.
+    #
+    # We're trying to get this overturned on the server side, but for now,
+    # patch in a special allowance.
+    def serialize_params: (?::Hash[untyped, untyped] options) -> untyped
+
+    def serialize_params_account: (untyped _obj, untyped update_hash, ?::Hash[untyped, untyped] options) -> untyped
+
+    def self.protected_fields: () -> ::Array[:legal_entity]
+
+    def legal_entity: () -> untyped
+
+    def legal_entity=: (untyped _legal_entity) -> untyped
+
+    def deauthorize: (?untyped? client_id, ?::Hash[untyped, untyped] opts) -> untyped
+
+    private
+
+    def serialize_additional_owners: (untyped legal_entity, untyped additional_owners) -> untyped
+  end
+end
+
+module Stripe
+  class AccountLink < APIResource
+    extend Stripe::APIOperations::Create
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class AlipayAccount < APIResource
+    include Stripe::APIOperations::Save
+
+    include Stripe::APIOperations::Delete
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> ::String
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+
+    def self.retrieve: (untyped _id, ?untyped? _opts) -> untyped
+  end
+end
+
+module Stripe
+  # Domains registered for Apple Pay on the Web
+  class ApplePayDomain < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+
+    def self.resource_url: () -> "/v1/apple_pay/domains"
+  end
+end
+
+module Stripe
+  class ApplicationFee < APIResource
+    extend Stripe::APIOperations::List
+
+    extend Stripe::APIOperations::NestedResource
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class ApplicationFeeRefund < APIResource
+    include Stripe::APIOperations::Save
+
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> ::String
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+
+    def self.retrieve: (untyped _id, ?untyped? _api_key) -> untyped
+  end
+end
+
+module Stripe
+  class Balance < SingletonAPIResource
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class BalanceTransaction < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class BankAccount < APIResource
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def verify: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def resource_url: () -> untyped
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+
+    def self.retrieve: (untyped _id, ?untyped? _opts) -> untyped
+  end
+end
+
+module Stripe
+  module BillingPortal
+    class Configuration < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module BillingPortal
+    class Session < APIResource
+      extend Stripe::APIOperations::Create
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  # Directly creating or retrieving BitcoinReceivers is deprecated. Please use
+  # the Sources API instead: https://stripe.com/docs/sources/bitcoin
+  class BitcoinReceiver < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+
+    def self.resource_url: () -> "/v1/bitcoin/receivers"
+
+    def resource_url: () -> untyped
+  end
+end
+
+module Stripe
+  class BitcoinTransaction < APIResource
+    # Directly retrieving BitcoinTransactions is deprecated. Please use the
+    # Sources API instead: https://stripe.com/docs/sources/bitcoin
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+
+    def self.resource_url: () -> "/v1/bitcoin/transactions"
+  end
+end
+
+module Stripe
+  class Capability < APIResource
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> ::String
+
+    def self.retrieve: (untyped _id, ?::Hash[untyped, untyped] _opts) -> untyped
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+  end
+end
+
+module Stripe
+  class Card < APIResource
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> untyped
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+
+    def self.retrieve: (untyped _id, ?untyped? _opts) -> untyped
+  end
+end
+
+module Stripe
+  class Charge < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def capture: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  module Checkout
+    class Session < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      extend Stripe::APIOperations::NestedResource
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  class CountrySpec < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Coupon < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class CreditNote < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def void_credit_note: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def self.preview: (untyped params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def self.list_preview_line_items: (untyped params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class CreditNoteLineItem < StripeObject
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Customer < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    extend Stripe::APIOperations::NestedResource
+
+    OBJECT_NAME: ::String
+
+    # alias self.detach_source self.delete_source
+
+    # Deletes a discount associated with the customer.
+    #
+    # Returns the deleted discount. The customer object is not updated,
+    # so you must call `refresh` on it to get a new version with the
+    # discount removed.
+    def delete_discount: () -> untyped
+  end
+end
+
+module Stripe
+  class CustomerBalanceTransaction < APIResource
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> ::String
+
+    def self.retrieve: (untyped _id, ?::Hash[untyped, untyped] _opts) -> untyped
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+  end
+end
+
+module Stripe
+  class Discount < StripeObject
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Dispute < APIResource
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def close: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class EphemeralKey < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    OBJECT_NAME: ::String
+
+    def self.create: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class Event < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class ExchangeRate < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class File < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+
+    # This resource can have two different object names. In latter API
+    # versions, only `file` is used, but since stripe-ruby may be used with
+    # any API version, we need to support deserializing the older
+    # `file_upload` object into the same class.
+    OBJECT_NAME_ALT: ::String
+
+    def self.resource_url: () -> "/v1/files"
+
+    def self.create: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class FileLink < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  module Identity
+    class VerificationReport < APIResource
+      extend Stripe::APIOperations::List
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Identity
+    class VerificationSession < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+
+      def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+      def redact: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+    end
+  end
+end
+
+module Stripe
+  class Invoice < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def finalize_invoice: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def mark_uncollectible: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def pay: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def send_invoice: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def void_invoice: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def self.upcoming: (untyped params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def self.list_upcoming_line_items: (untyped params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class InvoiceItem < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class InvoiceLineItem < StripeObject
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  module Issuing
+    class Authorization < APIResource
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+
+      def approve: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+      def decline: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+    end
+  end
+end
+
+module Stripe
+  module Issuing
+    class Card < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+
+      def details: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+    end
+  end
+end
+
+module Stripe
+  module Issuing
+    class CardDetails < Stripe::StripeObject
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Issuing
+    class Cardholder < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Issuing
+    class Dispute < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+
+      def submit: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+    end
+  end
+end
+
+module Stripe
+  module Issuing
+    class Transaction < APIResource
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  class LineItem < APIResource
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class LoginLink < APIResource
+    OBJECT_NAME: ::String
+
+    def self.retrieve: (untyped _id, ?untyped? _opts) -> untyped
+  end
+end
+
+module Stripe
+  class Mandate < APIResource
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Order < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def pay: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def return_order: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class OrderReturn < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class PaymentIntent < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def capture: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def confirm: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class PaymentMethod < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def attach: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def detach: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class Payout < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def reverse: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class Person < APIResource
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> ::String
+
+    def self.retrieve: (untyped _id, ?::Hash[untyped, untyped] _opts) -> untyped
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+  end
+end
+
+module Stripe
+  class Plan < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Price < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Product < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class PromotionCode < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Quote < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def accept: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def finalize_quote: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def list_computed_upfront_line_items: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def list_line_items: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def pdf: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) { () -> untyped } -> untyped
+
+    def self.pdf: (untyped id, ?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) { () -> untyped } -> untyped
+  end
+end
+
+module Stripe
+  module Radar
+    class EarlyFraudWarning < APIResource
+      extend Stripe::APIOperations::List
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Radar
+    class ValueList < APIResource
+      extend Stripe::APIOperations::Create
+
+      include Stripe::APIOperations::Delete
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Radar
+    class ValueListItem < APIResource
+      extend Stripe::APIOperations::Create
+
+      include Stripe::APIOperations::Delete
+
+      extend Stripe::APIOperations::List
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  # Recipients objects are deprecated. Please use Stripe Connect instead.
+  class Recipient < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class RecipientTransfer < StripeObject
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Refund < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  module Reporting
+    class ReportRun < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Reporting
+    class ReportType < APIResource
+      extend Stripe::APIOperations::Create
+
+      extend Stripe::APIOperations::List
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  class Reversal < APIResource
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> ::String
+
+    def self.update: (untyped _id, ?untyped? _params, ?untyped? _opts) -> untyped
+
+    def self.retrieve: (untyped _id, ?::Hash[untyped, untyped] _opts) -> untyped
+  end
+end
+
+module Stripe
+  class Review < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+
+    def approve: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class SetupAttempt < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class SetupIntent < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def confirm: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  module Sigma
+    class ScheduledQueryRun < APIResource
+      extend Stripe::APIOperations::List
+
+      OBJECT_NAME: ::String
+
+      def self.resource_url: () -> "/v1/sigma/scheduled_query_runs"
+    end
+  end
+end
+
+module Stripe
+  class SKU < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Source < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Save
+
+    extend Stripe::APIOperations::NestedResource
+
+    OBJECT_NAME: ::String
+
+    def verify: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def detach: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def source_transactions: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class SourceTransaction < StripeObject
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Subscription < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def delete_discount: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class SubscriptionItem < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    extend Stripe::APIOperations::NestedResource
+
+    OBJECT_NAME: ::String
+
+    def usage_record_summaries: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class SubscriptionSchedule < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def release: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class TaxCode < APIResource
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class TaxId < APIResource
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    OBJECT_NAME: ::String
+
+    def resource_url: () -> ::String
+
+    def self.retrieve: (untyped _id, ?::Hash[untyped, untyped] _opts) -> untyped
+  end
+end
+
+module Stripe
+  class TaxRate < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  module Terminal
+    class ConnectionToken < APIResource
+      extend Stripe::APIOperations::Create
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Terminal
+    class Location < APIResource
+      extend Stripe::APIOperations::Create
+
+      include Stripe::APIOperations::Delete
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  module Terminal
+    class Reader < APIResource
+      extend Stripe::APIOperations::Create
+
+      include Stripe::APIOperations::Delete
+
+      extend Stripe::APIOperations::List
+
+      include Stripe::APIOperations::Save
+
+      OBJECT_NAME: ::String
+    end
+  end
+end
+
+module Stripe
+  class ThreeDSecure < APIResource
+    extend Stripe::APIOperations::Create
+
+    OBJECT_NAME: ::String
+
+    def self.resource_url: () -> "/v1/3d_secure"
+  end
+end
+
+module Stripe
+  class Token < APIResource
+    extend Stripe::APIOperations::Create
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class Topup < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+
+    def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class Transfer < APIResource
+    extend Stripe::APIOperations::Create
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    extend Stripe::APIOperations::NestedResource
+
+    OBJECT_NAME: ::String
+
+    def cancel: (?::Hash[untyped, untyped] params, ?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  class UsageRecord < APIResource
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class UsageRecordSummary < StripeObject
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class WebhookEndpoint < APIResource
+    extend Stripe::APIOperations::Create
+
+    include Stripe::APIOperations::Delete
+
+    extend Stripe::APIOperations::List
+
+    include Stripe::APIOperations::Save
+
+    OBJECT_NAME: ::String
+  end
+end
+
+module Stripe
+  class SingletonAPIResource < APIResource
+    def self.resource_url: () -> ::String
+
+    def resource_url: () -> untyped
+
+    def self.retrieve: (?::Hash[untyped, untyped] opts) -> untyped
+  end
+end
+
+module Stripe
+  # StripeClient executes requests against the Stripe API and allows a user to
+  # recover both a resource a call returns as well as a response object that
+  # contains information on the HTTP call.
+  class StripeClient
+    # Initializes a new StripeClient
+    def initialize: (?::Hash[untyped, untyped] config_arg) -> void
+
+    attr_reader config: untyped
+
+    attr_reader options: untyped
+
+    # Gets a currently active `StripeClient`. Set for the current thread when
+    # `StripeClient#request` is being run so that API operations being executed
+    # inside of that block can find the currently active client. It's reset to
+    # the original value (hopefully `nil`) after the block ends.
+    #
+    # For internal use only. Does not provide a stable API and may be broken
+    # with future non-major changes.
+    def self.active_client: () -> untyped
+
+    # Finishes any active connections by closing their TCP connection and
+    # clears them from internal tracking in all connection managers across all
+    # threads.
+    #
+    # If passed a `config` object, only clear connection managers for that
+    # particular configuration.
+    #
+    # For internal use only. Does not provide a stable API and may be broken
+    # with future non-major changes.
+    def self.clear_all_connection_managers: (?config: untyped? config) -> (nil | untyped)
+
+    # A default client for the current thread.
+    def self.default_client: () -> untyped
+
+    # A default connection manager for the current thread scoped to the
+    # configuration object that may be provided.
+    def self.default_connection_manager: (?untyped config) -> untyped
+
+    # Checks if an error is a problem that we should retry on. This includes
+    # both socket errors that may represent an intermittent problem and some
+    # special HTTP statuses.
+    def self.should_retry?: (untyped error, method: untyped method, num_retries: untyped num_retries, ?config: untyped config) -> (::FalseClass | ::TrueClass | untyped)
+
+    def self.sleep_time: (untyped num_retries, ?config: untyped config) -> untyped
+
+    # Gets the connection manager in use for the current `StripeClient`.
+    #
+    # This method is DEPRECATED and for backwards compatibility only.
+    def connection_manager: () -> untyped
+
+    # Executes the API call within the given block. Usage looks like:
+    #
+    #     client = StripeClient.new
+    #     charge, resp = client.request { Charge.create }
+    #
+    def request: () { () -> untyped } -> untyped
+
+    def execute_request: (untyped method, untyped path, ?api_base: untyped? api_base, ?api_key: untyped? api_key, ?headers: ::Hash[untyped, untyped] headers, ?params: ::Hash[untyped, untyped] params) -> ::Array[untyped]
+
+    # Executes a request and returns the body as a stream instead of converting
+    # it to a StripeObject. This should be used for any request where we expect
+    # an arbitrary binary response.
+    #
+    # A `read_body_chunk` block can be passed, which will be called repeatedly
+    # with the body chunks read from the socket.
+    #
+    # If a block is passed, a StripeHeadersOnlyResponse is returned as the
+    # block is expected to do all the necessary body processing. If no block is
+    # passed, then a StripeStreamResponse is returned containing an IO stream
+    # with the response body.
+    def execute_request_stream: (untyped method, untyped path, ?api_base: untyped? api_base, ?api_key: untyped? api_key, ?headers: ::Hash[untyped, untyped] headers, ?params: ::Hash[untyped, untyped] params) { () -> untyped } -> ::Array[untyped]
+
+    def store_last_response: (untyped object_id, untyped resp) -> (nil | untyped)
+
+    def last_response_has_key?: (untyped object_id) -> untyped
+
+    # Time (in seconds) that a connection manager has not been used before it's
+    # eligible for garbage collection.
+    CONNECTION_MANAGER_GC_LAST_USED_EXPIRY: ::Integer
+
+    # How often to check (in seconds) for connection managers that haven't been
+    # used in a long time and which should be garbage collected.
+    CONNECTION_MANAGER_GC_PERIOD: ::Integer
+
+    ERROR_MESSAGE_CONNECTION: ::String
+
+    ERROR_MESSAGE_SSL: ::String
+
+    # Common error suffix sared by both connect and read timeout messages.
+    ERROR_MESSAGE_TIMEOUT_SUFFIX: ::String
+
+    ERROR_MESSAGE_TIMEOUT_CONNECT: untyped
+
+    ERROR_MESSAGE_TIMEOUT_READ: untyped
+
+    # Maps types of exceptions that we're likely to see during a network
+    # request to more user-friendly messages that we put in front of people.
+    # The original error message is also appended onto the final exception for
+    # full transparency.
+    NETWORK_ERROR_MESSAGES_MAP: untyped
+
+    # A record representing any data that `StripeClient` puts into
+    # `Thread.current`. Making it a class likes this gives us a little extra
+    # type safety and lets us document what each field does.
+    #
+    # For internal use only. Does not provide a stable API and may be broken
+    # with future non-major changes.
+    class ThreadContext
+      # A `StripeClient` that's been flagged as currently active within a
+      # thread by `StripeClient#request`. A client stays active until the
+      # completion of the request block.
+      attr_accessor active_client: untyped
+
+      # A default `StripeClient` object for the thread. Used in all cases where
+      # the user hasn't specified their own.
+      attr_accessor default_client: untyped
+
+      # A temporary map of object IDs to responses from last executed API
+      # calls. Used to return a responses from calls to `StripeClient#request`.
+      #
+      # Stored in the thread data to make the use of a single `StripeClient`
+      # object safe across multiple threads. Stored as a map so that multiple
+      # `StripeClient` objects can run concurrently on the same thread.
+      #
+      # Responses are only left in as long as they're needed, which means
+      # they're removed as soon as a call leaves `StripeClient#request`, and
+      # because that's wrapped in an `ensure` block, they should never leave
+      # garbage in `Thread.current`.
+      attr_accessor last_responses: untyped
+
+      # A map of connection mangers for the thread. Normally shared between
+      # all `StripeClient` objects on a particular thread, and created so as to
+      # minimize the number of open connections that an application needs.
+      def default_connection_managers: () -> untyped
+
+      def reset_connection_managers: () -> untyped
+    end
+
+    # Access data stored for `StripeClient` within the thread's current
+    # context. Returns `ThreadContext`.
+    #
+    # For internal use only. Does not provide a stable API and may be broken
+    # with future non-major changes.
+    def self.current_thread_context: () -> untyped
+
+    # Garbage collects connection managers that haven't been used in some time,
+    # with the idea being that we want to remove old connection managers that
+    # belong to dead threads and the like.
+    #
+    # Prefixed with `maybe_` because garbage collection will only run
+    # periodically so that we're not constantly engaged in busy work. If
+    # connection managers live a little passed their useful age it's not
+    # harmful, so it's not necessary to get them right away.
+    #
+    # For testability, returns `nil` if it didn't run and the number of
+    # connection managers that were garbage collected otherwise.
+    #
+    # IMPORTANT: This method is not thread-safe and expects to be called inside
+    # a lock on `@thread_contexts_with_connection_managers_mutex`.
+    #
+    # For internal use only. Does not provide a stable API and may be broken
+    # with future non-major changes.
+    def self.maybe_gc_connection_managers: () -> (nil | untyped)
+
+    private
+
+    def execute_request_internal: (untyped method, untyped path, untyped api_base, untyped api_key, untyped headers, untyped params) { () -> untyped } -> ::Array[untyped]
+
+    def api_url: (?::String url, ?untyped? api_base) -> untyped
+
+    def check_api_key!: (untyped api_key) -> (nil | untyped)
+
+    # Encodes a set of body parameters using multipart if `Content-Type` is set
+    # for that, or standard form-encoding otherwise. Returns the encoded body
+    # and a version of the encoded body that's safe to be logged.
+    def encode_body: (untyped body_params, untyped headers) -> ::Array[untyped]
+
+    def should_handle_as_error: (untyped http_status) -> untyped
+
+    def execute_request_with_rescues: (untyped method, untyped api_base, untyped context) { () -> untyped } -> untyped
+
+    def notify_request_begin: (untyped context) -> (nil | untyped)
+
+    def notify_request_end: (untyped context, untyped duration, untyped http_status, untyped num_retries, untyped user_data) -> (nil | untyped)
+
+    def general_api_error: (untyped status, untyped body) -> untyped
+
+    # Formats a plugin "app info" hash into a string that we can tack onto the
+    # end of a User-Agent string where it'll be fairly prominent in places like
+    # the Dashboard. Note that this formatting has been implemented to match
+    # other libraries, and shouldn't be changed without universal consensus.
+    def format_app_info: (untyped info) -> untyped
+
+    def handle_error_response: (untyped http_resp, untyped context) -> untyped
+
+    # Works around an edge case where we end up with both query parameters from
+    # parameteers and query parameters that were appended onto the end of the
+    # given path.
+    #
+    # Decode any parameters that were added onto the end of a path and add them
+    # to a unified query parameter hash so that all parameters end up in one
+    # place and all of them are correctly included in the final request.
+    def merge_query_params: (untyped query_params, untyped path) -> (untyped | ::Array[untyped])
+
+    def specific_api_error: (untyped resp, untyped error_data, untyped context) -> untyped
+
+    # Attempts to look at a response's error code and return an OAuth error if
+    # one matches. Will return `nil` if the code isn't recognized.
+    def specific_oauth_error: (untyped resp, untyped error_code, untyped context) -> untyped
+
+    def handle_network_error: (untyped error, untyped context, untyped num_retries, ?untyped? api_base) -> untyped
+
+    def request_headers: (untyped api_key, untyped method) -> untyped
+
+    def log_request: (untyped context, untyped num_retries) -> untyped
+
+    def log_response: (untyped context, untyped request_start, untyped status, untyped body) -> (nil | untyped)
+
+    def log_response_error: (untyped context, untyped request_start, untyped error) -> untyped
+
+    public
+
+    # RequestLogContext stores information about a request that's begin made so
+    # that we can log certain information. It's useful because it means that we
+    # don't have to pass around as many parameters.
+    class RequestLogContext
+      attr_accessor body: untyped
+
+      attr_accessor account: untyped
+
+      attr_accessor api_key: untyped
+
+      attr_accessor api_version: untyped
+
+      attr_accessor idempotency_key: untyped
+
+      attr_accessor method: untyped
+
+      attr_accessor path: untyped
+
+      attr_accessor query: untyped
+
+      attr_accessor request_id: untyped
+
+      # The idea with this method is that we might want to update some of
+      # context information because a response that we've received from the API
+      # contains information that's more authoritative than what we started
+      # with for a request. For example, we should trust whatever came back in
+      # a `Stripe-Version` header beyond what configuration information that we
+      # might have had available.
+      def dup_from_response_headers: (untyped headers) -> untyped
+    end
+
+    # SystemProfiler extracts information about the system that we're running
+    # in so that we can generate a rich user agent header to help debug
+    # integrations.
+    class SystemProfiler
+      def self.uname: () -> untyped
+
+      def self.uname_from_system: () -> untyped
+
+      def self.uname_from_system_ver: () -> untyped
+
+      def initialize: () -> void
+
+      def user_agent: () -> untyped
+    end
+
+    # StripeRequestMetrics tracks metadata to be reported to stripe for metrics
+    # collection
+    class StripeRequestMetrics
+      # The Stripe request ID of the response.
+      attr_accessor request_id: untyped
+
+      # Request duration in milliseconds
+      attr_accessor request_duration_ms: untyped
+
+      def initialize: (untyped request_id, untyped request_duration_ms) -> void
+
+      def payload: () -> { request_id: untyped, request_duration_ms: untyped }
+    end
+  end
+end
+
+module Stripe
+  # Configurable options:
+  #
+  # =ca_bundle_path=
+  # The location of a file containing a bundle of CA certificates. By default
+  # the library will use an included bundle that can successfully validate
+  # Stripe certificates.
+  #
+  # =log_level=
+  # When set prompts the library to log some extra information to $stdout and
+  # $stderr about what it's doing. For example, it'll produce information about
+  # requests, responses, and errors that are received. Valid log levels are
+  # `debug` and `info`, with `debug` being a little more verbose in places.
+  #
+  # Use of this configuration is only useful when `.logger` is _not_ set. When
+  # it is, the decision what levels to print is entirely deferred to the logger.
+  #
+  # =logger=
+  # The logger should support the same interface as the `Logger` class that's
+  # part of Ruby's standard library (hint, anything in `Rails.logger` will
+  # likely be suitable).
+  #
+  # If `.logger` is set, the value of `.log_level` is ignored. The decision on
+  # what levels to print is entirely deferred to the logger.
+  class StripeConfiguration
+    attr_accessor api_key: untyped
+
+    attr_accessor api_version: untyped
+
+    attr_accessor client_id: untyped
+
+    attr_accessor enable_telemetry: untyped
+
+    attr_accessor logger: untyped
+
+    attr_accessor stripe_account: untyped
+
+    attr_reader api_base: untyped
+
+    attr_reader uploads_base: untyped
+
+    attr_reader connect_base: untyped
+
+    attr_reader ca_bundle_path: untyped
+
+    attr_reader log_level: untyped
+
+    attr_reader initial_network_retry_delay: untyped
+
+    attr_reader max_network_retries: untyped
+
+    attr_reader max_network_retry_delay: untyped
+
+    attr_reader open_timeout: untyped
+
+    attr_reader read_timeout: untyped
+
+    attr_reader write_timeout: untyped
+
+    attr_reader proxy: untyped
+
+    attr_reader verify_ssl_certs: untyped
+
+    def self.setup: () { (untyped) -> untyped } -> untyped
+
+    # Create a new config based off an existing one. This is useful when the
+    # caller wants to override the global configuration
+    def reverse_duplicate_merge: (untyped hash) -> untyped
+
+    def initialize: () -> void
+
+    def log_level=: (untyped val) -> untyped
+
+    def max_network_retries=: (untyped val) -> untyped
+
+    def max_network_retry_delay=: (untyped val) -> untyped
+
+    def initial_network_retry_delay=: (untyped val) -> untyped
+
+    def open_timeout=: (untyped open_timeout) -> untyped
+
+    def read_timeout=: (untyped read_timeout) -> untyped
+
+    def write_timeout=: (untyped write_timeout) -> untyped
+
+    def proxy=: (untyped proxy) -> untyped
+
+    def verify_ssl_certs=: (untyped verify_ssl_certs) -> untyped
+
+    def uploads_base=: (untyped uploads_base) -> untyped
+
+    def connect_base=: (untyped connect_base) -> untyped
+
+    def api_base=: (untyped api_base) -> untyped
+
+    def ca_bundle_path=: (untyped path) -> untyped
+
+    # A certificate store initialized from the the bundle in #ca_bundle_path and
+    # which is used to validate TLS on every request.
+    #
+    # This was added to the give the gem "pseudo thread safety" in that it seems
+    # when initiating many parallel requests marshaling the certificate store is
+    # the most likely point of failure (see issue #382). Any program attempting
+    # to leverage this pseudo safety should make a call to this method (i.e.
+    # `Stripe.ca_store`) in their initialization code because it marshals lazily
+    # and is itself not thread safe.
+    def ca_store: () -> untyped
+
+    def enable_telemetry?: () -> untyped
+
+    # Generates a deterministic key to identify configuration objects with
+    # identical configuration values.
+    def key: () -> untyped
+  end
+end
+
+module Stripe
+  class StripeObject
+    # include Enumerable[Stripe::StripeObject]
+
+    # Sets the given parameter name to one which is known to be an additive
+    # object.
+    #
+    # Additive objects are subobjects in the API that don't have the same
+    # semantics as most subobjects, which are fully replaced when they're set.
+    # This is best illustrated by example. The `source` parameter sent when
+    # updating a subscription is *not* additive; if we set it:
+    #
+    #     source[object]=card&source[number]=123
+    #
+    # We expect the old `source` object to have been overwritten completely. If
+    # the previous source had an `address_state` key associated with it and we
+    # didn't send one this time, that value of `address_state` is gone.
+    #
+    # By contrast, additive objects are those that will have new data added to
+    # them while keeping any existing data in place. The only known case of its
+    # use is for `metadata`, but it could in theory be more general. As an
+    # example, say we have a `metadata` object that looks like this on the
+    # server side:
+    #
+    #     metadata = { old: "old_value" }
+    #
+    # If we update the object with `metadata[new]=new_value`, the server side
+    # object now has *both* fields:
+    #
+    #     metadata = { old: "old_value", new: "new_value" }
+    #
+    # This is okay in itself because usually users will want to treat it as
+    # additive:
+    #
+    #     obj.metadata[:new] = "new_value"
+    #     obj.save
+    #
+    # However, in other cases, they may want to replace the entire existing
+    # contents:
+    #
+    #     obj.metadata = { new: "new_value" }
+    #     obj.save
+    #
+    # This is where things get a little bit tricky because in order to clear
+    # any old keys that may have existed, we actually have to send an explicit
+    # empty string to the server. So the operation above would have to send
+    # this form to get the intended behavior:
+    #
+    #     metadata[old]=&metadata[new]=new_value
+    #
+    # This method allows us to track which parameters are considered additive,
+    # and lets us behave correctly where appropriate when serializing
+    # parameters to be sent.
+    def self.additive_object_param: (untyped name) -> untyped
+
+    # Returns whether the given name is an additive object parameter. See
+    # `.additive_object_param` for details.
+    def self.additive_object_param?: (untyped name) -> untyped
+
+    def initialize: (?untyped? id, ?::Hash[untyped, untyped] opts) -> void
+
+    def self.construct_from: (untyped values, ?::Hash[untyped, untyped] opts) -> untyped
+
+    # Determines the equality of two Stripe objects. Stripe objects are
+    # considered to be equal if they have the same set of values and each one
+    # of those values is the same.
+    def ==: (untyped other) -> untyped
+
+    # Hash equality. As with `#==`, we consider two equivalent Stripe objects
+    # equal.
+    def eql?: (untyped other) -> untyped
+
+    # As with equality in `#==` and `#eql?`, we hash two Stripe objects to the
+    # same value if they're equivalent objects.
+    def hash: () -> untyped
+
+    # Indicates whether or not the resource has been deleted on the server.
+    # Note that some, but not all, resources can indicate whether they have
+    # been deleted.
+    def deleted?: () -> untyped
+
+    def to_s: (*untyped _args) -> untyped
+
+    def inspect: () -> untyped
+
+    # Mass assigns attributes on the model.
+    #
+    # This is a version of +update_attributes+ that takes some extra options
+    # for internal use.
+    #
+    # ==== Attributes
+    #
+    # * +values+ - Hash of values to use to update the current attributes of
+    #   the object. If you are on ruby 2.7 or higher make sure to wrap in curly
+    #   braces to be ruby 3 compatible.
+    # * +opts+ - Options for +StripeObject+ like an API key that will be reused
+    #   on subsequent API calls.
+    #
+    # ==== Options
+    #
+    # * +:dirty+ - Whether values should be initiated as "dirty" (unsaved) and
+    #   which applies only to new StripeObjects being initiated under this
+    #   StripeObject. Defaults to true.
+    def update_attributes: (untyped values, ?::Hash[untyped, untyped] opts, ?dirty: bool dirty) -> untyped
+
+    def []: (untyped key) -> untyped
+
+    def []=: (untyped key, untyped value) -> untyped
+
+    def keys: () -> untyped
+
+    def values: () -> untyped
+
+    def to_json: (*untyped _opts) -> untyped
+
+    def as_json: (*untyped opts) -> untyped
+
+    def to_hash: () -> (nil | untyped)
+
+    def each: () { () -> untyped } -> untyped
+
+    # Sets all keys within the StripeObject as unsaved so that they will be
+    # included with an update when #serialize_params is called. This method is
+    # also recursive, so any StripeObjects contained as values or which are
+    # values in a tenant array are also marked as dirty.
+    def dirty!: () -> untyped
+
+    # Implements custom encoding for Ruby's Marshal. The data produced by this
+    # method should be comprehendable by #marshal_load.
+    #
+    # This allows us to remove certain features that cannot or should not be
+    # serialized.
+    def marshal_dump: () -> ::Array[untyped]
+
+    # Implements custom decoding for Ruby's Marshal. Consumes data that's
+    # produced by #marshal_dump.
+    def marshal_load: (untyped data) -> untyped
+
+    def serialize_params: (?::Hash[untyped, untyped] options) -> untyped
+
+    # A protected field is one that doesn't get an accessor assigned to it
+    # (i.e. `obj.public = ...`) and one which is not allowed to be updated via
+    # the class level `Model.update(id, { ... })`.
+    def self.protected_fields: () -> ::Array[untyped]
+
+    # When designing APIs, we now make a conscious effort server-side to avoid
+    # naming fields after important built-ins in various languages (e.g. class,
+    # method, etc.).
+    #
+    # However, a long time ago we made the mistake (either consciously or by
+    # accident) of initializing our `metadata` fields as instances of
+    # `StripeObject`, and metadata can have a wide range of different keys
+    # defined in it. This is somewhat a convenient in that it allows users to
+    # access data like `obj.metadata.my_field`, but is almost certainly not
+    # worth the cost.
+    #
+    # Naming metadata fields bad things like `class` causes `initialize_from`
+    # to produce strange results, so we ban known offenders here.
+    #
+    # In a future major version we should consider leaving `metadata` as a hash
+    # and forcing people to access it with `obj.metadata[:my_field]` because
+    # the potential for trouble is just too high. For now, reserve names.
+    RESERVED_FIELD_NAMES: untyped
+
+    def metaclass: () -> untyped
+
+    def remove_accessors: (untyped keys) -> untyped
+
+    def add_accessors: (untyped keys, untyped values) -> untyped
+
+    # Disabling the cop because it's confused by the fact that the methods are
+    # protected, but we do define `#respond_to_missing?` just below. Hopefully
+    # this is fixed in more recent Rubocop versions.
+    # rubocop:disable Style/MissingRespondToMissing
+    def method_missing: (untyped name, *untyped args) -> untyped
+
+    def respond_to_missing?: (untyped symbol, ?bool include_private) -> untyped
+
+    # Re-initializes the object based on a hash of values (usually one that's
+    # come back from an API call). Adds or removes value accessors as necessary
+    # and updates the state of internal data.
+    #
+    # Protected on purpose! Please do not expose.
+    #
+    # ==== Options
+    #
+    # * +:values:+ Hash used to update accessors and values.
+    # * +:opts:+ Options for StripeObject like an API key.
+    # * +:partial:+ Indicates that the re-initialization should not attempt to
+    #   remove accessors.
+    def initialize_from: (untyped values, untyped opts, ?bool partial) -> untyped
+
+    def serialize_params_value: (untyped value, untyped original, untyped unsaved, untyped force, ?key: untyped? key) -> untyped
+
+    # Produces a deep copy of the given object including support for arrays,
+    # hashes, and StripeObjects.
+    def self.deep_copy: (untyped obj) -> untyped
+
+    private
+
+    def dirty_value!: (untyped value) -> untyped
+
+    # Returns a hash of empty values for all the values that are in the given
+    # StripeObject.
+    def empty_values: (untyped obj) -> untyped
+  end
+end
+
+module Stripe
+  # Headers provides an access wrapper to an API response's header data. It
+  # mainly exists so that we don't need to expose the entire
+  # `Net::HTTPResponse` object while still getting some of its benefits like
+  # case-insensitive access to header names and flattening of header values.
+  class StripeResponseHeaders
+    # Initializes a Headers object from a Net::HTTP::HTTPResponse object.
+    def self.from_net_http: (untyped resp) -> untyped
+
+    # `hash` is expected to be a hash mapping header names to arrays of
+    # header values. This is the default format generated by calling
+    # `#to_hash` on a `Net::HTTPResponse` object because headers can be
+    # repeated multiple times. Using `#[]` will collapse values down to just
+    # the first.
+    def initialize: (untyped hash) -> void
+
+    def []: (untyped name) -> untyped
+  end
+
+  module StripeResponseBase
+    # A Hash of the HTTP headers of the response.
+    attr_accessor http_headers: untyped
+
+    # The integer HTTP status code of the response.
+    attr_accessor http_status: untyped
+
+    # The Stripe request ID of the response.
+    attr_accessor request_id: untyped
+
+    def self.populate_for_net_http: (untyped resp, untyped http_resp) -> untyped
+  end
+
+  # StripeResponse encapsulates some vitals of a response that came back from
+  # the Stripe API.
+  class StripeResponse
+    include StripeResponseBase
+
+    # The data contained by the HTTP body of the response deserialized from
+    # JSON.
+    attr_accessor data: untyped
+
+    # The raw HTTP body of the response.
+    attr_accessor http_body: untyped
+
+    # Initializes a StripeResponse object from a Net::HTTP::HTTPResponse
+    # object.
+    def self.from_net_http: (untyped http_resp) -> untyped
+  end
+
+  # We have to alias StripeResponseHeaders to StripeResponse::Headers, as this
+  # class used to be embedded within StripeResponse and we want to be backwards
+  # compatible.
+  StripeResponse::Headers: untyped
+
+  # StripeHeadersOnlyResponse includes only header-related vitals of the
+  # response. This is used for streaming requests where the response was read
+  # directly in a block and we explicitly don't want to store the body of the
+  # response in memory.
+  class StripeHeadersOnlyResponse
+    include StripeResponseBase
+
+    # Initializes a StripeHeadersOnlyResponse object from a
+    # Net::HTTP::HTTPResponse object.
+    def self.from_net_http: (untyped http_resp) -> untyped
+  end
+end
+
+module Stripe
+  module Util
+    # Options that a user is allowed to specify.
+    OPTS_USER_SPECIFIED: untyped
+
+    # Options that should be copyable from one StripeObject to another
+    # including options that may be internal.
+    OPTS_COPYABLE: untyped
+
+    # Options that should be persisted between API requests. This includes
+    # client, which is an object containing an HTTP client to reuse.
+    OPTS_PERSISTABLE: untyped
+
+    def self.objects_to_ids: (untyped obj) -> untyped
+
+    def self.object_classes: () -> untyped
+
+    def self.object_name_matches_class?: (untyped object_name, untyped klass) -> untyped
+
+    # Converts a hash of fields or an array of hashes into a +StripeObject+ or
+    # array of +StripeObject+s. These new objects will be created as a concrete
+    # type as dictated by their `object` field (e.g. an `object` value of
+    # `charge` would create an instance of +Charge+), but if `object` is not
+    # present or of an unknown type, the newly created instance will fall back
+    # to being a +StripeObject+.
+    #
+    # ==== Attributes
+    #
+    # * +data+ - Hash of fields and values to be converted into a StripeObject.
+    # * +opts+ - Options for +StripeObject+ like an API key that will be reused
+    #   on subsequent API calls.
+    def self.convert_to_stripe_object: (untyped data, ?::Hash[untyped, untyped] opts) -> untyped
+
+    def self.log_error: (untyped message, ?::Hash[untyped, untyped] data) -> untyped
+
+    def self.log_info: (untyped message, ?::Hash[untyped, untyped] data) -> untyped
+
+    def self.log_debug: (untyped message, ?::Hash[untyped, untyped] data) -> untyped
+
+    def self.symbolize_names: (untyped object) -> untyped
+
+    # Encodes a hash of parameters in a way that's suitable for use as query
+    # parameters in a URI or as form parameters in a request body. This mainly
+    # involves escaping special characters from parameter keys and values (e.g.
+    # `&`).
+    def self.encode_parameters: (untyped params) -> untyped
+
+    # Encodes a string in a way that makes it suitable for use in a set of
+    # query parameters in a URI or in a set of form parameters in a request
+    # body.
+    def self.url_encode: (untyped key) -> untyped
+
+    def self.flatten_params: (untyped params, ?untyped? parent_key) -> untyped
+
+    def self.flatten_params_array: (untyped value, untyped calculated_key) -> untyped
+
+    # `Time.now` can be unstable in cases like an administrator manually
+    # updating its value or a reconcilation via NTP. For this reason, prefer
+    # the use of the system's monotonic clock especially where comparing times
+    # to calculate an elapsed duration.
+    #
+    # Shortcut for getting monotonic time, mostly for purposes of line length
+    # and test stubbing. Returns time in seconds since the event used for
+    # monotonic reference purposes by the platform (e.g. system boot time).
+    def self.monotonic_time: () -> untyped
+
+    def self.normalize_id: (untyped id) -> ::Array[untyped]
+
+    # The secondary opts argument can either be a string or hash
+    # Turn this value into an api_key and a set of headers
+    def self.normalize_opts: (untyped opts) -> untyped
+
+    def self.check_string_argument!: (untyped key) -> untyped
+
+    def self.check_api_key!: (untyped key) -> untyped
+
+    # Normalizes header keys so that they're all lower case and each
+    # hyphen-delimited section starts with a single capitalized letter. For
+    # example, `request-id` becomes `Request-Id`. This is useful for extracting
+    # certain key values when the user could have set them with a variety of
+    # diffent naming schemes.
+    def self.normalize_headers: (untyped headers) -> untyped
+
+    # Generates a Dashboard link to inspect a request ID based off of a request
+    # ID value and an API key, which is used to attempt to extract whether the
+    # environment is livemode or testmode.
+    def self.request_id_dashboard_url: (untyped request_id, untyped api_key) -> ::String
+
+    # Constant time string comparison to prevent timing attacks
+    # Code borrowed from ActiveSupport
+    def self.secure_compare: (untyped str_a, untyped str_b) -> (::FalseClass | untyped)
+
+    COLOR_CODES: untyped
+
+    # Uses an ANSI escape code to colorize text if it's going to be sent to a
+    # TTY.
+    def self.colorize: (untyped val, untyped color, untyped isatty) -> (untyped | ::String)
+
+    # Turns an integer log level into a printable name.
+    def self.level_name: (untyped level) -> untyped
+
+    def self.log_internal: (untyped message, ?::Hash[untyped, untyped] data, color: untyped color, level: untyped level, logger: untyped logger, out: untyped `out`) -> untyped
+
+    # Wraps a value in double quotes if it looks sufficiently complex so that
+    # it can be read by logfmt parsers.
+    def self.wrap_logfmt_value: (untyped val) -> untyped
+  end
+end
+
+module Stripe
+  VERSION: ::String
+end
+
+module Stripe
+  module Webhook
+    DEFAULT_TOLERANCE: ::Integer
+
+    # Initializes an Event object from a JSON payload.
+    #
+    # This may raise JSON::ParserError if the payload is not valid JSON, or
+    # SignatureVerificationError if the signature verification fails.
+    def self.construct_event: (untyped payload, untyped sig_header, untyped secret, ?tolerance: untyped tolerance) -> untyped
+
+    module Signature
+      EXPECTED_SCHEME: ::String
+
+      # Computes a webhook signature given a time (probably the current time),
+      # a payload, and a signing secret.
+      def self.compute_signature: (untyped timestamp, untyped payload, untyped secret) -> untyped
+
+      # Generates a value that would be added to a `Stripe-Signature` for a
+      # given webhook payload.
+      #
+      # Note that this isn't needed to verify webhooks in any way, and is
+      # mainly here for use in test cases (those that are both within this
+      # project and without).
+      def self.generate_header: (untyped timestamp, untyped signature, ?scheme: untyped scheme) -> ::String
+
+      # Extracts the timestamp and the signature(s) with the desired scheme
+      # from the header
+      def self.get_timestamp_and_signatures: (untyped header, untyped scheme) -> ::Array[untyped]
+
+      # Verifies the signature header for a given payload.
+      #
+      # Raises a SignatureVerificationError in the following cases:
+      # - the header does not match the expected format
+      # - no signatures found with the expected scheme
+      # - no signatures matching the expected signature
+      # - a tolerance is provided and the timestamp is not within the
+      #   tolerance
+      #
+      # Returns true otherwise
+      def self.verify_header: (untyped payload, untyped header, untyped secret, ?tolerance: untyped? tolerance) -> ::TrueClass
+    end
+  end
+end

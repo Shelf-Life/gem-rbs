@@ -1,0 +1,17 @@
+module Draper
+  extend Draper::Configuration
+
+  def self.setup_action_controller: (untyped base) -> untyped
+
+  def self.setup_action_mailer: (untyped base) -> untyped
+
+  def self.setup_orm: (untyped base) -> untyped
+
+  class UninferrableDecoratorError < NameError[untyped]
+    def initialize: (untyped klass) -> void
+  end
+
+  class UninferrableObjectError < NameError[untyped]
+    def initialize: (untyped klass) -> void
+  end
+end

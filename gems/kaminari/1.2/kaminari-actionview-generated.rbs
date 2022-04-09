@@ -1,0 +1,15 @@
+module Kaminari
+  # = Helpers
+  module ActionViewExtension
+    # Monkey-patching AV::LogSubscriber not to log each render_partial
+    module LogSubscriberSilencer
+      def render_partial: () -> untyped
+    end
+  end
+end
+
+module Kaminari
+  module Actionview
+    VERSION: ::String
+  end
+end
