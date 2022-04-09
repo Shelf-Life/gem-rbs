@@ -1,7 +1,7 @@
 module Down
-  def self?.download: (*untyped args, **untyped options) { () -> untyped } -> untyped
+  def self?.download: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
 
-  def self?.open: (*untyped args, **untyped options) { () -> untyped } -> untyped
+  def self?.open: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
 
   # Allows setting a backend via a symbol or a downloader object.
   def self?.backend: (?untyped? value) -> untyped
@@ -9,9 +9,9 @@ end
 
 module Down
   class Backend
-    def self.download: (*untyped args, **untyped options) { () -> untyped } -> untyped
+    def self.download: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
 
-    def self.open: (*untyped args, **untyped options) { () -> untyped } -> untyped
+    def self.open: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
 
     private
 
