@@ -7575,7 +7575,7 @@ module ActionView
         # :nodoc:
         include CollectionHelpers
 
-        class CheckBoxBuilder < Builder
+        class CheckBoxBuilder < CollectionHelpers::Builder
           # :nodoc:
           def check_box: (?::Hash[untyped, untyped] extra_html_options) -> untyped
         end
@@ -7649,7 +7649,7 @@ module ActionView
         # :nodoc:
         include CollectionHelpers
 
-        class RadioButtonBuilder < Builder
+        class RadioButtonBuilder < CollectionHelpers::Builder
           # :nodoc:
           def radio_button: (?::Hash[untyped, untyped] extra_html_options) -> untyped
         end
@@ -9583,7 +9583,7 @@ module ActionView
     #
     # A +LookupContext+ will use a +PathSet+ to store the paths in its context.
     # :nodoc:
-    include Enumerable
+    include Enumerable[untyped]
 
     attr_reader paths: untyped
 
@@ -9859,11 +9859,11 @@ module ActionView
 
   class CollectionRenderer < PartialRenderer
     # :nodoc:
-    include ObjectRendering
+    include ActionView::AbstractRenderer::ObjectRendering
 
     class CollectionIterator
       # :nodoc:
-      include Enumerable
+      include Enumerable[untyped]
 
       def initialize: (untyped collection) -> void
 
@@ -9916,7 +9916,7 @@ end
 module ActionView
   class ObjectRenderer < PartialRenderer
     # :nodoc:
-    include ObjectRendering
+    include ActionView::AbstractRenderer::ObjectRendering
 
     def initialize: (untyped lookup_context, untyped options) -> void
 
@@ -10420,7 +10420,7 @@ module ActionView
         def to_symbol: () -> untyped
       end
 
-      class NodeParser < ::Ripper
+      class NodeParser
       end
 
       class RenderCallExtractor < NodeParser
@@ -10665,8 +10665,6 @@ module ActionView
 
     def initialize: (untyped paths, untyped path, untyped prefixes, untyped partial, untyped details) -> void
 
-    include DidYouMean::Correctable
-
     class Results
       # :nodoc:
       Result: untyped
@@ -10720,7 +10718,8 @@ module ActionView
     end
   end
 
-  TemplateError: untyped
+  class TemplateError
+  end
 
   class SyntaxErrorInTemplate < TemplateError
     # :nodoc:
