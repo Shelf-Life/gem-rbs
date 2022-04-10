@@ -35,7 +35,7 @@ module Psych
   # YAML documents that are supplied via user input.  Instead, please use the
   # load method or the safe_load method.
   #
-  def self.unsafe_load: (untyped yaml, ?filename: untyped? filename, ?fallback: bool fallback, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
+  def unsafe_load: (untyped yaml, ?filename: untyped? filename, ?fallback: bool fallback, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
 
   alias self.load self.unsafe_load
 
@@ -84,7 +84,7 @@ module Psych
   #   Psych.safe_load("---\n foo: bar")                         # => {"foo"=>"bar"}
   #   Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
   #
-  def self.safe_load: (untyped yaml, ?permitted_classes: untyped permitted_classes, ?permitted_symbols: untyped permitted_symbols, ?aliases: bool aliases, ?filename: untyped? filename, ?fallback: untyped? fallback, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
+  def safe_load: (untyped yaml, ?permitted_classes: untyped permitted_classes, ?permitted_symbols: untyped permitted_symbols, ?aliases: bool aliases, ?filename: untyped? filename, ?fallback: untyped? fallback, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
 
   # #
   # Load +yaml+ in to a Ruby data structure.  If multiple documents are
@@ -1293,7 +1293,7 @@ module Psych
   #   end
   #
   class Stream < Psych::Visitors::YAMLTree
-    class Emitter < Psych::Emitter
+    class Emitter
       # :nodoc:
       def end_document: (?untyped implicit_end) -> untyped
 
