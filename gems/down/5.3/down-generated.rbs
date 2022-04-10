@@ -1,0 +1,396 @@
+module Down
+  def self?.download: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
+
+  def self?.open: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
+
+  # Allows setting a backend via a symbol or a downloader object.
+  def self?.backend: (?untyped? value) -> untyped
+end
+
+module Down
+  class Backend
+    def self.download: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
+
+    def self.open: (*untyped args, **untyped options) ?{ () -> untyped } -> untyped
+
+    private
+
+    # If destination path is defined, move tempfile to the destination,
+    # otherwise return the tempfile unchanged.
+    def download_result: (untyped tempfile, untyped destination) -> (untyped | nil)
+
+    def normalize_headers: (untyped response_headers) -> untyped
+  end
+end
+
+module Down
+  # Wraps an enumerator that yields chunks of content into an IO object. It
+  # implements some essential IO methods:
+  #
+  # * IO#read
+  # * IO#readpartial
+  # * IO#gets
+  # * IO#size
+  # * IO#pos
+  # * IO#eof?
+  # * IO#rewind
+  # * IO#close
+  #
+  # By default the Down::ChunkedIO caches all read content into a tempfile,
+  # allowing it to be rewindable. If rewindability won't be used, it can be
+  # disabled by setting `:rewindable` to false, which eliminates any disk I/O.
+  #
+  # Any cleanup code (i.e. ensure block) that the given enumerator carries is
+  # guaranteed to get executed, either when all content has been retrieved or
+  # when Down::ChunkedIO is closed. One can also specify an `:on_close`
+  # callback that will also get executed in those situations.
+  class ChunkedIO
+    attr_accessor size: untyped
+
+    attr_accessor data: untyped
+
+    attr_accessor encoding: untyped
+
+    def initialize: (chunks: untyped chunks, ?size: untyped? size, ?on_close: untyped? on_close, ?data: ::Hash[untyped, untyped] data, ?rewindable: bool rewindable, ?encoding: untyped? encoding) -> void
+
+    # Yields elements of the underlying enumerator.
+    def each_chunk: () { (untyped) -> untyped } -> untyped
+
+    # Implements IO#read semantics. Without arguments it retrieves and returns
+    # all content.
+    #
+    # With `length` argument returns exactly that number of bytes if they're
+    # available.
+    #
+    # With `outbuf` argument each call will return that same string object,
+    # where the value is replaced with retrieved content.
+    #
+    # If end of file is reached, returns empty string if called without
+    # arguments, or nil if called with arguments. Raises IOError if closed.
+    def read: (?untyped? length, ?untyped? outbuf) -> untyped
+
+    # Implements IO#gets semantics. Without arguments it retrieves lines of
+    # content separated by newlines.
+    #
+    # With `separator` argument it does the following:
+    #
+    # * if `separator` is a nonempty string returns chunks of content
+    #   surrounded with that sequence of bytes
+    # * if `separator` is an empty string returns paragraphs of content
+    #   (content delimited by two newlines)
+    # * if `separator` is nil and `limit` is nil returns all content
+    #
+    # With `limit` argument returns maximum of that amount of bytes.
+    #
+    # Returns nil if end of file is reached. Raises IOError if closed.
+    def gets: (?untyped separator_or_limit, ?untyped? limit) -> untyped
+
+    # Implements IO#readpartial semantics. If there is any content readily
+    # available reads from it, otherwise fetches and reads from the next chunk.
+    # It writes to and reads from the cache when needed.
+    #
+    # Without arguments it either returns all content that's readily available,
+    # or the next chunk. This is useful when you don't care about the size of
+    # chunks and you want to minimize string allocations.
+    #
+    # With `maxlen` argument returns maximum of that amount of bytes (default
+    # is 16KB).
+    #
+    # With `outbuf` argument each call will return that same string object,
+    # where the value is replaced with retrieved content.
+    #
+    # Raises EOFError if end of file is reached. Raises IOError if closed.
+    def readpartial: (?untyped? maxlen, ?untyped? outbuf) -> untyped
+
+    # Implements IO#seek semantics.
+    def seek: (untyped amount, ?untyped whence) -> untyped
+
+    # Implements IO#pos semantics. Returns the current position of the
+    # Down::ChunkedIO.
+    def pos: () -> untyped
+
+    alias tell pos
+
+    # Implements IO#eof? semantics. Returns whether we've reached end of file.
+    # It returns true if cache is at the end and there is no more content to
+    # retrieve. Raises IOError if closed.
+    def eof?: () -> (::FalseClass | untyped)
+
+    # Implements IO#rewind semantics. Rewinds the Down::ChunkedIO by rewinding
+    # the cache and setting the position to the beginning of the file. Raises
+    # IOError if closed or not rewindable.
+    def rewind: () -> untyped
+
+    # Implements IO#close semantics. Closes the Down::ChunkedIO by terminating
+    # chunk retrieval and deleting the cached content.
+    def close: () -> (nil | untyped)
+
+    # Returns whether the Down::ChunkedIO has been closed.
+    def closed?: () -> untyped
+
+    # Returns whether the Down::ChunkedIO was specified as rewindable.
+    def rewindable?: () -> untyped
+
+    # Returns useful information about the Down::ChunkedIO object.
+    def inspect: () -> untyped
+
+    private
+
+    # If Down::ChunkedIO is specified as rewindable, returns a new Tempfile for
+    # writing read content to. This allows the Down::ChunkedIO to be rewinded.
+    def cache: () -> (nil | untyped)
+
+    # Returns current chunk and retrieves the next chunk. If next chunk is nil,
+    # we know we've reached EOF.
+    def retrieve_chunk: () -> untyped
+
+    # Returns whether there is any content left to retrieve.
+    def chunks_depleted?: () -> untyped
+
+    # Creates a Fiber wrapper around the underlying enumerator. The advantage
+    # of using a Fiber here is that we can terminate the chunk retrieval, in a
+    # way that executes any cleanup code that the enumerator potentially
+    # carries. At the end of iteration the :on_close callback is executed.
+    def chunks_fiber: () -> untyped
+
+    # Finds encoding by name. If the encoding couldn't be find, falls back to
+    # the generic binary encoding.
+    def find_encoding: (untyped encoding) -> untyped
+
+    # Returns whether the filesystem has POSIX semantics.
+    def posix?: () -> untyped
+  end
+end
+
+module Down
+  # generic error which is a superclass to all other errors
+  class Error < StandardError
+  end
+
+  # raised when the file is larger than the specified maximum size
+  class TooLarge < Error
+  end
+
+  # raised when the given URL couldn't be parsed
+  class InvalidUrl < Error
+  end
+
+  # raised when the number of redirects was larger than the specified maximum
+  class TooManyRedirects < Error
+  end
+
+  # raised when the requested resource has not been modified
+  class NotModified < Error
+  end
+
+  # raised when response returned 4xx or 5xx response
+  class ResponseError < Error
+    attr_reader response: untyped
+
+    def initialize: (untyped message, ?untyped? response) -> void
+  end
+
+  # raised when response returned 4xx response
+  class ClientError < ResponseError
+  end
+
+  # raised when response returned 404 response
+  class NotFound < ClientError
+  end
+
+  # raised when response returned 5xx response
+  class ServerError < ResponseError
+  end
+
+  # raised when there was an error connecting to the server
+  class ConnectionError < Error
+  end
+
+  # raised when connecting to the server too longer than the specified timeout
+  class TimeoutError < ConnectionError
+  end
+
+  # raised when an SSL error was raised
+  class SSLError < Error
+  end
+end
+
+module Down
+  # Provides streaming downloads implemented with HTTP.rb.
+  class Http < Backend
+    # Initializes the backend with common defaults.
+    def initialize: (**untyped options) ?{ () -> untyped } -> void
+
+    # Downlods the remote file to disk. Accepts HTTP.rb options via a hash or a
+    # block, and some additional options as well.
+    def download: (untyped url, ?max_size: untyped? max_size, ?progress_proc: untyped? progress_proc, ?content_length_proc: untyped? content_length_proc, ?destination: untyped? destination, ?extension: untyped? extension, **untyped options) ?{ () -> untyped } -> untyped
+
+    # Starts retrieving the remote file and returns an IO-like object which
+    # downloads the response body on-demand. Accepts HTTP.rb options via a hash
+    # or a block.
+    def open: (untyped url, ?rewindable: bool rewindable, **untyped options) ?{ () -> untyped } -> untyped
+
+    private
+
+    def request: (untyped url, ?method: untyped method, **untyped options) ?{ () -> untyped } -> untyped
+
+    def send_request: (untyped method, untyped url, **untyped options) ?{ () -> untyped } -> untyped
+
+    # Yields chunks of the response body to the block.
+    def stream_body: (untyped response) { () -> untyped } -> untyped
+
+    # Raises non-sucessful response as a Down::ResponseError.
+    def response_error!: (untyped response) -> untyped
+
+    # Re-raise HTTP.rb exceptions as Down::Error exceptions.
+    def request_error!: (untyped exception) -> untyped
+
+    # Defines some additional attributes for the returned Tempfile.
+    module DownloadedFile
+      attr_accessor url: untyped
+
+      attr_accessor headers: untyped
+
+      def original_filename: () -> untyped
+
+      def content_type: () -> untyped
+
+      def charset: () -> untyped
+    end
+  end
+end
+
+module Down
+  # Provides streaming downloads implemented with Net::HTTP and open-uri.
+  class NetHttp < Backend
+    URI_NORMALIZER: untyped
+
+    # Initializes the backend with common defaults.
+    def initialize: (*untyped args, **untyped options) -> void
+
+    # Downloads a remote file to disk using open-uri. Accepts any open-uri
+    # options, and a few more.
+    def download: (untyped url, *untyped args, **untyped options) -> untyped
+
+    # Starts retrieving the remote file using Net::HTTP and returns an IO-like
+    # object which downloads the response body on-demand.
+    def open: (untyped url, *untyped args, **untyped options) -> untyped
+
+    private
+
+    # Calls open-uri's URI::HTTP#open method. Additionally handles redirects.
+    def open_uri: (untyped uri, untyped options, follows_remaining: untyped follows_remaining) -> untyped
+
+    # Converts the given IO into a Tempfile if it isn't one already (open-uri
+    # returns a StringIO when there is less than 10KB of content), and gives
+    # it the specified file extension.
+    def ensure_tempfile: (untyped io, untyped extension) -> untyped
+
+    # Makes a Net::HTTP request and follows redirects.
+    def net_http_request: (untyped uri, untyped options, follows_remaining: untyped follows_remaining) { (untyped) -> untyped } -> untyped
+
+    # Build a Net::HTTP object for making a request.
+    def create_net_http: (untyped uri, untyped options) -> ::Array[untyped]
+
+    # Yields chunks of the response body to the block.
+    def stream_body: (untyped response) { () -> untyped } -> untyped
+
+    # Checks that the url is a valid URI and that its scheme is http or https.
+    def ensure_uri: (untyped url, ?allow_relative: bool allow_relative) -> untyped
+
+    # Makes sure that the URL is properly encoded.
+    def normalize_uri: (untyped url, uri_normalizer: untyped uri_normalizer) -> untyped
+
+    # When open-uri raises an exception, it doesn't expose the response object.
+    # Fortunately, the exception object holds response data that can be used to
+    # rebuild the Net::HTTP response object.
+    def rebuild_response_from_open_uri_exception: (untyped exception) -> untyped
+
+    # Raises non-sucessful response as a Down::ResponseError.
+    def response_error!: (untyped response) -> untyped
+
+    # Re-raise Net::HTTP exceptions as Down::Error exceptions.
+    def request_error!: (untyped exception) -> untyped
+
+    # Merge default and ad-hoc options, merging nested headers.
+    def merge_options: (untyped options, ?::Hash[untyped, untyped] headers, **untyped new_options) -> untyped
+
+    # Defines some additional attributes for the returned Tempfile (on top of what
+    # OpenURI::Meta already defines).
+    module DownloadedFile
+      def original_filename: () -> untyped
+
+      def content_type: () -> untyped
+    end
+  end
+end
+
+module Down
+  module Utils
+    # Retrieves potential filename from the "Content-Disposition" header.
+    def self?.filename_from_content_disposition: (untyped content_disposition) -> untyped
+
+    # Retrieves potential filename from the URL path.
+    def self?.filename_from_path: (untyped path) -> untyped
+  end
+end
+
+module Down
+  VERSION: ::String
+end
+
+module Down
+  # Provides streaming downloads implemented with the wget command-line tool.
+  # The design is very similar to Down::Http.
+  class Wget < Backend
+    # Initializes the backend with common defaults.
+    def initialize: (*untyped arguments) -> void
+
+    # Downlods the remote file to disk. Accepts wget command-line options and
+    # some additional options as well.
+    def download: (untyped url, *untyped args, ?max_size: untyped? max_size, ?content_length_proc: untyped? content_length_proc, ?progress_proc: untyped? progress_proc, ?destination: untyped? destination, ?extension: untyped? extension, **untyped options) -> untyped
+
+    # Starts retrieving the remote file and returns an IO-like object which
+    # downloads the response body on-demand. Accepts wget command-line options.
+    def open: (untyped url, *untyped args, ?rewindable: bool rewindable, **untyped options) -> untyped
+
+    private
+
+    # Generates the wget command.
+    def generate_command: (untyped url, *untyped args, **untyped options) -> untyped
+
+    # Handles executing the wget command.
+    class Command
+      PIPE_BUFFER_SIZE: untyped
+
+      def self.execute: (untyped arguments) -> untyped
+
+      def initialize: (untyped stdout_pipe, untyped stderr_pipe, untyped status_reaper) -> void
+
+      # Yields chunks of stdout. At the end handles the exit status.
+      def output: () { (untyped) -> untyped } -> untyped
+
+      def terminate: () -> untyped
+
+      def close: () -> untyped
+
+      private
+
+      # Translates nonzero wget exit statuses into exceptions.
+      def handle_status: (untyped status, untyped stderr) -> untyped
+    end
+
+    # Adds additional attributes to the Tempfile returned in #download.
+    module DownloadedFile
+      attr_accessor url: untyped
+
+      attr_accessor headers: untyped
+
+      def original_filename: () -> untyped
+
+      def content_type: () -> untyped
+
+      def charset: () -> untyped
+    end
+  end
+end

@@ -1,0 +1,350 @@
+# http gem namespace.
+# @see https://github.com/httprb/http
+module HTTP
+  # Utility-belt to build form data request bodies.
+  # Provides support for `application/x-www-form-urlencoded` and
+  # `multipart/form-data` types.
+  #
+  # @example Usage
+  #
+  #   form = FormData.create({
+  #     :username     => "ixti",
+  #     :avatar_file  => FormData::File.new("/home/ixti/avatar.png")
+  #   })
+  #
+  #   # Assuming socket is an open socket to some HTTP server
+  #   socket << "POST /some-url HTTP/1.1\r\n"
+  #   socket << "Host: example.com\r\n"
+  #   socket << "Content-Type: #{form.content_type}\r\n"
+  #   socket << "Content-Length: #{form.content_length}\r\n"
+  #   socket << "\r\n"
+  #   socket << form.to_s
+  module FormData
+    # CRLF
+    CRLF: ::String
+
+    # Generic FormData error.
+    class Error < StandardError
+    end
+
+    # FormData factory. Automatically selects best type depending on given
+    # `data` Hash.
+    #
+    # @param [#to_h, Hash] data
+    # @return [Multipart] if any of values is a {FormData::File}
+    # @return [Urlencoded] otherwise
+    def self.create: (untyped data, ?encoder: untyped? encoder) -> untyped
+
+    # Coerce `obj` to Hash.
+    #
+    # @note Internal usage helper, to workaround lack of `#to_h` on Ruby < 2.1
+    # @raise [Error] `obj` can't be coerced.
+    # @return [Hash]
+    def self.ensure_hash: (untyped obj) -> untyped
+
+    private
+
+    # Tells whenever data contains multipart data or not.
+    #
+    # @param [Hash] data
+    # @return [Boolean]
+    def self.multipart?: (untyped data) -> untyped
+  end
+end
+
+module HTTP
+  module FormData
+    # Provides IO interface across multiple IO objects.
+    class CompositeIO
+      # @param [Array<IO>] ios Array of IO objects
+      def initialize: (untyped ios) -> void
+
+      # Reads and returns partial content acrosss multiple IO objects.
+      #
+      # @param [Integer] length Number of bytes to retrieve
+      # @param [String] outbuf String to be replaced with retrieved data
+      #
+      # @return [String, nil]
+      def read: (?untyped? length, ?untyped? outbuf) -> untyped
+
+      # Returns sum of all IO sizes.
+      def size: () -> untyped
+
+      # Rewinds all IO objects and set cursor to the first IO object.
+      def rewind: () -> untyped
+
+      private
+
+      # Yields chunks with total length up to `length`.
+      def read_chunks: (?untyped? length) { (untyped) -> untyped } -> untyped
+
+      # Reads chunk from current IO with length up to `max_length`.
+      def readpartial: (?untyped? max_length) -> untyped
+
+      # Returns IO object under the cursor.
+      def current_io: () -> untyped
+
+      # Advances cursor to the next IO object.
+      def advance_io: () -> untyped
+    end
+  end
+end
+
+module HTTP
+  module FormData
+    # Represents file form param.
+    #
+    # @example Usage with StringIO
+    #
+    #  io = StringIO.new "foo bar baz"
+    #  FormData::File.new io, :filename => "foobar.txt"
+    #
+    # @example Usage with IO
+    #
+    #  File.open "/home/ixti/avatar.png" do |io|
+    #    FormData::File.new io
+    #  end
+    #
+    # @example Usage with pathname
+    #
+    #  FormData::File.new "/home/ixti/avatar.png"
+    class File < Part
+      # Default MIME type
+      DEFAULT_MIME: ::String
+
+      # @deprecated Use #content_type instead
+      alias mime_type content_type
+
+      # @see DEFAULT_MIME
+      # @param [String, Pathname, IO] path_or_io Filename or IO instance.
+      # @param [#to_h] opts
+      # @option opts [#to_s] :content_type (DEFAULT_MIME)
+      #   Value of Content-Type header
+      # @option opts [#to_s] :filename
+      #   When `path_or_io` is a String, Pathname or File, defaults to basename.
+      #   When `path_or_io` is a IO, defaults to `"stream-{object_id}"`.
+      def initialize: (untyped path_or_io, ?::Hash[untyped, untyped] opts) -> void
+
+      private
+
+      def make_io: (untyped path_or_io) -> untyped
+
+      def filename_for: (untyped io) -> untyped
+    end
+  end
+end
+
+module HTTP
+  module FormData
+    # `multipart/form-data` form data.
+    class Multipart
+      include Readable
+
+      attr_reader boundary: untyped
+
+      # @param [#to_h, Hash] data form data key-value Hash
+      def initialize: (untyped data, ?boundary: untyped boundary) -> void
+
+      # Generates a string suitable for using as a boundary in multipart form
+      # data.
+      #
+      # @return [String]
+      def self.generate_boundary: () -> untyped
+
+      # Returns MIME type to be used for HTTP request `Content-Type` header.
+      #
+      # @return [String]
+      def content_type: () -> ::String
+
+      # Returns form data content size to be used for HTTP request
+      # `Content-Length` header.
+      #
+      # @return [Integer]
+      alias content_length size
+
+      private
+
+      # @return [String]
+      def glue: () -> untyped
+
+      # @return [String]
+      def tail: () -> untyped
+    end
+  end
+end
+
+module HTTP
+  module FormData
+    class Multipart
+      # Utility class to represent multi-part chunks
+      class Param
+        include Readable
+
+        # Initializes body part with headers and data.
+        #
+        # @example With {FormData::File} value
+        #
+        #   Content-Disposition: form-data; name="avatar"; filename="avatar.png"
+        #   Content-Type: application/octet-stream
+        #
+        #   ...data of avatar.png...
+        #
+        # @example With non-{FormData::File} value
+        #
+        #   Content-Disposition: form-data; name="username"
+        #
+        #   ixti
+        #
+        # @return [String]
+        # @param [#to_s] name
+        # @param [FormData::File, FormData::Part, #to_s] value
+        def initialize: (untyped name, untyped value) -> void
+
+        # Flattens given `data` Hash into an array of `Param`'s.
+        # Nested array are unwinded.
+        # Behavior is similar to `URL.encode_www_form`.
+        #
+        # @param [Hash] data
+        # @return [Array<FormData::MultiPart::Param>]
+        def self.coerce: (untyped data) -> untyped
+
+        private
+
+        def header: () -> untyped
+
+        def parameters: () -> untyped
+
+        def content_type: () -> untyped
+
+        def filename: () -> untyped
+
+        def footer: () -> untyped
+      end
+    end
+  end
+end
+
+module HTTP
+  module FormData
+    # Represents a body part of multipart/form-data request.
+    #
+    # @example Usage with String
+    #
+    #  body = "Message"
+    #  FormData::Part.new body, :content_type => 'foobar.txt; charset="UTF-8"'
+    class Part
+      include Readable
+
+      attr_reader content_type: untyped
+
+      attr_reader filename: untyped
+
+      # @param [#to_s] body
+      # @param [String] content_type Value of Content-Type header
+      # @param [String] filename     Value of filename parameter
+      def initialize: (untyped body, ?content_type: untyped? content_type, ?filename: untyped? filename) -> void
+    end
+  end
+end
+
+module HTTP
+  module FormData
+    # Common behaviour for objects defined by an IO object.
+    module Readable
+      # Returns IO content.
+      #
+      # @return [String]
+      def to_s: () -> untyped
+
+      # Reads and returns part of IO content.
+      #
+      # @param [Integer] length Number of bytes to retrieve
+      # @param [String] outbuf String to be replaced with retrieved data
+      #
+      # @return [String, nil]
+      def read: (?untyped? length, ?untyped? outbuf) -> untyped
+
+      # Returns IO size.
+      #
+      # @return [Integer]
+      def size: () -> untyped
+
+      # Rewinds the IO.
+      def rewind: () -> untyped
+    end
+  end
+end
+
+module HTTP
+  module FormData
+    # `application/x-www-form-urlencoded` form data.
+    class Urlencoded
+      include Readable
+
+      # Set custom form data encoder implementation.
+      #
+      # @example
+      #
+      #     module CustomFormDataEncoder
+      #       UNESCAPED_CHARS = /[^a-z0-9\-\.\_\~]/i
+      #
+      #       def self.escape(s)
+      #         ::URI::DEFAULT_PARSER.escape(s.to_s, UNESCAPED_CHARS)
+      #       end
+      #
+      #       def self.call(data)
+      #         parts = []
+      #
+      #         data.each do |k, v|
+      #           k = escape(k)
+      #
+      #           if v.nil?
+      #             parts << k
+      #           elsif v.respond_to?(:to_ary)
+      #             v.to_ary.each { |vv| parts << "#{k}=#{escape vv}" }
+      #           else
+      #             parts << "#{k}=#{escape v}"
+      #           end
+      #         end
+      #
+      #         parts.join("&")
+      #       end
+      #     end
+      #
+      #     HTTP::FormData::Urlencoded.encoder = CustomFormDataEncoder
+      #
+      # @raise [ArgumentError] if implementation deos not responds to `#call`.
+      # @param implementation [#call]
+      # @return [void]
+      def self.encoder=: (untyped implementation) -> untyped
+
+      # Returns form data encoder implementation.
+      # Default: `URI.encode_www_form`.
+      #
+      # @see .encoder=
+      # @return [#call]
+      def self.encoder: () -> untyped
+
+      # @param [#to_h, Hash] data form data key-value Hash
+      def initialize: (untyped data, ?encoder: untyped? encoder) -> void
+
+      # Returns MIME type to be used for HTTP request `Content-Type` header.
+      #
+      # @return [String]
+      def content_type: () -> "application/x-www-form-urlencoded"
+
+      # Returns form data content size to be used for HTTP request
+      # `Content-Length` header.
+      #
+      # @return [Integer]
+      alias content_length size
+    end
+  end
+end
+
+module HTTP
+  module FormData
+    # Gem version.
+    VERSION: ::String
+  end
+end
