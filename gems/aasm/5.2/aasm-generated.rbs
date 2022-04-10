@@ -704,10 +704,6 @@ module AASM
     # make sure to create a (named) scope for each state
     def state_with_scope: (*untyped args) -> untyped
 
-    alias state_without_scope state
-
-    alias state state_with_scope
-
     private
 
     def create_scope?: (untyped name) -> untyped
