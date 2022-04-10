@@ -35,7 +35,7 @@ class CGI
   #   cookie1.expires  = Time.now + 30
   #   cookie1.secure   = true
   #   cookie1.httponly = true
-  class Cookie < Array
+  class Cookie < Array[self]
     # Create a new CGI::Cookie object.
     #
     # :call-seq:
