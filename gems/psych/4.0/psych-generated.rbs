@@ -972,7 +972,7 @@ module Psych
     # The base class for any Node in a YAML parse tree.  This class should
     # never be instantiated.
     class Node
-      include Enumerable
+      include Enumerable[Elem]
 
       # The children of this node
       attr_reader children: untyped
@@ -1218,7 +1218,7 @@ end
 # frozen_string_literal: true
 module Psych
   class Parser
-    class Mark <
+    class Mark < Struct.new :index, :line, :column
     end
 
     # The handler on which events will be called
