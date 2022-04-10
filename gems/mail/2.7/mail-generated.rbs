@@ -15,7 +15,7 @@ end
 
 # frozen_string_literal: true
 module Mail
-  class AttachmentsList < Array
+  class AttachmentsList < Array[untyped]
     def initialize: (untyped parts_list) -> void
 
     def inline: () -> untyped
@@ -322,15 +322,6 @@ module Net
 
     def tlsconnect: (untyped s) -> untyped
   end
-end
-
-class String
-  # Backport from Ruby 1.9 checks for non-us-ascii characters.
-  def ascii_only?: () -> untyped
-
-  MATCH_NON_US_ASCII: untyped
-
-  alias bytesize length
 end
 
 # frozen_string_literal: true
@@ -1099,8 +1090,8 @@ module Mail
   # Field List class provides an enhanced array that keeps a list of
   # email fields in order.  And allows you to insert new fields without
   # having to worry about the order they will appear in.
-  class FieldList < Array
-    include Enumerable
+  class FieldList < Array[untyped]
+    include Enumerable[self]
 
     # Insert the field in sorted order.
     #
@@ -1192,7 +1183,7 @@ end
 
 # frozen_string_literal: true
 module Mail
-  class AddressContainer < Array
+  class AddressContainer < Array[untyped]
     def initialize: (untyped field, ?untyped list) -> void
 
     def <<: (untyped address) -> untyped
@@ -2052,8 +2043,6 @@ module Mail
 
     include Utilities
 
-    include Enumerable
-
     # Large amount of headers in Email might create extra high CPU load
     # Use this parameter to limit number of headers that will be parsed by
     # mail library.
@@ -2192,7 +2181,7 @@ module Mail
 end
 
 module Mail
-  class IndifferentHash < Hash
+  class IndifferentHash < Hash[untyped, untyped]
     def initialize: (?::Hash[untyped, untyped] constructor) -> void
 
     def default: (?untyped? key) -> untyped
@@ -5605,10 +5594,6 @@ module Mail
     def map_lines: (untyped str) { (untyped) -> untyped } -> untyped
 
     def map_with_index: (untyped enum) { (untyped, untyped) -> untyped } -> untyped
-
-    def map_lines: (untyped str) { () -> untyped } -> untyped
-
-    def map_with_index: (untyped enum) { () -> untyped } -> untyped
 
     def self.binary_unsafe_to_lf: (untyped string) -> untyped
 

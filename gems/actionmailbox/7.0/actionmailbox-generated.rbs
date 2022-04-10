@@ -164,7 +164,7 @@ end
 
 module ActionMailbox
   class Relayer
-    class Result < 
+    class Result
       def success?: () -> untyped
 
       def failure?: () -> untyped
