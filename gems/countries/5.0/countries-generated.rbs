@@ -49,6 +49,12 @@ module ISO3166
 
     def valid?: () -> untyped
 
+    def postal_code: -> untyped
+
+    def postal_code_format: -> untyped
+
+    def languages_official: -> untyped
+
     alias zip postal_code
 
     alias zip? postal_code
@@ -284,13 +290,6 @@ class Country < ISO3166::Country
 end
 
 module ISO3166
-  class KwargStruct < Struct
-    # Override the initialize to handle hashes of named parameters
-    def initialize: (*untyped args) -> void
-  end
-end
-
-module ISO3166
   class Country
     def mongoize: () -> untyped
 
@@ -419,7 +418,7 @@ module ISO3166
   #
   # E.g. if a country has translations for +pt+, and the user looks up +pt-br+ fallback
   # to +pt+ to prevent from showing nil values
-  class Translations < Hash
+  class Translations < Hash[untyped, untyped]
     def []: (untyped locale) -> untyped
   end
 end
