@@ -1218,7 +1218,7 @@ end
 # frozen_string_literal: true
 module Psych
   class Parser
-    class Mark < Struct.new :index, :line, :column
+    class Mark < Struct[:index, :line, :column]
     end
 
     # The handler on which events will be called
@@ -1468,8 +1468,6 @@ module Psych
     end
   end
 end
-
-Regexp::NOENCODING: ::Integer
 
 module Psych
   module Visitors
