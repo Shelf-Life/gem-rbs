@@ -1,0 +1,1693 @@
+module Psych
+  # The version of libyaml Psych is using
+  LIBYAML_VERSION: untyped
+
+  # #
+  # Load +yaml+ in to a Ruby data structure.  If multiple documents are
+  # provided, the object contained in the first document will be returned.
+  # +filename+ will be used in the exception message if any exception
+  # is raised while parsing.  If +yaml+ is empty, it returns
+  # the specified +fallback+ return value, which defaults to +false+.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  # Example:
+  #
+  #   Psych.unsafe_load("--- a")             # => 'a'
+  #   Psych.unsafe_load("---\n - a\n - b")   # => ['a', 'b']
+  #
+  #   begin
+  #     Psych.unsafe_load("--- `", filename: "file.txt")
+  #   rescue Psych::SyntaxError => ex
+  #     ex.file    # => 'file.txt'
+  #     ex.message # => "(file.txt): found character that cannot start any token"
+  #   end
+  #
+  # When the optional +symbolize_names+ keyword argument is set to a
+  # true value, returns symbols for keys in Hash objects (default: strings).
+  #
+  #   Psych.unsafe_load("---\n foo: bar")                         # => {"foo"=>"bar"}
+  #   Psych.unsafe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
+  #
+  # Raises a TypeError when `yaml` parameter is NilClass
+  #
+  # NOTE: This method *should not* be used to parse untrusted documents, such as
+  # YAML documents that are supplied via user input.  Instead, please use the
+  # load method or the safe_load method.
+  #
+  def unsafe_load: (untyped yaml, ?filename: untyped? filename, ?fallback: bool fallback, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
+
+  # #
+  # Safely load the yaml string in +yaml+.  By default, only the following
+  # classes are allowed to be deserialized:
+  #
+  # * TrueClass
+  # * FalseClass
+  # * NilClass
+  # * Integer
+  # * Float
+  # * String
+  # * Array
+  # * Hash
+  #
+  # Recursive data structures are not allowed by default.  Arbitrary classes
+  # can be allowed by adding those classes to the +permitted_classes+ keyword argument.  They are
+  # additive.  For example, to allow Date deserialization:
+  #
+  #   Psych.safe_load(yaml, permitted_classes: [Date])
+  #
+  # Now the Date class can be loaded in addition to the classes listed above.
+  #
+  # Aliases can be explicitly allowed by changing the +aliases+ keyword argument.
+  # For example:
+  #
+  #   x = []
+  #   x << x
+  #   yaml = Psych.dump x
+  #   Psych.safe_load yaml               # => raises an exception
+  #   Psych.safe_load yaml, aliases: true # => loads the aliases
+  #
+  # A Psych::DisallowedClass exception will be raised if the yaml contains a
+  # class that isn't in the +permitted_classes+ list.
+  #
+  # A Psych::BadAlias exception will be raised if the yaml contains aliases
+  # but the +aliases+ keyword argument is set to false.
+  #
+  # +filename+ will be used in the exception message if any exception is raised
+  # while parsing.
+  #
+  # When the optional +symbolize_names+ keyword argument is set to a
+  # true value, returns symbols for keys in Hash objects (default: strings).
+  #
+  #   Psych.safe_load("---\n foo: bar")                         # => {"foo"=>"bar"}
+  #   Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
+  #
+  def safe_load: (untyped yaml, ?permitted_classes: untyped permitted_classes, ?permitted_symbols: untyped permitted_symbols, ?aliases: bool aliases, ?filename: untyped? filename, ?fallback: untyped? fallback, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
+
+  # #
+  # Load +yaml+ in to a Ruby data structure.  If multiple documents are
+  # provided, the object contained in the first document will be returned.
+  # +filename+ will be used in the exception message if any exception
+  # is raised while parsing.  If +yaml+ is empty, it returns
+  # the specified +fallback+ return value, which defaults to +false+.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  # Example:
+  #
+  #   Psych.load("--- a")             # => 'a'
+  #   Psych.load("---\n - a\n - b")   # => ['a', 'b']
+  #
+  #   begin
+  #     Psych.load("--- `", filename: "file.txt")
+  #   rescue Psych::SyntaxError => ex
+  #     ex.file    # => 'file.txt'
+  #     ex.message # => "(file.txt): found character that cannot start any token"
+  #   end
+  #
+  # When the optional +symbolize_names+ keyword argument is set to a
+  # true value, returns symbols for keys in Hash objects (default: strings).
+  #
+  #   Psych.load("---\n foo: bar")                         # => {"foo"=>"bar"}
+  #   Psych.load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
+  #
+  # Raises a TypeError when `yaml` parameter is NilClass.  This method is
+  # similar to `safe_load` except that `Symbol` objects are allowed by default.
+  #
+  def self.load: (untyped yaml, ?permitted_classes: ::Array[untyped] permitted_classes, ?permitted_symbols: untyped permitted_symbols, ?aliases: bool aliases, ?filename: untyped? filename, ?fallback: untyped? fallback, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
+
+  # #
+  # Parse a YAML string in +yaml+.  Returns the Psych::Nodes::Document.
+  # +filename+ is used in the exception message if a Psych::SyntaxError is
+  # raised.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  # Example:
+  #
+  #   Psych.parse("---\n - a\n - b") # => #<Psych::Nodes::Document:0x00>
+  #
+  #   begin
+  #     Psych.parse("--- `", filename: "file.txt")
+  #   rescue Psych::SyntaxError => ex
+  #     ex.file    # => 'file.txt'
+  #     ex.message # => "(file.txt): found character that cannot start any token"
+  #   end
+  #
+  # See Psych::Nodes for more information about YAML AST.
+  def self.parse: (untyped yaml, ?filename: untyped? filename) -> (untyped | ::FalseClass)
+
+  # #
+  # Parse a file at +filename+. Returns the Psych::Nodes::Document.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  def self.parse_file: (untyped filename, ?fallback: bool fallback) -> untyped
+
+  # #
+  # Returns a default parser
+  def self.parser: () -> untyped
+
+  # #
+  # Parse a YAML string in +yaml+.  Returns the Psych::Nodes::Stream.
+  # This method can handle multiple YAML documents contained in +yaml+.
+  # +filename+ is used in the exception message if a Psych::SyntaxError is
+  # raised.
+  #
+  # If a block is given, a Psych::Nodes::Document node will be yielded to the
+  # block as it's being parsed.
+  #
+  # Raises a Psych::SyntaxError when a YAML syntax error is detected.
+  #
+  # Example:
+  #
+  #   Psych.parse_stream("---\n - a\n - b") # => #<Psych::Nodes::Stream:0x00>
+  #
+  #   Psych.parse_stream("--- a\n--- b") do |node|
+  #     node # => #<Psych::Nodes::Document:0x00>
+  #   end
+  #
+  #   begin
+  #     Psych.parse_stream("--- `", filename: "file.txt")
+  #   rescue Psych::SyntaxError => ex
+  #     ex.file    # => 'file.txt'
+  #     ex.message # => "(file.txt): found character that cannot start any token"
+  #   end
+  #
+  # Raises a TypeError when NilClass is passed.
+  #
+  # See Psych::Nodes for more information about YAML AST.
+  def self.parse_stream: (untyped yaml, ?filename: untyped? filename) { () -> untyped } -> untyped
+
+  # #
+  # call-seq:
+  #   Psych.dump(o)               -> string of yaml
+  #   Psych.dump(o, options)      -> string of yaml
+  #   Psych.dump(o, io)           -> io object passed in
+  #   Psych.dump(o, io, options)  -> io object passed in
+  #
+  # Dump Ruby object +o+ to a YAML string.  Optional +options+ may be passed in
+  # to control the output format.  If an IO object is passed in, the YAML will
+  # be dumped to that IO object.
+  #
+  # Currently supported options are:
+  #
+  # [<tt>:indentation</tt>]   Number of space characters used to indent.
+  #                           Acceptable value should be in <tt>0..9</tt> range,
+  #                           otherwise option is ignored.
+  #
+  #                           Default: <tt>2</tt>.
+  # [<tt>:line_width</tt>]    Max character to wrap line at.
+  #
+  #                           Default: <tt>0</tt> (meaning "wrap at 81").
+  # [<tt>:canonical</tt>]     Write "canonical" YAML form (very verbose, yet
+  #                           strictly formal).
+  #
+  #                           Default: <tt>false</tt>.
+  # [<tt>:header</tt>]        Write <tt>%YAML [version]</tt> at the beginning of document.
+  #
+  #                           Default: <tt>false</tt>.
+  #
+  # Example:
+  #
+  #   # Dump an array, get back a YAML string
+  #   Psych.dump(['a', 'b'])  # => "---\n- a\n- b\n"
+  #
+  #   # Dump an array to an IO object
+  #   Psych.dump(['a', 'b'], StringIO.new)  # => #<StringIO:0x000001009d0890>
+  #
+  #   # Dump an array with indentation set
+  #   Psych.dump(['a', ['b']], indentation: 3) # => "---\n- a\n-  - b\n"
+  #
+  #   # Dump an array to an IO with indentation set
+  #   Psych.dump(['a', ['b']], StringIO.new, indentation: 3)
+  def self.dump: (untyped o, ?untyped? io, ?::Hash[untyped, untyped] options) -> untyped
+
+  # #
+  # call-seq:
+  #   Psych.safe_dump(o)               -> string of yaml
+  #   Psych.safe_dump(o, options)      -> string of yaml
+  #   Psych.safe_dump(o, io)           -> io object passed in
+  #   Psych.safe_dump(o, io, options)  -> io object passed in
+  #
+  # Safely dump Ruby object +o+ to a YAML string. Optional +options+ may be passed in
+  # to control the output format.  If an IO object is passed in, the YAML will
+  # be dumped to that IO object. By default, only the following
+  # classes are allowed to be serialized:
+  #
+  # * TrueClass
+  # * FalseClass
+  # * NilClass
+  # * Integer
+  # * Float
+  # * String
+  # * Array
+  # * Hash
+  #
+  # Arbitrary classes can be allowed by adding those classes to the +permitted_classes+
+  # keyword argument.  They are additive.  For example, to allow Date serialization:
+  #
+  #   Psych.safe_dump(yaml, permitted_classes: [Date])
+  #
+  # Now the Date class can be dumped in addition to the classes listed above.
+  #
+  # A Psych::DisallowedClass exception will be raised if the object contains a
+  # class that isn't in the +permitted_classes+ list.
+  #
+  # Currently supported options are:
+  #
+  # [<tt>:indentation</tt>]   Number of space characters used to indent.
+  #                           Acceptable value should be in <tt>0..9</tt> range,
+  #                           otherwise option is ignored.
+  #
+  #                           Default: <tt>2</tt>.
+  # [<tt>:line_width</tt>]    Max character to wrap line at.
+  #
+  #                           Default: <tt>0</tt> (meaning "wrap at 81").
+  # [<tt>:canonical</tt>]     Write "canonical" YAML form (very verbose, yet
+  #                           strictly formal).
+  #
+  #                           Default: <tt>false</tt>.
+  # [<tt>:header</tt>]        Write <tt>%YAML [version]</tt> at the beginning of document.
+  #
+  #                           Default: <tt>false</tt>.
+  #
+  # Example:
+  #
+  #   # Dump an array, get back a YAML string
+  #   Psych.safe_dump(['a', 'b'])  # => "---\n- a\n- b\n"
+  #
+  #   # Dump an array to an IO object
+  #   Psych.safe_dump(['a', 'b'], StringIO.new)  # => #<StringIO:0x000001009d0890>
+  #
+  #   # Dump an array with indentation set
+  #   Psych.safe_dump(['a', ['b']], indentation: 3) # => "---\n- a\n-  - b\n"
+  #
+  #   # Dump an array to an IO with indentation set
+  #   Psych.safe_dump(['a', ['b']], StringIO.new, indentation: 3)
+  def self.safe_dump: (untyped o, ?untyped? io, ?::Hash[untyped, untyped] options) -> untyped
+
+  # #
+  # Dump a list of objects as separate documents to a document stream.
+  #
+  # Example:
+  #
+  #   Psych.dump_stream("foo\n  ", {}) # => "--- ! \"foo\\n  \"\n--- {}\n"
+  def self.dump_stream: (*untyped objects) -> untyped
+
+  # #
+  # Dump Ruby +object+ to a JSON string.
+  def self.to_json: (untyped object) -> untyped
+
+  # #
+  # Load multiple documents given in +yaml+.  Returns the parsed documents
+  # as a list.  If a block is given, each document will be converted to Ruby
+  # and passed to the block during parsing
+  #
+  # Example:
+  #
+  #   Psych.load_stream("--- foo\n...\n--- bar\n...") # => ['foo', 'bar']
+  #
+  #   list = []
+  #   Psych.load_stream("--- foo\n...\n--- bar\n...") do |ruby|
+  #     list << ruby
+  #   end
+  #   list # => ['foo', 'bar']
+  #
+  def self.load_stream: (untyped yaml, ?filename: untyped? filename, ?fallback: untyped fallback, **untyped kwargs) { (untyped) -> untyped } -> untyped
+
+  # #
+  # Load the document contained in +filename+.  Returns the yaml contained in
+  # +filename+ as a Ruby object, or if the file is empty, it returns
+  # the specified +fallback+ return value, which defaults to +false+.
+  #
+  # NOTE: This method *should not* be used to parse untrusted documents, such as
+  # YAML documents that are supplied via user input.  Instead, please use the
+  # safe_load_file method.
+  def self.unsafe_load_file: (untyped filename, **untyped kwargs) -> untyped
+
+  # #
+  # Safely loads the document contained in +filename+.  Returns the yaml contained in
+  # +filename+ as a Ruby object, or if the file is empty, it returns
+  # the specified +fallback+ return value, which defaults to +false+.
+  # See safe_load for options.
+  def self.safe_load_file: (untyped filename, **untyped kwargs) -> untyped
+
+  # #
+  # Loads the document contained in +filename+.  Returns the yaml contained in
+  # +filename+ as a Ruby object, or if the file is empty, it returns
+  # the specified +fallback+ return value, which defaults to +false+.
+  # See load for options.
+  def self.load_file: (untyped filename, **untyped kwargs) -> untyped
+
+  # :stopdoc:
+  def self.add_domain_type: (untyped domain, untyped type_tag) { () -> untyped } -> untyped
+
+  def self.add_builtin_type: (untyped type_tag) { () -> untyped } -> untyped
+
+  def self.remove_type: (untyped type_tag) -> untyped
+
+  def self.add_tag: (untyped tag, untyped klass) -> untyped
+
+  # Workaround for emulating `warn '...', uplevel: 1` in Ruby 2.4 or lower.
+  def self.warn_with_uplevel: (untyped message, ?uplevel: ::Integer uplevel) -> untyped
+
+  def self.parse_caller: (untyped at) -> untyped
+
+  extend Forwardable
+
+  class Config
+    attr_accessor load_tags: untyped
+
+    attr_accessor dump_tags: untyped
+
+    attr_accessor domain_types: untyped
+
+    def initialize: () -> void
+  end
+
+  def self.config: () -> untyped
+
+  attr_accessor self.load_tags: untyped
+
+  attr_accessor self.dump_tags: untyped
+
+  attr_accessor self.domain_types: untyped
+end
+
+module Psych
+  class ClassLoader
+    # :nodoc:
+    BIG_DECIMAL: ::String
+
+    COMPLEX: ::String
+
+    DATE: ::String
+
+    DATE_TIME: ::String
+
+    EXCEPTION: ::String
+
+    OBJECT: ::String
+
+    PSYCH_OMAP: ::String
+
+    PSYCH_SET: ::String
+
+    RANGE: ::String
+
+    RATIONAL: ::String
+
+    REGEXP: ::String
+
+    STRUCT: ::String
+
+    SYMBOL: ::String
+
+    def initialize: () -> void
+
+    def load: (untyped klassname) -> (nil | untyped)
+
+    def symbolize: (untyped sym) -> untyped
+
+    private
+
+    def find: (untyped klassname) -> untyped
+
+    def resolve: (untyped klassname) -> untyped
+
+    CACHE: untyped
+
+    class Restricted < ClassLoader
+      def initialize: (untyped classes, untyped symbols) -> void
+
+      def symbolize: (untyped sym) -> untyped
+
+      private
+
+      def find: (untyped klassname) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  # #
+  # If an object defines +encode_with+, then an instance of Psych::Coder will
+  # be passed to the method when the object is being serialized.  The Coder
+  # automatically assumes a Psych::Nodes::Mapping is being emitted.  Other
+  # objects like Sequence and Scalar may be emitted if +seq=+ or +scalar=+ are
+  # called, respectively.
+  class Coder
+    attr_accessor tag: untyped
+
+    attr_accessor style: untyped
+
+    attr_accessor implicit: untyped
+
+    attr_accessor object: untyped
+
+    attr_reader type: untyped
+
+    attr_reader seq: untyped
+
+    def initialize: (untyped tag) -> void
+
+    def scalar: (*untyped args) -> untyped
+
+    # Emit a map.  The coder will be yielded to the block.
+    def map: (?untyped tag, ?untyped style) { (untyped) -> untyped } -> untyped
+
+    # Emit a scalar with +value+ and +tag+
+    def represent_scalar: (untyped tag, untyped value) -> untyped
+
+    # Emit a sequence with +list+ and +tag+
+    def represent_seq: (untyped tag, untyped list) -> untyped
+
+    # Emit a sequence with +map+ and +tag+
+    def represent_map: (untyped tag, untyped map) -> untyped
+
+    # Emit an arbitrary object +obj+ and +tag+
+    def represent_object: (untyped tag, untyped obj) -> untyped
+
+    # Emit a scalar with +value+
+    def scalar=: (untyped value) -> untyped
+
+    # Emit a map with +value+
+    def map=: (untyped map) -> untyped
+
+    def []=: (untyped k, untyped v) -> untyped
+
+    alias add []=
+
+    def []: (untyped k) -> untyped
+
+    # Emit a sequence of +list+
+    def seq=: (untyped list) -> untyped
+  end
+end
+
+# frozen_string_literal: true
+class Object
+  def self.yaml_tag: (untyped url) -> untyped
+
+  # #
+  # call-seq: to_yaml(options = {})
+  #
+  # Convert an object to YAML.  See Psych.dump for more information on the
+  # available +options+.
+  def to_yaml: (?::Hash[untyped, untyped] options) -> untyped
+end
+
+# frozen_string_literal: true
+module Psych
+  class Exception < RuntimeError
+  end
+
+  class BadAlias < Exception
+  end
+
+  class DisallowedClass < Exception
+    def initialize: (untyped action, untyped klass_name) -> void
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  # #
+  # Psych::Handler is an abstract base class that defines the events used
+  # when dealing with Psych::Parser.  Clients who want to use Psych::Parser
+  # should implement a class that inherits from Psych::Handler and define
+  # events that they can handle.
+  #
+  # Psych::Handler defines all events that Psych::Parser can possibly send to
+  # event handlers.
+  #
+  # See Psych::Parser for more details
+  class Handler
+    # #
+    # Configuration options for dumping YAML.
+    class DumperOptions
+      attr_accessor line_width: untyped
+
+      attr_accessor indentation: untyped
+
+      attr_accessor canonical: untyped
+
+      def initialize: () -> void
+    end
+
+    # Default dumping options
+    OPTIONS: untyped
+
+    # Events that a Handler should respond to.
+    EVENTS: ::Array[untyped]
+
+    # #
+    # Called with +encoding+ when the YAML stream starts.  This method is
+    # called once per stream.  A stream may contain multiple documents.
+    #
+    # See the constants in Psych::Parser for the possible values of +encoding+.
+    def start_stream: (untyped encoding) -> nil
+
+    # #
+    # Called when the document starts with the declared +version+,
+    # +tag_directives+, if the document is +implicit+.
+    #
+    # +version+ will be an array of integers indicating the YAML version being
+    # dealt with, +tag_directives+ is a list of tuples indicating the prefix
+    # and suffix of each tag, and +implicit+ is a boolean indicating whether
+    # the document is started implicitly.
+    #
+    # === Example
+    #
+    # Given the following YAML:
+    #
+    #   %YAML 1.1
+    #   %TAG ! tag:tenderlovemaking.com,2009:
+    #   --- !squee
+    #
+    # The parameters for start_document must be this:
+    #
+    #   version         # => [1, 1]
+    #   tag_directives  # => [["!", "tag:tenderlovemaking.com,2009:"]]
+    #   implicit        # => false
+    def start_document: (untyped version, untyped tag_directives, untyped implicit) -> nil
+
+    # #
+    # Called with the document ends.  +implicit+ is a boolean value indicating
+    # whether or not the document has an implicit ending.
+    #
+    # === Example
+    #
+    # Given the following YAML:
+    #
+    #   ---
+    #     hello world
+    #
+    # +implicit+ will be true.  Given this YAML:
+    #
+    #   ---
+    #     hello world
+    #   ...
+    #
+    # +implicit+ will be false.
+    def end_document: (untyped implicit) -> nil
+
+    # #
+    # Called when an alias is found to +anchor+.  +anchor+ will be the name
+    # of the anchor found.
+    #
+    # === Example
+    #
+    # Here we have an example of an array that references itself in YAML:
+    #
+    #   --- &ponies
+    #   - first element
+    #   - *ponies
+    #
+    # &ponies is the anchor, *ponies is the alias.  In this case, alias is
+    # called with "ponies".
+    def alias: (untyped anchor) -> nil
+
+    # #
+    # Called when a scalar +value+ is found.  The scalar may have an
+    # +anchor+, a +tag+, be implicitly +plain+ or implicitly +quoted+
+    #
+    # +value+ is the string value of the scalar
+    # +anchor+ is an associated anchor or nil
+    # +tag+ is an associated tag or nil
+    # +plain+ is a boolean value
+    # +quoted+ is a boolean value
+    # +style+ is an integer indicating the string style
+    #
+    # See the constants in Psych::Nodes::Scalar for the possible values of
+    # +style+
+    #
+    # === Example
+    #
+    # Here is a YAML document that exercises most of the possible ways this
+    # method can be called:
+    #
+    #   ---
+    #   - !str "foo"
+    #   - &anchor fun
+    #   - many
+    #     lines
+    #   - |
+    #     many
+    #     newlines
+    #
+    # The above YAML document contains a list with four strings.  Here are
+    # the parameters sent to this method in the same order:
+    #
+    #   # value               anchor    tag     plain   quoted  style
+    #   ["foo",               nil,      "!str", false,  false,  3    ]
+    #   ["fun",               "anchor", nil,    true,   false,  1    ]
+    #   ["many lines",        nil,      nil,    true,   false,  1    ]
+    #   ["many\nnewlines\n",  nil,      nil,    false,  true,   4    ]
+    #
+    def scalar: (untyped value, untyped anchor, untyped tag, untyped plain, untyped quoted, untyped style) -> nil
+
+    def start_sequence: (untyped anchor, untyped tag, untyped implicit, untyped style) -> nil
+
+    # #
+    # Called when a sequence ends.
+    def end_sequence: () -> nil
+
+    def start_mapping: (untyped anchor, untyped tag, untyped implicit, untyped style) -> nil
+
+    # #
+    # Called when a map ends
+    def end_mapping: () -> nil
+
+    # #
+    # Called when an empty event happens. (Which, as far as I can tell, is
+    # never).
+    def empty: () -> nil
+
+    # #
+    # Called when the YAML stream ends
+    def end_stream: () -> nil
+
+    # #
+    # Called before each event with line/column information.
+    def event_location: (untyped start_line, untyped start_column, untyped end_line, untyped end_column) -> nil
+
+    # #
+    # Is this handler a streaming handler?
+    def streaming?: () -> ::FalseClass
+  end
+end
+
+module Psych
+  module Handlers
+    class DocumentStream < Psych::TreeBuilder
+      # :nodoc:
+      def initialize: () { () -> untyped } -> void
+
+      def start_document: (untyped version, untyped tag_directives, untyped implicit) -> untyped
+
+      def end_document: (?untyped implicit_end) -> untyped
+    end
+  end
+end
+
+module Psych
+  module Handlers
+    class Recorder < Psych::Handler
+      attr_reader events: untyped
+
+      def initialize: () -> void
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module JSON
+    module RubyEvents
+      # :nodoc:
+      def visit_Time: (untyped o) -> untyped
+
+      def visit_DateTime: (untyped o) -> untyped
+
+      def visit_String: (untyped o) -> untyped
+
+      alias visit_Symbol visit_String
+    end
+  end
+end
+
+module Psych
+  module JSON
+    class Stream < Psych::Visitors::JSONTree
+      include Psych::JSON::RubyEvents
+
+      include Psych::Streaming
+
+      extend Psych::Streaming::ClassMethods
+
+      class Emitter < Psych::Stream::Emitter
+        # :nodoc:
+        include Psych::JSON::YAMLEvents
+      end
+    end
+  end
+end
+
+module Psych
+  module JSON
+    # #
+    # Psych::JSON::TreeBuilder is an event based AST builder.  Events are sent
+    # to an instance of Psych::JSON::TreeBuilder and a JSON AST is constructed.
+    class TreeBuilder < Psych::TreeBuilder
+      include Psych::JSON::YAMLEvents
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module JSON
+    module YAMLEvents
+      # :nodoc:
+      def start_document: (untyped version, untyped tag_directives, untyped implicit) -> untyped
+
+      def end_document: (?untyped implicit_end) -> untyped
+
+      def start_mapping: (untyped anchor, untyped tag, untyped implicit, untyped style) -> untyped
+
+      def start_sequence: (untyped anchor, untyped tag, untyped implicit, untyped style) -> untyped
+
+      def scalar: (untyped value, untyped anchor, untyped tag, untyped plain, untyped quoted, untyped style) -> untyped
+    end
+  end
+end
+
+module Psych
+  # #
+  # = Overview
+  #
+  # When using Psych.load to deserialize a YAML document, the document is
+  # translated to an intermediary AST.  That intermediary AST is then
+  # translated in to a Ruby object graph.
+  #
+  # In the opposite direction, when using Psych.dump, the Ruby object graph is
+  # translated to an intermediary AST which is then converted to a YAML
+  # document.
+  #
+  # Psych::Nodes contains all of the classes that make up the nodes of a YAML
+  # AST.  You can manually build an AST and use one of the visitors (see
+  # Psych::Visitors) to convert that AST to either a YAML document or to a
+  # Ruby object graph.
+  #
+  # Here is an example of building an AST that represents a list with one
+  # scalar:
+  #
+  #   # Create our nodes
+  #   stream = Psych::Nodes::Stream.new
+  #   doc    = Psych::Nodes::Document.new
+  #   seq    = Psych::Nodes::Sequence.new
+  #   scalar = Psych::Nodes::Scalar.new('foo')
+  #
+  #   # Build up our tree
+  #   stream.children << doc
+  #   doc.children    << seq
+  #   seq.children    << scalar
+  #
+  # The stream is the root of the tree.  We can then convert the tree to YAML:
+  #
+  #   stream.to_yaml => "---\n- foo\n"
+  #
+  # Or convert it to Ruby:
+  #
+  #   stream.to_ruby => [["foo"]]
+  #
+  # == YAML AST Requirements
+  #
+  # A valid YAML AST *must* have one Psych::Nodes::Stream at the root.  A
+  # Psych::Nodes::Stream node must have 1 or more Psych::Nodes::Document nodes
+  # as children.
+  #
+  # Psych::Nodes::Document nodes must have one and *only* one child.  That child
+  # may be one of:
+  #
+  # * Psych::Nodes::Sequence
+  # * Psych::Nodes::Mapping
+  # * Psych::Nodes::Scalar
+  #
+  # Psych::Nodes::Sequence and Psych::Nodes::Mapping nodes may have many
+  # children, but Psych::Nodes::Mapping nodes should have an even number of
+  # children.
+  #
+  # All of these are valid children for Psych::Nodes::Sequence and
+  # Psych::Nodes::Mapping nodes:
+  #
+  # * Psych::Nodes::Sequence
+  # * Psych::Nodes::Mapping
+  # * Psych::Nodes::Scalar
+  # * Psych::Nodes::Alias
+  #
+  # Psych::Nodes::Scalar and Psych::Nodes::Alias are both terminal nodes and
+  # should not have any children.
+  module Nodes
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Nodes
+    # #
+    # This class represents a {YAML Alias}[http://yaml.org/spec/1.1/#alias].
+    # It points to an +anchor+.
+    #
+    # A Psych::Nodes::Alias is a terminal node and may have no children.
+    class Alias < Psych::Nodes::Node
+      # The anchor this alias links to
+      attr_accessor anchor: untyped
+
+      # Create a new Alias that points to an +anchor+
+      def initialize: (untyped anchor) -> void
+
+      def alias?: () -> ::TrueClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Nodes
+    # #
+    # This represents a YAML Document.  This node must be a child of
+    # Psych::Nodes::Stream.  A Psych::Nodes::Document must have one child,
+    # and that child may be one of the following:
+    #
+    # * Psych::Nodes::Sequence
+    # * Psych::Nodes::Mapping
+    # * Psych::Nodes::Scalar
+    class Document < Psych::Nodes::Node
+      # The version of the YAML document
+      attr_accessor version: untyped
+
+      # A list of tag directives for this document
+      attr_accessor tag_directives: untyped
+
+      # Was this document implicitly created?
+      attr_accessor implicit: untyped
+
+      # Is the end of the document implicit?
+      attr_accessor implicit_end: untyped
+
+      # #
+      # Create a new Psych::Nodes::Document object.
+      #
+      # +version+ is a list indicating the YAML version.
+      # +tags_directives+ is a list of tag directive declarations
+      # +implicit+ is a flag indicating whether the document will be implicitly
+      # started.
+      #
+      # == Example:
+      # This creates a YAML document object that represents a YAML 1.1 document
+      # with one tag directive, and has an implicit start:
+      #
+      #   Psych::Nodes::Document.new(
+      #     [1,1],
+      #     [["!", "tag:tenderlovemaking.com,2009:"]],
+      #     true
+      #   )
+      #
+      # == See Also
+      # See also Psych::Handler#start_document
+      def initialize: (?untyped version, ?untyped tag_directives, ?bool implicit) -> void
+
+      # #
+      # Returns the root node.  A Document may only have one root node:
+      # http://yaml.org/spec/1.1/#id898031
+      def root: () -> untyped
+
+      def document?: () -> ::TrueClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Nodes
+    # #
+    # This class represents a {YAML Mapping}[http://yaml.org/spec/1.1/#mapping].
+    #
+    # A Psych::Nodes::Mapping node may have 0 or more children, but must have
+    # an even number of children.  Here are the valid children a
+    # Psych::Nodes::Mapping node may have:
+    #
+    # * Psych::Nodes::Sequence
+    # * Psych::Nodes::Mapping
+    # * Psych::Nodes::Scalar
+    # * Psych::Nodes::Alias
+    class Mapping < Psych::Nodes::Node
+      # Any Map Style
+      ANY: ::Integer
+
+      # Block Map Style
+      BLOCK: ::Integer
+
+      # Flow Map Style
+      FLOW: ::Integer
+
+      # The optional anchor for this mapping
+      attr_accessor anchor: untyped
+
+      # The optional tag for this mapping
+      attr_accessor tag: untyped
+
+      # Is this an implicit mapping?
+      attr_accessor implicit: untyped
+
+      # The style of this mapping
+      attr_accessor style: untyped
+
+      # #
+      # Create a new Psych::Nodes::Mapping object.
+      #
+      # +anchor+ is the anchor associated with the map or +nil+.
+      # +tag+ is the tag associated with the map or +nil+.
+      # +implicit+ is a boolean indicating whether or not the map was implicitly
+      # started.
+      # +style+ is an integer indicating the mapping style.
+      #
+      # == See Also
+      # See also Psych::Handler#start_mapping
+      def initialize: (?untyped? anchor, ?untyped? tag, ?bool implicit, ?untyped style) -> void
+
+      def mapping?: () -> ::TrueClass
+    end
+  end
+end
+
+module Psych
+  module Nodes
+    # #
+    # The base class for any Node in a YAML parse tree.  This class should
+    # never be instantiated.
+    class Node
+
+      # The children of this node
+      attr_reader children: untyped
+
+      # An associated tag
+      attr_reader tag: untyped
+
+      # The line number where this node start
+      attr_accessor start_line: untyped
+
+      # The column number where this node start
+      attr_accessor start_column: untyped
+
+      # The line number where this node ends
+      attr_accessor end_line: untyped
+
+      # The column number where this node ends
+      attr_accessor end_column: untyped
+
+      # Create a new Psych::Nodes::Node
+      def initialize: () -> void
+
+      # #
+      # Iterate over each node in the tree. Yields each node to +block+ depth
+      # first.
+      def each: () { () -> untyped } -> untyped
+
+      # #
+      # Convert this node to Ruby.
+      #
+      # See also Psych::Visitors::ToRuby
+      def to_ruby: (?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
+
+      alias transform to_ruby
+
+      # #
+      # Convert this node to YAML.
+      #
+      # See also Psych::Visitors::Emitter
+      def yaml: (?untyped? io, ?::Hash[untyped, untyped] options) -> untyped
+
+      alias to_yaml yaml
+
+      def alias?: () -> ::FalseClass
+
+      def document?: () -> ::FalseClass
+
+      def mapping?: () -> ::FalseClass
+
+      def scalar?: () -> ::FalseClass
+
+      def sequence?: () -> ::FalseClass
+
+      def stream?: () -> ::FalseClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Nodes
+    # #
+    # This class represents a {YAML Scalar}[http://yaml.org/spec/1.1/#id858081].
+    #
+    # This node type is a terminal node and should not have any children.
+    class Scalar < Psych::Nodes::Node
+      # Any style scalar, the emitter chooses
+      ANY: ::Integer
+
+      # Plain scalar style
+      PLAIN: ::Integer
+
+      # Single quoted style
+      SINGLE_QUOTED: ::Integer
+
+      # Double quoted style
+      DOUBLE_QUOTED: ::Integer
+
+      # Literal style
+      LITERAL: ::Integer
+
+      # Folded style
+      FOLDED: ::Integer
+
+      # The scalar value
+      attr_accessor value: untyped
+
+      # The anchor value (if there is one)
+      attr_accessor anchor: untyped
+
+      # The tag value (if there is one)
+      attr_accessor tag: untyped
+
+      # Is this a plain scalar?
+      attr_accessor plain: untyped
+
+      # Is this scalar quoted?
+      attr_accessor quoted: untyped
+
+      # The style of this scalar
+      attr_accessor style: untyped
+
+      # #
+      # Create a new Psych::Nodes::Scalar object.
+      #
+      # +value+ is the string value of the scalar
+      # +anchor+ is an associated anchor or nil
+      # +tag+ is an associated tag or nil
+      # +plain+ is a boolean value
+      # +quoted+ is a boolean value
+      # +style+ is an integer indicating the string style
+      #
+      # == See Also
+      #
+      # See also Psych::Handler#scalar
+      def initialize: (untyped value, ?untyped? anchor, ?untyped? tag, ?bool plain, ?bool quoted, ?untyped style) -> void
+
+      def scalar?: () -> ::TrueClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Nodes
+    # #
+    # This class represents a
+    # {YAML sequence}[http://yaml.org/spec/1.1/#sequence/syntax].
+    #
+    # A YAML sequence is basically a list, and looks like this:
+    #
+    #   %YAML 1.1
+    #   ---
+    #   - I am
+    #   - a Sequence
+    #
+    # A YAML sequence may have an anchor like this:
+    #
+    #   %YAML 1.1
+    #   ---
+    #   &A [
+    #     "This sequence",
+    #     "has an anchor"
+    #   ]
+    #
+    # A YAML sequence may also have a tag like this:
+    #
+    #   %YAML 1.1
+    #   ---
+    #   !!seq [
+    #     "This sequence",
+    #     "has a tag"
+    #   ]
+    #
+    # This class represents a sequence in a YAML document.  A
+    # Psych::Nodes::Sequence node may have 0 or more children.  Valid children
+    # for this node are:
+    #
+    # * Psych::Nodes::Sequence
+    # * Psych::Nodes::Mapping
+    # * Psych::Nodes::Scalar
+    # * Psych::Nodes::Alias
+    class Sequence < Psych::Nodes::Node
+      # Any Styles, emitter chooses
+      ANY: ::Integer
+
+      # Block style sequence
+      BLOCK: ::Integer
+
+      # Flow style sequence
+      FLOW: ::Integer
+
+      # The anchor for this sequence (if any)
+      attr_accessor anchor: untyped
+
+      # The tag name for this sequence (if any)
+      attr_accessor tag: untyped
+
+      # Is this sequence started implicitly?
+      attr_accessor implicit: untyped
+
+      # The sequence style used
+      attr_accessor style: untyped
+
+      # #
+      # Create a new object representing a YAML sequence.
+      #
+      # +anchor+ is the anchor associated with the sequence or nil.
+      # +tag+ is the tag associated with the sequence or nil.
+      # +implicit+ a boolean indicating whether or not the sequence was
+      # implicitly started.
+      # +style+ is an integer indicating the list style.
+      #
+      # See Psych::Handler#start_sequence
+      def initialize: (?untyped? anchor, ?untyped? tag, ?bool implicit, ?untyped style) -> void
+
+      def sequence?: () -> ::TrueClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Nodes
+    # #
+    # Represents a YAML stream.  This is the root node for any YAML parse
+    # tree.  This node must have one or more child nodes.  The only valid
+    # child node for a Psych::Nodes::Stream node is Psych::Nodes::Document.
+    class Stream < Psych::Nodes::Node
+      # Any encoding
+      ANY: untyped
+
+      # UTF-8 encoding
+      UTF8: untyped
+
+      # UTF-16LE encoding
+      UTF16LE: untyped
+
+      # UTF-16BE encoding
+      UTF16BE: untyped
+
+      # The encoding used for this stream
+      attr_accessor encoding: untyped
+
+      # #
+      # Create a new Psych::Nodes::Stream node with an +encoding+ that
+      # defaults to Psych::Nodes::Stream::UTF8.
+      #
+      # See also Psych::Handler#start_stream
+      def initialize: (?untyped encoding) -> void
+
+      def stream?: () -> ::TrueClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  class Omap < ::Hash[untyped, untyped]
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  class Parser
+    class Mark < Struct[Symbol]
+    end
+
+    # The handler on which events will be called
+    attr_accessor handler: untyped
+
+    # Set the encoding for this parser to +encoding+
+    attr_writer external_encoding: untyped
+
+    def initialize: (?untyped handler) -> void
+  end
+end
+
+module Psych
+  # #
+  # Scan scalars for built in types
+  class ScalarScanner
+    # Taken from http://yaml.org/type/timestamp.html
+    TIME: untyped
+
+    # Taken from http://yaml.org/type/float.html
+    # Base 60, [-+]inf and NaN are handled separately
+    FLOAT: untyped
+
+    # Taken from http://yaml.org/type/int.html
+    INTEGER: untyped
+
+    attr_reader class_loader: untyped
+
+    # Create a new scanner
+    def initialize: (untyped class_loader) -> void
+
+    # Tokenize +string+ returning the Ruby object
+    def tokenize: (untyped string) -> (nil | untyped)
+
+    # #
+    # Parse and return an int from +string+
+    def parse_int: (untyped string) -> untyped
+
+    # #
+    # Parse and return a Time from +string+
+    def parse_time: (untyped string) -> untyped
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  class Set < ::Hash[untyped, untyped]
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  # #
+  # Psych::Stream is a streaming YAML emitter.  It will not buffer your YAML,
+  # but send it straight to an IO.
+  #
+  # Here is an example use:
+  #
+  #   stream = Psych::Stream.new($stdout)
+  #   stream.start
+  #   stream.push({:foo => 'bar'})
+  #   stream.finish
+  #
+  # YAML will be immediately emitted to $stdout with no buffering.
+  #
+  # Psych::Stream#start will take a block and ensure that Psych::Stream#finish
+  # is called, so you can do this form:
+  #
+  #   stream = Psych::Stream.new($stdout)
+  #   stream.start do |em|
+  #     em.push(:foo => 'bar')
+  #   end
+  #
+  class Stream < Psych::Visitors::YAMLTree
+    class Emitter
+      # :nodoc:
+      def end_document: (?untyped implicit_end) -> untyped
+
+      def streaming?: () -> ::TrueClass
+    end
+
+    include Psych::Streaming
+
+    extend Psych::Streaming::ClassMethods
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Streaming
+    module ClassMethods
+      # #
+      # Create a new streaming emitter.  Emitter will print to +io+.  See
+      # Psych::Stream for an example.
+      def new: (untyped io) -> untyped
+    end
+
+    # #
+    # Start streaming using +encoding+
+    def start: (?untyped encoding) { (untyped) -> untyped } -> untyped
+
+    private
+
+    def register: (untyped target, untyped obj) -> nil
+  end
+end
+
+module Psych
+  class SyntaxError < Psych::Exception
+    attr_reader file: untyped
+
+    attr_reader line: untyped
+
+    attr_reader column: untyped
+
+    attr_reader offset: untyped
+
+    attr_reader problem: untyped
+
+    attr_reader context: untyped
+
+    def initialize: (untyped file, untyped line, untyped col, untyped offset, untyped problem, untyped context) -> void
+  end
+end
+
+module Psych
+  # #
+  # This class works in conjunction with Psych::Parser to build an in-memory
+  # parse tree that represents a YAML document.
+  #
+  # == Example
+  #
+  #   parser = Psych::Parser.new Psych::TreeBuilder.new
+  #   parser.parse('--- foo')
+  #   tree = parser.handler.root
+  #
+  # See Psych::Handler for documentation on the event methods used in this
+  # class.
+  class TreeBuilder < Psych::Handler
+    # Returns the root node for the built tree
+    attr_reader root: untyped
+
+    # Create a new TreeBuilder instance
+    def initialize: () -> void
+
+    def event_location: (untyped start_line, untyped start_column, untyped end_line, untyped end_column) -> untyped
+
+    # #
+    # Handles start_document events with +version+, +tag_directives+,
+    # and +implicit+ styling.
+    #
+    # See Psych::Handler#start_document
+    def start_document: (untyped version, untyped tag_directives, untyped implicit) -> untyped
+
+    # #
+    # Handles end_document events with +version+, +tag_directives+,
+    # and +implicit+ styling.
+    #
+    # See Psych::Handler#start_document
+    def end_document: (?untyped implicit_end) -> untyped
+
+    def start_stream: (untyped encoding) -> untyped
+
+    def end_stream: () -> untyped
+
+    def scalar: (untyped value, untyped anchor, untyped tag, untyped plain, untyped quoted, untyped style) -> untyped
+
+    def alias: (untyped anchor) -> untyped
+
+    private
+
+    def push: (untyped value) -> untyped
+
+    def pop: () -> untyped
+
+    def set_location: (untyped node) -> untyped
+
+    def set_start_location: (untyped node) -> untyped
+
+    def set_end_location: (untyped node) -> untyped
+  end
+end
+
+module Psych
+  # The version of Psych you are using
+  VERSION: ::String
+
+  DEFAULT_SNAKEYAML_VERSION: untyped
+end
+
+# frozen_string_literal: true
+module Psych
+  module Visitors
+    class DepthFirst < Psych::Visitors::Visitor
+      def initialize: (untyped block) -> void
+
+      private
+
+      def nary: (untyped o) -> untyped
+
+      alias visit_Psych_Nodes_Stream nary
+
+      alias visit_Psych_Nodes_Document nary
+
+      alias visit_Psych_Nodes_Sequence nary
+
+      alias visit_Psych_Nodes_Mapping nary
+
+      def terminal: (untyped o) -> untyped
+
+      alias visit_Psych_Nodes_Scalar terminal
+
+      alias visit_Psych_Nodes_Alias terminal
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Visitors
+    class Emitter < Psych::Visitors::Visitor
+      def initialize: (untyped io, ?::Hash[untyped, untyped] options) -> void
+
+      def visit_Psych_Nodes_Stream: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Document: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Scalar: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Sequence: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Mapping: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Alias: (untyped o) -> untyped
+    end
+  end
+end
+
+module Psych
+  module Visitors
+    class JSONTree < YAMLTree
+      include Psych::JSON::RubyEvents
+
+      def self.create: (?::Hash[untyped, untyped] options) -> untyped
+
+      def accept: (untyped target) -> untyped
+    end
+  end
+end
+
+module Psych
+  module Visitors
+    # #
+    # This class walks a YAML AST, converting each node to Ruby
+    class ToRuby < Psych::Visitors::Visitor
+      def self.create: (?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> untyped
+
+      attr_reader class_loader: untyped
+
+      def initialize: (untyped ss, untyped class_loader, ?symbolize_names: bool symbolize_names, ?freeze: bool freeze) -> void
+
+      def accept: (untyped target) -> untyped
+
+      private
+
+      def deserialize: (untyped o) -> untyped
+
+      public
+
+      def visit_Psych_Nodes_Scalar: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Sequence: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Mapping: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Document: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Stream: (untyped o) -> untyped
+
+      def visit_Psych_Nodes_Alias: (untyped o) -> untyped
+
+      private
+
+      def register: (untyped node, untyped object) -> untyped
+
+      def register_empty: (untyped object) -> untyped
+
+      def revive_hash: (untyped hash, untyped o, ?bool tagged) -> untyped
+
+      def deduplicate: (untyped key) -> untyped
+
+      def merge_key: (untyped hash, untyped key, untyped val) -> nil
+
+      def revive: (untyped klass, untyped node) -> untyped
+
+      def init_with: (untyped o, untyped h, untyped node) -> untyped
+
+      # Convert +klassname+ to a Class
+      def resolve_class: (untyped klassname) -> untyped
+    end
+
+    class NoAliasRuby < ToRuby
+      def visit_Psych_Nodes_Alias: (untyped o) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Psych
+  module Visitors
+    class Visitor
+      def accept: (untyped target) -> untyped
+
+      private
+
+      # @api private
+      def self.dispatch_cache: () -> untyped
+
+      def dispatch: () -> untyped
+
+      DISPATCH: untyped
+
+      def visit: (untyped target) -> untyped
+    end
+  end
+end
+
+module Psych
+  module Visitors
+    # #
+    # YAMLTree builds a YAML ast given a Ruby object.  For example:
+    #
+    #   builder = Psych::Visitors::YAMLTree.new
+    #   builder << { :foo => 'bar' }
+    #   builder.tree # => #<Psych::Nodes::Stream .. }
+    #
+    class YAMLTree < Psych::Visitors::Visitor
+      class Registrar
+        # :nodoc:
+        def initialize: () -> void
+
+        def register: (untyped target, untyped node) -> (nil | untyped)
+
+        def key?: (untyped target) -> untyped
+
+        def id_for: (untyped target) -> untyped
+
+        def node_for: (untyped target) -> untyped
+      end
+
+      attr_reader started: untyped
+
+      attr_reader finished: untyped
+
+      alias finished? finished
+
+      alias started? started
+
+      def self.create: (?::Hash[untyped, untyped] options, ?untyped? emitter) -> untyped
+
+      def initialize: (untyped emitter, untyped ss, untyped options) -> void
+
+      def start: (?untyped encoding) -> untyped
+
+      def finish: () -> untyped
+
+      def tree: () -> untyped
+
+      def push: (untyped object) -> untyped
+
+      alias << push
+
+      def accept: (untyped target) -> untyped
+
+      def visit_Psych_Omap: (untyped o) -> untyped
+
+      def visit_Encoding: (untyped o) -> untyped
+
+      def visit_Object: (untyped o) -> untyped
+
+      alias visit_Delegator visit_Object
+
+      def visit_Struct: (untyped o) -> untyped
+
+      def visit_Exception: (untyped o) -> untyped
+
+      def visit_NameError: (untyped o) -> untyped
+
+      def visit_Regexp: (untyped o) -> untyped
+
+      def visit_DateTime: (untyped o) -> untyped
+
+      def visit_Time: (untyped o) -> untyped
+
+      def visit_Rational: (untyped o) -> untyped
+
+      def visit_Complex: (untyped o) -> untyped
+
+      def visit_Integer: (untyped o) -> untyped
+
+      alias visit_TrueClass visit_Integer
+
+      alias visit_FalseClass visit_Integer
+
+      alias visit_Date visit_Integer
+
+      def visit_Float: (untyped o) -> untyped
+
+      def visit_BigDecimal: (untyped o) -> untyped
+
+      def visit_String: (untyped o) -> untyped
+
+      def visit_Module: (untyped o) -> untyped
+
+      def visit_Class: (untyped o) -> untyped
+
+      def visit_Range: (untyped o) -> untyped
+
+      def visit_Hash: (untyped o) -> untyped
+
+      def visit_Psych_Set: (untyped o) -> untyped
+
+      def visit_Array: (untyped o) -> untyped
+
+      def visit_Enumerator: (untyped o) -> untyped
+
+      def visit_NilClass: (untyped o) -> untyped
+
+      def visit_Symbol: (untyped o) -> untyped
+
+      def visit_BasicObject: (untyped o) -> untyped
+
+      private
+
+      def binary?: (untyped string) -> untyped
+
+      def visit_array_subclass: (untyped o) -> untyped
+
+      def visit_hash_subclass: (untyped o) -> untyped
+
+      def dump_list: (untyped o) -> nil
+
+      def dump_exception: (untyped o, untyped msg) -> untyped
+
+      def format_time: (untyped time) -> untyped
+
+      def register: (untyped target, untyped yaml_obj) -> untyped
+
+      def dump_coder: (untyped o) -> untyped
+
+      def emit_coder: (untyped c, untyped o) -> untyped
+
+      def dump_ivars: (untyped target) -> untyped
+    end
+
+    class RestrictedYAMLTree < YAMLTree
+      DEFAULT_PERMITTED_CLASSES: untyped
+
+      def initialize: (untyped emitter, untyped ss, untyped options) -> void
+
+      def accept: (untyped target) -> untyped
+
+      def visit_Symbol: (untyped sym) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module Kernel
+  private
+
+  # #
+  # An alias for Psych.dump_stream meant to be used with IRB.
+  def y: (*untyped objects) -> untyped
+end
