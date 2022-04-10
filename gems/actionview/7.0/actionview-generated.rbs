@@ -8506,7 +8506,7 @@ module ActionView
       # This enables annotate translated text to be aware of the scope it was
       # resolved against.
       #
-      def translate: (untyped key, **untyped options) { (untyped, untyped) -> untyped } -> untyped
+      def translate: (untyped key, **untyped options) ?{ (untyped, untyped) -> untyped } -> untyped
 
       alias t translate
 
@@ -8983,8 +8983,6 @@ module ActionView
       # We can also pass in the symbol arguments instead of strings.
       #
       def current_page?: (?untyped? options, ?check_parameters: bool check_parameters, **untyped options_as_kwargs) -> (::FalseClass | untyped)
-
-      def current_page?: (*untyped args) -> untyped
 
       # Creates an SMS anchor link tag to the specified +phone_number+. When the
       # link is clicked, the default SMS messaging app is opened ready to send a
@@ -9603,6 +9601,8 @@ module ActionView
 
     def exists?: (untyped path, untyped prefixes, untyped partial, untyped details, untyped details_key, untyped locals) -> untyped
 
+    def each: () { (untyped) -> void } -> untyped
+
     private
 
     def search_combinations: (untyped prefixes) { (untyped, untyped) -> untyped } -> untyped
@@ -9867,7 +9867,7 @@ module ActionView
 
       def initialize: (untyped collection) -> void
 
-      def each: () { () -> untyped } -> untyped
+      def each: () { (untyped) -> void } -> untyped
 
       def size: () -> untyped
 
@@ -10378,7 +10378,7 @@ end
 module ActionView
   class RenderParser
     module RipperASTParser
-      class Node < ::Array
+      class Node < ::Array[untyped]
         # :nodoc:
         # :nodoc:
         attr_reader type: untyped
