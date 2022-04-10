@@ -1,8 +1,6 @@
 module Mail
   RubyVer: untyped
 
-  RubyVer: untyped
-
   def self.register_autoload: (untyped name, untyped path) -> untyped
 
   # This runs through the autoload list and explictly requires them for you.
@@ -62,7 +60,7 @@ module Mail
   # each part gets initialized into a Mail::Part object.
   #
   # The boundary that is used to split up the Body is also stored in the Body
-  # object for use on encoding itself back out to a string.  You can 
+  # object for use on encoding itself back out to a string.  You can
   # overwrite this if it needs to be changed.
   #
   # On encoding, the body will return the preamble, then each part joined by
@@ -77,10 +75,10 @@ module Mail
     #
     #   body = Mail::Body.new('The body')
     #   body == body #=> true
-    #   
+    #
     #   body = Mail::Body.new('The body')
     #   body == 'The body' #=> true
-    #   
+    #
     #   body = Mail::Body.new("VGhlIGJvZHk=\n")
     #   body.encoding = 'base64'
     #   body == "The body" #=> true
@@ -92,7 +90,7 @@ module Mail
     #
     #   body = Mail::Body.new('The body')
     #   body =~ /The/ #=> 0
-    #   
+    #
     #   body = Mail::Body.new("VGhlIGJvZHk=\n")
     #   body.encoding = 'base64'
     #   body =~ /The/ #=> 0
@@ -104,7 +102,7 @@ module Mail
     #
     #   body = Mail::Body.new('The body')
     #   body.match(/The/) #=> #<MatchData "The">
-    #   
+    #
     #   body = Mail::Body.new("VGhlIGJvZHk=\n")
     #   body.encoding = 'base64'
     #   body.match(/The/) #=> #<MatchData "The">
@@ -1098,7 +1096,7 @@ end
 # encoding: utf-8
 # frozen_string_literal: true
 module Mail
-  # Field List class provides an enhanced array that keeps a list of 
+  # Field List class provides an enhanced array that keeps a list of
   # email fields in order.  And allows you to insert new fields without
   # having to worry about the order they will appear in.
   class FieldList < Array
@@ -1165,7 +1163,7 @@ end
 #
 # Sending comments to a mail message will instantiate a Mail::Field object that
 # has a CommentsField as its field type.
-#  
+#
 # An email header can have as many comments fields as it wants.  There is no upper
 # limit, the comments field is also optional (that is, no comment is needed)
 #
@@ -1179,7 +1177,7 @@ end
 #  mail['comments'] #=> '#<Mail::Field:0x180e5e8 @field=#<Mail::CommentsField:0x180e1c4
 #
 #  mail.comments = "This is another comment"
-#  mail[:comments].map { |c| c.to_s } 
+#  mail[:comments].map { |c| c.to_s }
 #  #=> ['This is a comment', "This is another comment"]
 #
 module Mail
@@ -1911,7 +1909,7 @@ module Mail
   #
   # ===Per RFC 2822:
   #  2.2.2. Structured Header Field Bodies
-  #  
+  #
   #     Some field bodies in this standard have specific syntactical
   #     structure more restrictive than the unstructured field bodies
   #     described above. These are referred to as "structured" field bodies.
@@ -2057,7 +2055,7 @@ module Mail
     include Enumerable
 
     # Large amount of headers in Email might create extra high CPU load
-    # Use this parameter to limit number of headers that will be parsed by 
+    # Use this parameter to limit number of headers that will be parsed by
     # mail library.
     # Default: 1000
     def self.maximum_amount: () -> untyped
@@ -2089,7 +2087,7 @@ module Mail
     def fields: () -> untyped
 
     #  3.6. Field definitions
-    #  
+    #
     #   It is important to note that the header fields are not guaranteed to
     #   be in a particular order.  They may appear in any order, and they
     #   have been known to be reordered occasionally when transported over
@@ -2112,7 +2110,7 @@ module Mail
     def errors: () -> untyped
 
     #  3.6. Field definitions
-    #  
+    #
     #   The following table indicates limits on the number of times each
     #   field may occur in a message header as well as any special
     #   limitations on the use of those fields.  An asterisk next to a value
@@ -2122,7 +2120,7 @@ module Mail
     #   <snip table from 3.6>
     #
     # As per RFC, many fields can appear more than once, we will return a string
-    # of the value if there is only one header, or if there is more than one 
+    # of the value if there is only one header, or if there is more than one
     # matching header, will return an array of values in order that they appear
     # in the header ordered from top to bottom.
     #
@@ -4657,7 +4655,7 @@ module Mail
   # verify mode constant (OpenSSL::SSL::VERIFY_NONE, OpenSSL::SSL::VERIFY_PEER),
   # or a string containing the name of an OpenSSL verify mode (none, peer).
   #
-  # === Others 
+  # === Others
   #
   # Feel free to send me other examples that were tricky
   #
@@ -4769,7 +4767,7 @@ module Mail
     def self.deliveries: () -> untyped
 
     # Allows you to over write the default deliveries store from an array to some
-    # other object.  If you just want to clear the store, 
+    # other object.  If you just want to clear the store,
     # call TestMailer.deliveries.clear.
     #
     # If you place another object here, please make sure it responds to:
@@ -4814,7 +4812,7 @@ module Mail
     #
     def all: (?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
 
-    # Find emails in the mailbox, and then deletes them. Without any options, the 
+    # Find emails in the mailbox, and then deletes them. Without any options, the
     # five last received emails are returned.
     #
     # Possible options:
@@ -4857,7 +4855,7 @@ module Mail
   #   order:   order of emails returned. Possible values are :asc or :desc. Default value is :asc.
   #   count:   number of emails to retrieve. The default value is 10. A value of 1 returns an
   #            instance of Message, not an array of Message instances.
-  #   keys:    are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string, 
+  #   keys:    are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string,
   #            or a single-dimension array of search keywords and arguments.  Refer to  [IMAP] section 6.4.4 for a full list
   #            The default is 'ALL'
   #
@@ -4883,7 +4881,7 @@ module Mail
     #              This is helpful when you don't want your messages to be set to read automatically. Default is false.
     #   delete_after_find: flag for whether to delete each retreived email after find. Default
     #           is false. Use #find_and_delete if you would like this to default to true.
-    #   keys:   are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string, 
+    #   keys:   are passed as criteria to the SEARCH command.  They can either be a string holding the entire search string,
     #           or a single-dimension array of search keywords and arguments.  Refer to  [IMAP] section 6.4.4 for a full list
     #           The default is 'ALL'
     #   search_charset: charset to pass to IMAP server search. Omitted by default. Example: 'UTF-8' or 'ASCII'.
@@ -4954,7 +4952,7 @@ module Mail
     #
     def find: (?::Hash[untyped, untyped] options) { (untyped) -> untyped } -> untyped
 
-    # Delete all emails from a POP3 server   
+    # Delete all emails from a POP3 server
     def delete_all: () -> untyped
 
     # Returns the connection object of the retrievable (IMAP or POP3)
@@ -5426,7 +5424,7 @@ module Mail
 end
 
 module Mail
-  class PartsList < 
+  class PartsList
     attr_reader parts: untyped
 
     def initialize: (*untyped args) -> void
