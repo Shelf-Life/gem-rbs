@@ -13,3 +13,14 @@ module Rails
     end
   end
 end
+
+module Rails
+  module Dom
+    module Testing
+      module Assertions
+        module DomAssertions
+        end
+      end
+    end
+  end
+end
