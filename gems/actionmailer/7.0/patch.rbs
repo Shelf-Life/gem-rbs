@@ -1,0 +1,15 @@
+module Base64
+end
+
+# Remove the fake rails-dom-testing type
+# if the real types are available.
+module Rails
+  module Dom
+    module Testing
+      module Assertions
+        module SelectorAssertions
+        end
+      end
+    end
+  end
+end
