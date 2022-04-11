@@ -1538,7 +1538,3 @@ module SimpleForm
     end
   end
 end
-
-class Object
-  include SimpleForm::ActionViewExtensions::FormHelper
-end
