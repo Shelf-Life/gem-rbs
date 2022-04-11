@@ -731,7 +731,7 @@ module ActionMailer
     #     format.html
     #   end
     #
-    def mail: (?::Hash[untyped, untyped] headers) { () -> untyped } -> untyped
+    def mail: (?::Hash[untyped, untyped] headers) ?{ () -> untyped } -> untyped
 
     private
 
