@@ -494,6 +494,8 @@ module ActionMailer
     # If a string or symbol is passed in it will be camelized and constantized.
     def self.unregister_interceptor: (untyped interceptor) -> untyped
 
+    def self.wrap_delivery_behavior: (untyped mail, ?untyped? method, ?untyped? options) -> untyped
+
     private
 
     def self.observer_class_for: (untyped value) -> untyped

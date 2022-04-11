@@ -3023,7 +3023,7 @@ module Mail
     #  mail.from 'Mikel <mikel@test.lindsaar.net>'
     #  mail.from << 'ada@test.lindsaar.net'
     #  mail.from #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
-    def from: (?untyped? val) -> untyped
+    def from: (?untyped? val) -> Array[String]
 
     # Sets the From value of the mail object, pass in a string of the field
     #
@@ -3448,7 +3448,7 @@ module Mail
     #  mail.to 'Mikel <mikel@test.lindsaar.net>'
     #  mail.to << 'ada@test.lindsaar.net'
     #  mail.to #=> ['mikel@test.lindsaar.net', 'ada@test.lindsaar.net']
-    def to: (?untyped? val) -> untyped
+    def to: (?untyped? val) -> Array[String]
 
     # Sets the To value of the mail object, pass in a string of the field
     #
