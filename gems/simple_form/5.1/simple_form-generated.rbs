@@ -1,0 +1,1544 @@
+# frozen_string_literal: true
+module SimpleForm
+  module Generators
+    class InstallGenerator < Rails::Generators::Base
+      def info_bootstrap: () -> (nil | untyped)
+
+      def copy_config: () -> untyped
+
+      def copy_scaffold_template: () -> untyped
+
+      def show_readme: () -> untyped
+    end
+  end
+end
+
+module SimpleForm
+  extend ActiveSupport::Autoload
+
+  def self.eager_load!: () -> untyped
+
+  CUSTOM_INPUT_DEPRECATION_WARN: ::String
+
+  FILE_METHODS_DEPRECATION_WARN: ::String
+
+  def self.configured?: () -> untyped
+
+  # Retrieves a given wrapper
+  def self.wrapper: (untyped name) -> untyped
+
+  # Raised when fails to find a given wrapper name
+  class WrapperNotFound < StandardError
+  end
+
+  # Define a new wrapper using SimpleForm::Wrappers::Builder
+  # and store it in the given name.
+  def self.wrappers: (*untyped args) { () -> untyped } -> untyped
+
+  # Builds a new wrapper using SimpleForm::Wrappers::Builder.
+  def self.build: (?::Hash[untyped, untyped] options) { (untyped) -> untyped } -> untyped
+
+  def self.additional_classes_for: (untyped component) { () -> untyped } -> untyped
+
+  def self.default_input_size=: () -> untyped
+
+  def self.form_class=: (untyped value) -> untyped
+
+  def self.file_methods=: (untyped file_methods) -> untyped
+
+  def self.file_methods: () -> untyped
+
+  # Default way to setup Simple Form. Run rails generate simple_form:install
+  # to create a fresh initializer with all configuration values.
+  def self.setup: () { (untyped) -> untyped } -> untyped
+
+  # Includes a component to be used by Simple Form. Methods defined in a
+  # component will be exposed to be used in the wrapper as Simple::Components
+  #
+  # Examples
+  #
+  #    # The application needs to tell where the components will be.
+  #    Dir[Rails.root.join('lib/components/**/*.rb')].each { |f| require f }
+  #
+  #    # Create a custom component in the path specified above.
+  #    # lib/components/input_group_component.rb
+  #    module InputGroupComponent
+  #      def prepend
+  #        ...
+  #      end
+  #
+  #      def append
+  #        ...
+  #      end
+  #    end
+  #
+  #    SimpleForm.setup do |config|
+  #      # Create a wrapper using the custom component.
+  #      config.wrappers :input_group, tag: :div, error_class: :error do |b|
+  #        b.use :label
+  #        b.optional :prepend
+  #        b.use :input
+  #        b.use :append
+  #      end
+  #    end
+  #
+  #    # Using the custom component in the form.
+  #    <%= simple_form_for @blog, wrapper: input_group do |f| %>
+  #      <%= f.input :title, prepend: true %>
+  #    <% end %>
+  #
+  def self.include_component: (untyped component) -> untyped
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module ActionViewExtensions
+    # A collection of methods required by simple_form but added to rails default form.
+    # This means that you can use such methods outside simple_form context.
+    module Builder
+      # Wrapper for using SimpleForm inside a default rails form.
+      # Example:
+      #
+      #   form_for @user do |f|
+      #     f.simple_fields_for :posts do |posts_form|
+      #       # Here you have all simple_form methods available
+      #       posts_form.input :title
+      #     end
+      #   end
+      def simple_fields_for: (*untyped args) { () -> untyped } -> untyped
+    end
+  end
+end
+
+module ActionView::Helpers
+  class FormBuilder
+    include SimpleForm::ActionViewExtensions::Builder
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module ActionViewExtensions
+    # This module creates SimpleForm wrappers around default form_for and fields_for.
+    #
+    # Example:
+    #
+    #   simple_form_for @user do |f|
+    #     f.input :name, hint: 'My hint'
+    #   end
+    #
+    module FormHelper
+      def simple_form_for: (untyped record, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+      def simple_fields_for: (untyped record_name, ?untyped? record_object, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+      private
+
+      def with_simple_form_field_error_proc: () { () -> untyped } -> untyped
+
+      def simple_form_css_class: (untyped record, untyped options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  # Components are a special type of helpers that can work on their own.
+  # For example, by using a component, it will automatically change the
+  # output under given circumstances without user input. For example,
+  # the disabled helper always need a disabled: true option given
+  # to the input in order to be enabled. On the other hand, things like
+  # hints can generate output automatically by doing I18n lookups.
+  module Components
+    extend ActiveSupport::Autoload
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    module Errors
+      def error: (?untyped? wrapper_options) -> untyped
+
+      def full_error: (?untyped? wrapper_options) -> untyped
+
+      def has_errors?: () -> untyped
+
+      def has_value?: () -> untyped
+
+      def valid?: () -> untyped
+
+      def error_text: () -> untyped
+
+      def full_error_text: () -> untyped
+
+      def object_with_errors?: () -> untyped
+
+      def error_method: () -> untyped
+
+      def errors: () -> untyped
+
+      def full_errors: () -> untyped
+
+      def errors_on_attribute: () -> untyped
+
+      def full_errors_on_attribute: () -> untyped
+
+      def errors_on_association: () -> untyped
+
+      def full_errors_on_association: () -> untyped
+
+      def has_custom_error?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    # Needs to be enabled in order to do automatic lookups.
+    module Hints
+      def hint: (?untyped? wrapper_options) -> untyped
+
+      def has_hint?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    module HTML5
+      def initialize: () -> void
+
+      def html5: (?untyped? wrapper_options) -> nil
+
+      def html5?: () -> untyped
+
+      def input_html_required_option: () -> untyped
+
+      def input_html_aria_required_option: () -> untyped
+
+      def has_required?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    module LabelInput
+      extend ActiveSupport::Concern
+
+      include SimpleForm::Components::Labels
+
+      def label_input: (?untyped? wrapper_options) -> untyped
+
+      private
+
+      def deprecated_component: (untyped namespace, untyped wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    module Labels
+      extend ActiveSupport::Concern
+
+      module ClassMethods
+        # nodoc:
+        def translate_required_html: () -> untyped
+
+        def translate_required_text: () -> untyped
+
+        def translate_required_mark: () -> untyped
+
+        private
+
+        def i18n_scope: () -> untyped
+      end
+
+      def label: (?untyped? wrapper_options) -> untyped
+
+      def label_text: (?untyped? wrapper_options) -> untyped
+
+      def label_target: () -> untyped
+
+      def label_html_options: () -> untyped
+
+      def raw_label_text: () -> untyped
+
+      def required_label_text: () -> untyped
+
+      def label_translation: () -> untyped
+
+      def generate_label_for_attribute?: () -> ::TrueClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    # Needs to be enabled in order to do automatic lookups.
+    module Maxlength
+      def maxlength: (?untyped? wrapper_options) -> nil
+
+      private
+
+      def maximum_length_from_validation: () -> untyped
+
+      def find_length_validator: () -> untyped
+
+      def maximum_length_value_from: (untyped length_validator) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    module MinMax
+      def min_max: (?untyped? wrapper_options) -> nil
+
+      private
+
+      def integer?: () -> untyped
+
+      def minimum_value: (untyped validator_options) -> untyped
+
+      def maximum_value: (untyped validator_options) -> untyped
+
+      def find_numericality_validator: () -> untyped
+
+      def evaluate_numericality_validator_option: (untyped option) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    # Needs to be enabled in order to do automatic lookups.
+    module Minlength
+      def minlength: (?untyped? wrapper_options) -> nil
+
+      private
+
+      def minimum_length_from_validation: () -> untyped
+
+      def find_length_validator: () -> untyped
+
+      def minimum_length_value_from: (untyped length_validator) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    # Needs to be enabled in order to do automatic lookups.
+    module Pattern
+      def pattern: (?untyped? wrapper_options) -> nil
+
+      private
+
+      def pattern_source: () -> untyped
+
+      def find_pattern_validator: () -> untyped
+
+      def evaluate_format_validator_option: (untyped option) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    # Needs to be enabled in order to do automatic lookups.
+    module Placeholders
+      def placeholder: (?untyped? wrapper_options) -> nil
+
+      def placeholder_text: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Components
+    # Needs to be enabled in order to do automatic lookups.
+    module Readonly
+      def readonly: (?untyped? wrapper_options) -> nil
+
+      private
+
+      def readonly_attribute?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  class ErrorNotification
+    def initialize: (untyped builder, untyped options) -> void
+
+    def render: () -> untyped
+
+    def errors: () -> untyped
+
+    def has_errors?: () -> untyped
+
+    def error_message: () -> untyped
+
+    def error_notification_tag: () -> untyped
+
+    def html_options: () -> untyped
+
+    def translate_error_notification: () -> untyped
+  end
+end
+
+module SimpleForm
+  class FormBuilder < ActionView::Helpers::FormBuilder
+    attr_reader template: untyped
+
+    attr_reader object_name: untyped
+
+    attr_reader object: untyped
+
+    attr_reader wrapper: untyped
+
+    # When action is create or update, we still should use new and edit
+    ACTIONS: ::Hash[untyped, untyped]
+
+    ATTRIBUTE_COMPONENTS: ::Array[untyped]
+
+    extend MapType
+
+    include SimpleForm::Inputs
+
+    def self.discovery_cache: () -> untyped
+
+    def initialize: () -> void
+
+    # Basic input helper, combines all components in the stack to generate
+    # input html based on options the user define and some guesses through
+    # database column information. By default a call to input will generate
+    # label + input + hint (when defined) + errors (when exists), and all can
+    # be configured inside a wrapper html.
+    #
+    # If a block is given, the contents of the block will replace the input
+    # field that would otherwise be generated automatically. The content will
+    # be given a label and wrapper div to make it consistent with the other
+    # elements in the form.
+    #
+    # == Examples
+    #
+    #   # Imagine @user has error "can't be blank" on name
+    #   simple_form_for @user do |f|
+    #     f.input :name, hint: 'My hint'
+    #   end
+    #
+    # This is the output html (only the input portion, not the form):
+    #
+    #     <label class="string required" for="user_name">
+    #       <abbr title="required">*</abbr> Super User Name!
+    #     </label>
+    #     <input class="string required" id="user_name" maxlength="100"
+    #        name="user[name]" type="text" value="Carlos" />
+    #     <span class="hint">My hint</span>
+    #     <span class="error">can't be blank</span>
+    #
+    # Each database type will render a default input, based on some mappings and
+    # heuristic to determine which is the best option.
+    #
+    # You have some options for the input to enable/disable some functions:
+    #
+    #   as: allows you to define the input type you want, for instance you
+    #          can use it to generate a text field for a date column.
+    #
+    #   required: defines whether this attribute is required or not. True
+    #               by default.
+    #
+    # The fact SimpleForm is built in components allow the interface to be unified.
+    # So, for instance, if you need to disable :hint for a given input, you can pass
+    # hint: false. The same works for :error, :label and :wrapper.
+    #
+    # Besides the html for any component can be changed. So, if you want to change
+    # the label html you just need to give a hash to :label_html. To configure the
+    # input html, supply :input_html instead and so on.
+    #
+    # == Options
+    #
+    # Some inputs, as datetime, time and select allow you to give extra options, like
+    # prompt and/or include blank. Such options are given in plainly:
+    #
+    #    f.input :created_at, include_blank: true
+    #
+    # == Collection
+    #
+    # When playing with collections (:radio_buttons, :check_boxes and :select
+    # inputs), you have three extra options:
+    #
+    #   collection: use to determine the collection to generate the radio or select
+    #
+    #   label_method: the method to apply on the array collection to get the label
+    #
+    #   value_method: the method to apply on the array collection to get the value
+    #
+    # == Priority
+    #
+    # Some inputs, as :time_zone and :country accepts a :priority option. If none is
+    # given SimpleForm.time_zone_priority and SimpleForm.country_priority are used respectively.
+    #
+    def input: (untyped attribute_name, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+    alias attribute input
+
+    # Creates a input tag for the given attribute. All the given options
+    # are sent as :input_html.
+    #
+    # == Examples
+    #
+    #   simple_form_for @user do |f|
+    #     f.input_field :name
+    #   end
+    #
+    # This is the output html (only the input portion, not the form):
+    #
+    #     <input class="string required" id="user_name" maxlength="100"
+    #        name="user[name]" type="text" value="Carlos" />
+    #
+    # It also support validation classes once it is configured.
+    #
+    #   # config/initializers/simple_form.rb
+    #   SimpleForm.setup do |config|
+    #     config.input_field_valid_class = 'is-valid'
+    #     config.input_field_error_class = 'is-invalid'
+    #   end
+    #
+    #   simple_form_for @user do |f|
+    #     f.input_field :name
+    #   end
+    #
+    # When the validation happens, the input will be rendered with
+    # the class configured according to the validation:
+    #
+    # - when the input is valid:
+    #
+    #     <input class="is-valid string required" id="user_name" value="Carlos" />
+    #
+    # - when the input is invalid:
+    #
+    #     <input class="is-invalid string required" id="user_name" value="" />
+    #
+    def input_field: (untyped attribute_name, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Helper for dealing with association selects/radios, generating the
+    # collection automatically. It's just a wrapper to input, so all options
+    # supported in input are also supported by association. Some extra options
+    # can also be given:
+    #
+    # == Examples
+    #
+    #   simple_form_for @user do |f|
+    #     f.association :company          # Company.all
+    #   end
+    #
+    #   f.association :company, collection: Company.all(order: 'name')
+    #   # Same as using :order option, but overriding collection
+    #
+    # == Block
+    #
+    # When a block is given, association simple behaves as a proxy to
+    # simple_fields_for:
+    #
+    #   f.association :company do |c|
+    #     c.input :name
+    #     c.input :type
+    #   end
+    #
+    # From the options above, only :collection can also be supplied.
+    #
+    # Please note that the association helper is currently only tested with Active Record. Depending on the ORM you are using your mileage may vary.
+    #
+    def association: (untyped association, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+    # Creates a button:
+    #
+    #   form_for @user do |f|
+    #     f.button :submit
+    #   end
+    #
+    # It just acts as a proxy to method name given. We also alias original Rails
+    # button implementation (3.2 forward (to delegate to the original when
+    # calling `f.button :button`.
+    #
+    alias button_button button
+
+    def button: (untyped `type`, *untyped args) { () -> untyped } -> untyped
+
+    # Creates an error tag based on the given attribute, only when the attribute
+    # contains errors. All the given options are sent as :error_html.
+    #
+    # == Examples
+    #
+    #    f.error :name
+    #    f.error :name, id: "cool_error"
+    #
+    def error: (untyped attribute_name, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Return the error but also considering its name. This is used
+    # when errors for a hidden field need to be shown.
+    #
+    # == Examples
+    #
+    #    f.full_error :token #=> <span class="error">Token is invalid</span>
+    #
+    def full_error: (untyped attribute_name, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Creates a hint tag for the given attribute. Accepts a symbol indicating
+    # an attribute for I18n lookup or a string. All the given options are sent
+    # as :hint_html.
+    #
+    # == Examples
+    #
+    #    f.hint :name # Do I18n lookup
+    #    f.hint :name, id: "cool_hint"
+    #    f.hint "Don't forget to accept this"
+    #
+    def hint: (untyped attribute_name, ?::Hash[untyped, untyped] options) -> untyped
+
+    # Creates a default label tag for the given attribute. You can give a label
+    # through the :label option or using i18n. All the given options are sent
+    # as :label_html.
+    #
+    # == Examples
+    #
+    #    f.label :name                     # Do I18n lookup
+    #    f.label :name, "Name"             # Same behavior as Rails, do not add required tag
+    #    f.label :name, label: "Name"      # Same as above, but adds required tag
+    #
+    #    f.label :name, required: false
+    #    f.label :name, id: "cool_label"
+    #
+    def label: (untyped attribute_name, *untyped args) -> untyped
+
+    # Creates an error notification message that only appears when the form object
+    # has some error. You can give a specific message with the :message option,
+    # otherwise it will look for a message using I18n. All other options given are
+    # passed straight as html options to the html tag.
+    #
+    # == Examples
+    #
+    #    f.error_notification
+    #    f.error_notification message: 'Something went wrong'
+    #    f.error_notification id: 'user_error_message', class: 'form_error'
+    #
+    def error_notification: (?::Hash[untyped, untyped] options) -> untyped
+
+    # Create a collection of radio inputs for the attribute. Basically this
+    # helper will create a radio input associated with a label for each
+    # text/value option in the collection, using value_method and text_method
+    # to convert these text/value. You can give a symbol or a proc to both
+    # value_method and text_method, that will be evaluated for each item in
+    # the collection.
+    #
+    # == Examples
+    #
+    #   form_for @user do |f|
+    #     f.collection_radio_buttons :options, [[true, 'Yes'] ,[false, 'No']], :first, :last
+    #   end
+    #
+    #   <input id="user_options_true" name="user[options]" type="radio" value="true" />
+    #   <label class="collection_radio_buttons" for="user_options_true">Yes</label>
+    #   <input id="user_options_false" name="user[options]" type="radio" value="false" />
+    #   <label class="collection_radio_buttons" for="user_options_false">No</label>
+    #
+    # It is also possible to give a block that should generate the radio +
+    # label. To wrap the radio with the label, for instance:
+    #
+    #   form_for @user do |f|
+    #     f.collection_radio_buttons(
+    #       :options, [[true, 'Yes'] ,[false, 'No']], :first, :last
+    #     ) do |b|
+    #       b.label { b.radio_button + b.text }
+    #     end
+    #   end
+    #
+    # == Options
+    #
+    # Collection radio accepts some extra options:
+    #
+    #   * checked  => the value that should be checked initially.
+    #
+    #   * disabled => the value or values that should be disabled. Accepts a single
+    #                 item or an array of items.
+    #
+    #   * collection_wrapper_tag   => the tag to wrap the entire collection.
+    #
+    #   * collection_wrapper_class => the CSS class to use for collection_wrapper_tag
+    #
+    #   * item_wrapper_tag         => the tag to wrap each item in the collection.
+    #
+    #   * item_wrapper_class       => the CSS class to use for item_wrapper_tag
+    #
+    #   * a block                  => to generate the label + radio or any other component.
+    def collection_radio_buttons: (untyped method, untyped collection, untyped value_method, untyped text_method, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) { () -> untyped } -> untyped
+
+    # Creates a collection of check boxes for each item in the collection,
+    # associated with a clickable label. Use value_method and text_method to
+    # convert items in the collection for use as text/value in check boxes.
+    # You can give a symbol or a proc to both value_method and text_method,
+    # that will be evaluated for each item in the collection.
+    #
+    # == Examples
+    #
+    #   form_for @user do |f|
+    #     f.collection_check_boxes :options, [[true, 'Yes'] ,[false, 'No']], :first, :last
+    #   end
+    #
+    #   <input name="user[options][]" type="hidden" value="" />
+    #   <input id="user_options_true" name="user[options][]" type="checkbox" value="true" />
+    #   <label class="collection_check_boxes" for="user_options_true">Yes</label>
+    #   <input name="user[options][]" type="hidden" value="" />
+    #   <input id="user_options_false" name="user[options][]" type="checkbox" value="false" />
+    #   <label class="collection_check_boxes" for="user_options_false">No</label>
+    #
+    # It is also possible to give a block that should generate the check box +
+    # label. To wrap the check box with the label, for instance:
+    #
+    #   form_for @user do |f|
+    #     f.collection_check_boxes(
+    #       :options, [[true, 'Yes'] ,[false, 'No']], :first, :last
+    #     ) do |b|
+    #       b.label { b.check_box + b.text }
+    #     end
+    #   end
+    #
+    # == Options
+    #
+    # Collection check box accepts some extra options:
+    #
+    #   * checked  => the value or values that should be checked initially. Accepts
+    #                 a single item or an array of items. It overrides existing associations.
+    #
+    #   * disabled => the value or values that should be disabled. Accepts a single
+    #                 item or an array of items.
+    #
+    #   * collection_wrapper_tag   => the tag to wrap the entire collection.
+    #
+    #   * collection_wrapper_class => the CSS class to use for collection_wrapper_tag. This option
+    #                                 is ignored if the :collection_wrapper_tag option is blank.
+    #
+    #   * item_wrapper_tag         => the tag to wrap each item in the collection.
+    #
+    #   * item_wrapper_class       => the CSS class to use for item_wrapper_tag
+    #
+    #   * a block                  => to generate the label + check box or any other component.
+    def collection_check_boxes: (untyped method, untyped collection, untyped value_method, untyped text_method, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] html_options) { () -> untyped } -> untyped
+
+    def lookup_model_names: () -> untyped
+
+    def lookup_action: () -> untyped
+
+    private
+
+    def fetch_association_collection: (untyped reflection, untyped options) -> untyped
+
+    def build_association_attribute: (untyped reflection, untyped association, untyped options) -> untyped
+
+    # Find an input based on the attribute name.
+    def find_input: (untyped attribute_name, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+    # Attempt to guess the better input type given the defined options. By
+    # default always fallback to the user :as option, or to a :select when a
+    # collection is given.
+    def default_input_type: (untyped attribute_name, untyped column, untyped options) -> (untyped | :select)
+
+    def find_custom_type: (untyped attribute_name) -> untyped
+
+    # Internal: Try to discover whether an attribute corresponds to a file or not.
+    #
+    # Most upload Gems add some kind of attributes to the ActiveRecord's model they are included in.
+    # This method tries to guess if an attribute belongs to some of these Gems by checking the presence
+    # of their methods using `#respond_to?`.
+    #
+    # Note: This does not support multiple file upload inputs, as this is very application-specific.
+    #
+    # The order here was chosen based on the popularity of Gems:
+    #
+    # - `#{attribute_name}_attachment` - ActiveStorage >= `5.2` and Refile >= `0.2.0` <= `0.4.0`
+    # - `remote_#{attribute_name}_url` - Refile >= `0.3.0` and CarrierWave >= `0.2.2`
+    # - `#{attribute_name}_attacher` - Refile >= `0.4.0` and Shrine >= `0.9.0`
+    # - `#{attribute_name}_file_name` - Paperclip ~> `2.0` (added for backwards compatibility)
+    #
+    # Returns a Boolean.
+    def file_method?: (untyped attribute_name) -> untyped
+
+    def find_attribute_column: (untyped attribute_name) -> untyped
+
+    def find_association_reflection: (untyped association) -> untyped
+
+    # Attempts to find a mapping. It follows the following rules:
+    #
+    # 1) It tries to find a registered mapping, if succeeds:
+    #    a) Try to find an alternative with the same name in the Object scope
+    #    b) Or use the found mapping
+    # 2) If not, fallbacks to #{input_type}Input
+    # 3) If not, fallbacks to SimpleForm::Inputs::#{input_type}Input
+    def find_mapping: (untyped input_type) -> untyped
+
+    # Attempts to find a wrapper mapping. It follows the following rules:
+    #
+    # 1) It tries to find a wrapper for the current form
+    # 2) If not, it tries to find a config
+    def find_wrapper_mapping: (untyped input_type) -> untyped
+
+    def find_wrapper: (untyped input_type, untyped options) -> untyped
+
+    # If cache_discovery is enabled, use the class level cache that persists
+    # between requests, otherwise use the instance one.
+    def discovery_cache: () -> untyped
+
+    def mapping_override: (untyped klass) -> untyped
+
+    def attempt_mapping: (untyped mapping, untyped at) -> (nil | untyped)
+
+    def attempt_mapping_with_custom_namespace: (untyped input_name) -> (untyped | nil)
+
+    def build_input_field_components: (untyped components) -> untyped
+
+    def build_input_field_options: () -> untyped
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  # Helpers are made of several helpers that cannot be turned on automatically.
+  # For instance, disabled cannot be turned on automatically, it requires the
+  # user to explicitly pass the option disabled: true so it may work.
+  module Helpers
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Helpers
+    module Autofocus
+      private
+
+      def has_autofocus?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Helpers
+    module Disabled
+      private
+
+      def has_disabled?: () -> untyped
+
+      def disabled_class: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Helpers
+    module Readonly
+      private
+
+      def readonly_class: () -> untyped
+
+      def has_readonly?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Helpers
+    module Required
+      private
+
+      def required_field?: () -> untyped
+
+      def calculate_required: () -> untyped
+
+      def required_by_validators?: () -> untyped
+
+      def required_by_default?: () -> untyped
+
+      # Do not use has_required? because we want to add the class
+      # regardless of the required option.
+      def required_class: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Helpers
+    module Validators
+      def has_validators?: () -> untyped
+
+      private
+
+      def attribute_validators: () -> untyped
+
+      def reflection_validators: () -> untyped
+
+      def valid_validator?: (untyped validator) -> untyped
+
+      def conditional_validators?: (untyped validator) -> untyped
+
+      def action_validator_match?: (untyped validator) -> (::TrueClass | untyped)
+
+      def find_validator: (untyped kind) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    extend ActiveSupport::Autoload
+  end
+end
+
+module SimpleForm
+  module Inputs
+    class Base
+      include ERB::Util
+
+      include ActionView::Helpers::TranslationHelper
+
+      include SimpleForm::Helpers::Autofocus
+
+      include SimpleForm::Helpers::Disabled
+
+      include SimpleForm::Helpers::Readonly
+
+      include SimpleForm::Helpers::Required
+
+      include SimpleForm::Helpers::Validators
+
+      include SimpleForm::Components::Errors
+
+      include SimpleForm::Components::Hints
+
+      include SimpleForm::Components::HTML5
+
+      include SimpleForm::Components::LabelInput
+
+      include SimpleForm::Components::Maxlength
+
+      include SimpleForm::Components::Minlength
+
+      include SimpleForm::Components::MinMax
+
+      include SimpleForm::Components::Pattern
+
+      include SimpleForm::Components::Placeholders
+
+      include SimpleForm::Components::Readonly
+
+      attr_reader attribute_name: untyped
+
+      attr_reader column: untyped
+
+      attr_reader input_type: untyped
+
+      attr_reader reflection: untyped
+
+      attr_reader options: untyped
+
+      attr_reader input_html_options: untyped
+
+      attr_reader input_html_classes: untyped
+
+      attr_reader html_classes: untyped
+
+      def self.enable: (*untyped keys) -> untyped
+
+      def self.disable: (*untyped keys) -> untyped
+
+      def initialize: (untyped builder, untyped attribute_name, untyped column, untyped input_type, ?::Hash[untyped, untyped] options) -> void
+
+      def input: (?untyped? wrapper_options) -> untyped
+
+      def input_options: () -> untyped
+
+      def additional_classes: () -> untyped
+
+      def input_class: () -> ::String
+
+      private
+
+      def limit: () -> untyped
+
+      def column_limit: () -> untyped
+
+      # Add one for decimal point
+      def decimal_limit: () -> untyped
+
+      def decimal_or_float?: () -> untyped
+
+      def nested_boolean_style?: () -> untyped
+
+      # Find reflection name when available, otherwise use attribute
+      def reflection_or_attribute_name: () -> untyped
+
+      # Retrieve options for the given namespace from the options hash
+      def html_options_for: (untyped namespace, untyped css_classes) -> untyped
+
+      # Lookup translations for the given namespace using I18n, based on object name,
+      # actual action and attribute name. Lookup priority as follows:
+      #
+      #   simple_form.{namespace}.{model}.{action}.{attribute}
+      #   simple_form.{namespace}.{model}.{attribute}
+      #   simple_form.{namespace}.defaults.{attribute}
+      #
+      #  Namespace is used for :labels and :hints.
+      #
+      #  Model is the actual object name, for a @user object you'll have :user.
+      #  Action is the action being rendered, usually :new or :edit.
+      #  And attribute is the attribute itself, :name for example.
+      #
+      #  The lookup for nested attributes is also done in a nested format using
+      #  both model and nested object names, such as follow:
+      #
+      #   simple_form.{namespace}.{model}.{nested}.{action}.{attribute}
+      #   simple_form.{namespace}.{model}.{nested}.{attribute}
+      #   simple_form.{namespace}.{nested}.{action}.{attribute}
+      #   simple_form.{namespace}.{nested}.{attribute}
+      #   simple_form.{namespace}.defaults.{attribute}
+      #
+      #  Example:
+      #
+      #    simple_form:
+      #      labels:
+      #        user:
+      #          new:
+      #            email: 'E-mail para efetuar o sign in.'
+      #          edit:
+      #            email: 'E-mail.'
+      #
+      #  Take a look at our locale example file.
+      def translate_from_namespace: (untyped namespace, ?::String default) -> untyped
+
+      def merge_wrapper_options: (untyped options, untyped wrapper_options) -> untyped
+
+      def set_input_classes: (untyped wrapper_options) -> untyped
+
+      def i18n_scope: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class BlockInput < Base
+      def initialize: (*untyped args) { () -> untyped } -> void
+
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class BooleanInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+
+      def label_input: (?untyped? wrapper_options) -> untyped
+
+      private
+
+      def boolean_label_class: () -> untyped
+
+      # Build a checkbox tag using default unchecked value. This allows us to
+      # reuse the method for nested boolean style, but with no unchecked value,
+      # which won't generate the hidden checkbox. This is the default functionality
+      # in Rails > 3.2.1, and is backported in SimpleForm AV helpers.
+      def build_check_box: (untyped unchecked_value, untyped options) -> untyped
+
+      # Build a checkbox without generating the hidden field. See
+      # #build_hidden_field_for_checkbox for more info.
+      def build_check_box_without_hidden_field: (untyped options) -> untyped
+
+      # Create a hidden field for the current checkbox, so we can simulate Rails
+      # functionality with hidden + checkbox, but under a nested context, where
+      # we need the hidden field to be *outside* the label (otherwise it
+      # generates invalid html - html5 only).
+      def build_hidden_field_for_checkbox: () -> (::String | untyped)
+
+      def inline_label?: () -> untyped
+
+      def inline_label: () -> untyped
+
+      # Booleans are not required by default because in most of the cases
+      # it makes no sense marking them as required. The only exception is
+      # Terms of Use usually presented at most sites sign up screen.
+      def required_by_default?: () -> ::FalseClass
+
+      def include_hidden?: () -> untyped
+
+      def checked_value: () -> untyped
+
+      def unchecked_value: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class CollectionCheckBoxesInput < CollectionRadioButtonsInput
+      # Checkbox components do not use the required html tag.
+      # More info: https://github.com/heartcombo/simple_form/issues/340#issuecomment-2871956
+      def has_required?: () -> ::FalseClass
+
+      def build_nested_boolean_style_item_tag: (untyped collection_builder) -> untyped
+
+      def item_wrapper_class: () -> "checkbox"
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class CollectionInput < Base
+      BASIC_OBJECT_CLASSES: ::Array[untyped]
+
+      # Default boolean collection for use with selects/radios when no
+      # collection is given. Always fallback to this boolean collection.
+      # Texts can be translated using i18n in "simple_form.yes" and
+      # "simple_form.no" keys. See the example locale file.
+      def self.boolean_collection: () -> ::Array[::Array[untyped | ::TrueClass] | ::Array[untyped | ::FalseClass]]
+
+      def input: (?untyped? wrapper_options) -> untyped
+
+      def input_options: () -> untyped
+
+      private
+
+      def collection: () -> untyped
+
+      def has_required?: () -> untyped
+
+      # Check if :include_blank must be included by default.
+      def skip_include_blank?: () -> untyped
+
+      def multiple?: () -> untyped
+
+      # Detect the right method to find the label and value for a collection.
+      # If no label or value method are defined, will attempt to find them based
+      # on default label and value methods that can be configured through
+      # SimpleForm.collection_label_methods and
+      # SimpleForm.collection_value_methods.
+      def detect_collection_methods: () -> ::Array[untyped]
+
+      def detect_common_display_methods: (?untyped collection_classes) -> untyped
+
+      def detect_method_from_class: (untyped collection_classes) -> { label: untyped, value: untyped }
+
+      def detect_collection_classes: (?untyped some_collection) -> untyped
+
+      def collection_includes_basic_objects?: (untyped collection_classes) -> untyped
+
+      def translate_collection: () -> untyped
+
+      def translate_option: (untyped options, untyped key) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class CollectionRadioButtonsInput < CollectionInput
+      def input: (?untyped? wrapper_options) -> untyped
+
+      def input_options: () -> untyped
+
+      def apply_default_collection_options!: (untyped options) -> untyped
+
+      def collection_block_for_nested_boolean_style: () -> (nil | untyped)
+
+      def build_nested_boolean_style_item_tag: (untyped collection_builder) -> untyped
+
+      def item_wrapper_class: () -> "radio"
+
+      # Do not attempt to generate label[for] attributes by default, unless an
+      # explicit html option is given. This avoids generating labels pointing to
+      # non existent fields.
+      def generate_label_for_attribute?: () -> ::FalseClass
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class CollectionSelectInput < CollectionInput
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class ColorInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class DateTimeInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+
+      private
+
+      def label_target: () -> untyped
+
+      def use_html5_inputs?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class FileInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class GroupedCollectionSelectInput < CollectionInput
+      def input: (?untyped? wrapper_options) -> untyped
+
+      private
+
+      def grouped_collection: () -> untyped
+
+      # Sample collection
+      def collection: () -> untyped
+
+      def group_method: () -> untyped
+
+      def group_label_method: () -> untyped
+
+      def detect_method_from_class: (untyped collection_classes) -> (::Hash[untyped, untyped] | { label: untyped, value: untyped })
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class HiddenInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+
+      private
+
+      def required_class: () -> nil
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class NumericInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class PasswordInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class PriorityInput < CollectionSelectInput
+      def input: (?untyped? wrapper_options) -> untyped
+
+      def input_priority: () -> untyped
+
+      def skip_include_blank?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class RangeInput < NumericInput
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class RichTextAreaInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class StringInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+
+      private
+
+      def string?: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Inputs
+    class TextInput < Base
+      def input: (?untyped? wrapper_options) -> untyped
+    end
+  end
+end
+
+module SimpleForm
+  module MapType
+    def self.extended: (untyped base) -> untyped
+
+    def map_type: (*untyped types) -> untyped
+  end
+end
+
+module SimpleForm
+  class Railtie < Rails::Railtie
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Tags
+    module CollectionExtensions
+      private
+
+      def render_collection: () { (untyped, untyped, untyped, untyped) -> untyped } -> untyped
+
+      def wrap_rendered_collection: (untyped collection) -> untyped
+    end
+
+    class CollectionRadioButtons < ActionView::Helpers::Tags::CollectionRadioButtons
+      include CollectionExtensions
+
+      def render: () -> untyped
+
+      private
+
+      def render_component: (untyped builder) -> untyped
+    end
+
+    class CollectionCheckBoxes < ActionView::Helpers::Tags::CollectionCheckBoxes
+      include CollectionExtensions
+
+      def render: () -> untyped
+
+      private
+
+      def render_component: (untyped builder) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  VERSION: untyped
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Wrappers
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Wrappers
+    # Provides the builder syntax for components. The builder provides
+    # three methods `use`, `optional` and `wrapper` and they allow the following invocations:
+    #
+    #     config.wrappers do |b|
+    #       # Use a single component
+    #       b.use :html5
+    #
+    #       # Use the component, but do not automatically lookup. It will only be triggered when
+    #       # :placeholder is explicitly set.
+    #       b.optional :placeholder
+    #
+    #       # Use a component with specific wrapper options
+    #       b.use :error, wrap_with: { tag: "span", class: "error" }
+    #
+    #       # Use a set of components by wrapping them in a tag+class.
+    #       b.wrapper tag: "div", class: "another" do |ba|
+    #         ba.use :label
+    #         ba.use :input
+    #       end
+    #
+    #       # Use a set of components by wrapping them in a tag+class.
+    #       # This wrapper is identified by :label_input, which means it can
+    #       # be turned off on demand with `f.input :name, label_input: false`
+    #       b.wrapper :label_input, tag: "div", class: "another" do |ba|
+    #         ba.use :label
+    #         ba.use :input
+    #       end
+    #     end
+    #
+    # The builder also accepts default options at the root level. This is usually
+    # used if you want a component to be disabled by default:
+    #
+    #     config.wrappers hint: false do |b|
+    #       b.use :hint
+    #       b.use :label_input
+    #     end
+    #
+    # In the example above, hint defaults to false, which means it won't automatically
+    # do the lookup anymore. It will only be triggered when :hint is explicitly set.
+    class Builder
+      def initialize: (untyped options) -> void
+
+      def use: (untyped name, ?::Hash[untyped, untyped] options) -> untyped
+
+      def optional: (untyped name, ?::Hash[untyped, untyped] options) { () -> untyped } -> untyped
+
+      def wrapper: (untyped name, ?untyped? options) { (untyped) -> untyped } -> untyped
+
+      def to_a: () -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Wrappers
+    class Leaf
+      attr_reader namespace: untyped
+
+      def initialize: (untyped namespace, ?::Hash[untyped, untyped] options) -> void
+
+      def render: (untyped input) -> untyped
+
+      def find: (untyped name) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Wrappers
+    # A wrapper is an object that holds several components and render them.
+    # A component may be any object that responds to `render`.
+    # This API allows inputs/components to be easily wrapped, removing the
+    # need to modify the code only to wrap input in an extra tag.
+    #
+    # `Many` represents a wrapper around several components at the same time.
+    # It may optionally receive a namespace, allowing it to be configured
+    # on demand on input generation.
+    class Many
+      attr_reader namespace: untyped
+
+      attr_reader defaults: untyped
+
+      attr_reader components: untyped
+
+      def initialize: (untyped namespace, untyped components, ?::Hash[untyped, untyped] defaults) -> void
+
+      def render: (untyped input) -> untyped
+
+      def find: (untyped name) -> (untyped | nil)
+
+      private
+
+      def wrap: (untyped input, untyped options, untyped content) -> (untyped | nil)
+
+      def html_options: (untyped options) -> untyped
+
+      def html_classes: (untyped input, untyped options) -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Wrappers
+    # `Root` is the root wrapper for all components. It is special cased to
+    # always have a namespace and to add special html classes.
+    class Root < Many
+      attr_reader options: untyped
+
+      def initialize: (*untyped args) -> void
+
+      def render: (untyped input) -> untyped
+
+      # Provide a fallback if name cannot be found.
+      def find: (untyped name) -> untyped
+
+      private
+
+      def html_classes: (untyped input, untyped options) -> untyped
+
+      def html_class: (untyped key, untyped options) { () -> untyped } -> untyped
+    end
+  end
+end
+
+# frozen_string_literal: true
+module SimpleForm
+  module Wrappers
+    # `Single` is an optimization for a wrapper that has only one component.
+    class Single < Many
+      def initialize: (untyped name, ?::Hash[untyped, untyped] wrapper_options, ?::Hash[untyped, untyped] options) -> void
+
+      def render: (untyped input) -> untyped
+
+      private
+
+      def html_options: (untyped options) -> untyped
+    end
+  end
+end
+
+class Object
+  include SimpleForm::ActionViewExtensions::FormHelper
+end
