@@ -1,0 +1,674 @@
+module Noticed
+  module Generators
+    class DeliveryMethodGenerator < Rails::Generators::NamedBase
+      include Rails::Generators::ResourceHelpers
+
+      def generate_notification: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module Generators
+    class ModelGenerator < Rails::Generators::NamedBase
+      include Rails::Generators::ResourceHelpers
+
+      def generate_notification: () -> untyped
+
+      def add_noticed_model: () -> untyped
+
+      def add_not_nullable: () -> untyped
+
+      def done: () -> untyped
+
+      private
+
+      def model_path: () -> untyped
+
+      def params_column: () -> untyped
+
+      def current_adapter: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module Generators
+    class NotificationGenerator < Rails::Generators::NamedBase
+      include Rails::Generators::ResourceHelpers
+
+      def generate_notification: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+  end
+
+  def self.notify: (recipients: untyped recipients, notification: untyped notification) -> untyped
+
+  class ValidationError < StandardError
+  end
+
+  class ResponseUnsuccessful < StandardError
+    attr_reader response: untyped
+
+    def initialize: (untyped response) -> void
+  end
+end
+
+module Noticed
+  class Base
+    include Translation
+
+    extend ActiveModel::Callbacks
+
+    # Gives notifications access to the record and recipient during delivery
+    attr_accessor record: untyped
+
+    # Gives notifications access to the record and recipient during delivery
+    attr_accessor recipient: untyped
+
+    def self.deliver_by: (untyped name, ?::Hash[untyped, untyped] options) -> untyped
+
+    def self.inherited: (untyped base) -> untyped
+
+    def self.with: (untyped params) -> untyped
+
+    # Shortcut for delivering without params
+    def self.deliver: (untyped recipients) -> untyped
+
+    # Shortcut for delivering later without params
+    def self.deliver_later: (untyped recipients) -> untyped
+
+    def self.params: (*untyped names) -> untyped
+
+    alias self.param self.params
+
+    def initialize: (?::Hash[untyped, untyped] params) -> void
+
+    def deliver: (untyped recipients) -> untyped
+
+    def deliver_later: (untyped recipients) -> untyped
+
+    def params: () -> untyped
+
+    private
+
+    # Runs all delivery methods for a notification
+    def run_delivery: (untyped recipient, ?enqueue: bool enqueue) -> untyped
+
+    # Actually runs an individual delivery
+    def run_delivery_method: (untyped delivery_method, recipient: untyped recipient, enqueue: untyped enqueue, record: untyped record) -> untyped
+
+    def delivery_method_for: (untyped name, untyped options) -> untyped
+
+    def validate!: () -> untyped
+
+    # Validates that all params are present
+    def validate_params_present!: () -> untyped
+
+    def validate_options_of_delivery_methods!: () -> untyped
+  end
+end
+
+module Noticed
+  class Coder
+    def self.load: (untyped data) -> (nil | untyped)
+
+    def self.dump: (untyped data) -> (nil | untyped)
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class ActionCable < Base
+      def deliver: () -> untyped
+
+      private
+
+      def format: () -> untyped
+
+      def channel: () -> untyped
+
+      def stream: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Base < 
+      extend ActiveModel::Callbacks
+
+      attr_reader notification: untyped
+
+      attr_reader options: untyped
+
+      attr_reader params: untyped
+
+      attr_reader recipient: untyped
+
+      attr_reader record: untyped
+
+      def self.inherited: (untyped base) -> untyped
+
+      def self.options: (*untyped names) -> untyped
+
+      alias self.option self.options
+
+      def self.validate!: (untyped delivery_method_options) -> untyped
+
+      def assign_args: (untyped args) -> untyped
+
+      def perform: (untyped args) -> (nil | untyped)
+
+      def deliver: () -> untyped
+
+      private
+
+      # Helper method for making POST requests from delivery methods
+      #
+      # Usage:
+      #   post("http://example.com", basic_auth: {user:, pass:}, headers: {}, json: {}, form: {})
+      #
+      def post: (untyped url, ?::Hash[untyped, untyped] args) -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Database < Base
+      # Must return the database record
+      def deliver: () -> untyped
+
+      def self.validate!: (untyped options) -> untyped
+
+      private
+
+      def association_name: () -> untyped
+
+      def attributes: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Email < Base
+      def deliver: () -> untyped
+
+      private
+
+      # mailer: "UserMailer"
+      # mailer: UserMailer
+      # mailer: :my_method - `my_method` should return Class
+      def mailer: () -> untyped
+
+      # Method should be a symbol
+      #
+      # If notification responds to symbol, call that method and use return value
+      # If notification does not respond to symbol, use the symbol for the mailer method
+      # Otherwise, use the underscored notification class name as the mailer method
+      def method: () -> untyped
+
+      def format: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Fcm < Base
+      BASE_URI: ::String
+
+      def deliver: () -> untyped
+
+      def cleanup_invalid_token: (untyped device_token) -> (nil | untyped)
+
+      def credentials: () -> untyped
+
+      def load_json: (untyped path) -> untyped
+
+      def project_id: () -> untyped
+
+      def access_token: () -> untyped
+
+      def authorizer: () -> untyped
+
+      def format: (untyped device_token) -> untyped
+
+      def device_tokens: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Ios < Base
+      def deliver: () -> untyped
+
+      private
+
+      def format_notification: (untyped apn) -> untyped
+
+      def device_tokens: () -> untyped
+
+      def bad_token?: (untyped response) -> untyped
+
+      def cleanup_invalid_token: (untyped token) -> (nil | untyped)
+
+      def connection_pool: () -> untyped
+
+      def new_connection_pool: () -> untyped
+
+      def connection_pool_options: () -> { auth_method: :token, cert_path: untyped, key_id: untyped, team_id: untyped }
+
+      def bundle_identifier: () -> untyped
+
+      def cert_path: () -> untyped
+
+      def key_id: () -> untyped
+
+      def team_id: () -> untyped
+
+      def development?: () -> untyped
+
+      def valid_cert_path?: () -> untyped
+
+      def pool_options: () -> { size: untyped }
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class MicrosoftTeams < Base
+      def deliver: () -> untyped
+
+      private
+
+      def format: () -> untyped
+
+      def url: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Slack < Base
+      def deliver: () -> untyped
+
+      private
+
+      def format: () -> untyped
+
+      def url: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Test < Base
+      def self.clear!: () -> untyped
+
+      def deliver: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Twilio < Base
+      def deliver: () -> untyped
+
+      private
+
+      def format: () -> untyped
+
+      def url: () -> untyped
+
+      def account_sid: () -> untyped
+
+      def auth_token: () -> untyped
+
+      def phone_number: () -> untyped
+
+      def credentials: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  module DeliveryMethods
+    class Vonage < Base
+      def deliver: () -> untyped
+
+      private
+
+      def format: () -> untyped
+
+      def credentials: () -> untyped
+    end
+  end
+end
+
+module Noticed
+  class Engine < ::Rails::Engine
+    include Noticed::HasNotifications
+  end
+end
+
+module Noticed
+  module HasNotifications
+    extend ActiveSupport::Concern
+
+    def has_noticed_notifications: (?param_name: untyped param_name, **untyped options) -> untyped
+
+    def current_adapter: () -> untyped
+  end
+end
+
+module Noticed
+  module Model
+    DATABASE_ERROR_CLASS_NAMES: untyped
+
+    extend ActiveSupport::Concern
+
+    def mark_as_read!: () -> untyped
+
+    def mark_as_unread!: () -> untyped
+
+    def noticed_coder: () -> untyped
+
+    # Rehydrate the database notification into the Notification object for rendering
+    def to_notification: () -> untyped
+
+    def unread?: () -> untyped
+
+    def read?: () -> untyped
+  end
+end
+
+module Noticed
+  class NotificationChannel < ApplicationCable::Channel
+    def subscribed: () -> untyped
+
+    def unsubscribed: () -> untyped
+
+    def mark_as_read: (untyped data) -> untyped
+  end
+end
+
+module Noticed
+  class TextCoder
+    def self.load: (untyped data) -> (nil | untyped)
+
+    def self.dump: (untyped data) -> (nil | untyped)
+  end
+end
+
+module Noticed
+  module Translation
+    extend ActiveSupport::Concern
+
+    # Returns the +i18n_scope+ for the class. Overwrite if you want custom lookup.
+    def i18n_scope: () -> :notifications
+
+    def class_scope: () -> untyped
+
+    def translate: (untyped key, **untyped options) -> untyped
+
+    alias t translate
+
+    def scope_translation_key: (untyped key) -> untyped
+  end
+end
+
+module Noticed
+  VERSION: ::String
+end
+
+module ActionCable
+  module SubscriptionAdapter
+    # == Test adapter for Action Cable
+    #
+    # The test adapter should be used only in testing. Along with
+    # <tt>ActionCable::TestHelper</tt> it makes a great tool to test your Rails application.
+    #
+    # To use the test adapter set +adapter+ value to +test+ in your +config/cable.yml+ file.
+    #
+    # NOTE: Test adapter extends the <tt>ActionCable::SubscriptionsAdapter::Async</tt> adapter,
+    # so it could be used in system tests too.
+    class Test < Async
+      def broadcast: (untyped channel, untyped payload) -> untyped
+
+      def broadcasts: (untyped channel) -> untyped
+
+      def clear_messages: (untyped channel) -> untyped
+
+      def clear: () -> untyped
+
+      private
+
+      def channels_data: () -> untyped
+    end
+  end
+
+  # Update how broadcast_for determines the channel name so it's consistent with the Rails 6 way
+  module Channel
+    module Broadcasting
+      module ClassMethods
+        def broadcast_to: (untyped model, untyped message) -> untyped
+
+        def broadcasting_for: (untyped model) -> untyped
+
+        def serialize_broadcasting: (untyped object) -> untyped
+      end
+    end
+  end
+end
+
+module ActionCable
+  # Have ActionCable pick its Test SubscriptionAdapter when it's called for in cable.yml
+  module Server
+    class Configuration
+      def pubsub_adapter: () -> untyped
+    end
+  end
+
+  # Provides helper methods for testing Action Cable broadcasting
+  module TestHelper
+    def before_setup: () -> untyped
+
+    def after_teardown: () -> untyped
+
+    # Asserts that the number of broadcasted messages to the stream matches the given number.
+    #
+    #   def test_broadcasts
+    #     assert_broadcasts 'messages', 0
+    #     ActionCable.server.broadcast 'messages', { text: 'hello' }
+    #     assert_broadcasts 'messages', 1
+    #     ActionCable.server.broadcast 'messages', { text: 'world' }
+    #     assert_broadcasts 'messages', 2
+    #   end
+    #
+    # If a block is passed, that block should cause the specified number of
+    # messages to be broadcasted.
+    #
+    #   def test_broadcasts_again
+    #     assert_broadcasts('messages', 1) do
+    #       ActionCable.server.broadcast 'messages', { text: 'hello' }
+    #     end
+    #
+    #     assert_broadcasts('messages', 2) do
+    #       ActionCable.server.broadcast 'messages', { text: 'hi' }
+    #       ActionCable.server.broadcast 'messages', { text: 'how are you?' }
+    #     end
+    #   end
+    #
+    def assert_broadcasts: (untyped stream, untyped number) { () -> untyped } -> untyped
+
+    # Asserts that no messages have been sent to the stream.
+    #
+    #   def test_no_broadcasts
+    #     assert_no_broadcasts 'messages'
+    #     ActionCable.server.broadcast 'messages', { text: 'hi' }
+    #     assert_broadcasts 'messages', 1
+    #   end
+    #
+    # If a block is passed, that block should not cause any message to be sent.
+    #
+    #   def test_broadcasts_again
+    #     assert_no_broadcasts 'messages' do
+    #       # No job messages should be sent from this block
+    #     end
+    #   end
+    #
+    # Note: This assertion is simply a shortcut for:
+    #
+    #   assert_broadcasts 'messages', 0, &block
+    #
+    def assert_no_broadcasts: (untyped stream) { () -> untyped } -> untyped
+
+    # Asserts that the specified message has been sent to the stream.
+    #
+    #   def test_assert_transmitted_message
+    #     ActionCable.server.broadcast 'messages', text: 'hello'
+    #     assert_broadcast_on('messages', text: 'hello')
+    #   end
+    #
+    # If a block is passed, that block should cause a message with the specified data to be sent.
+    #
+    #   def test_assert_broadcast_on_again
+    #     assert_broadcast_on('messages', text: 'hello') do
+    #       ActionCable.server.broadcast 'messages', text: 'hello'
+    #     end
+    #   end
+    #
+    def assert_broadcast_on: (untyped stream, untyped data) { () -> untyped } -> untyped
+
+    def pubsub_adapter: () -> untyped
+
+    private
+
+    def broadcasts_size: (untyped channel) -> untyped
+  end
+end
+
+# First add Rails 6.0 ActiveJob Serializers support, and then the
+# DurationSerializer and SymbolSerializer.
+module ActiveJob
+  module Arguments
+    # :nodoc:
+    OBJECT_SERIALIZER_KEY: ::String
+
+    def serialize_argument: (untyped argument) -> untyped
+
+    def deserialize_argument: (untyped argument) -> untyped
+
+    def custom_serialized?: (untyped hash) -> untyped
+  end
+
+  module Serializers
+    # The <tt>ActiveJob::Serializers</tt> module is used to store a list of known serializers
+    # and to add new ones. It also has helpers to serialize/deserialize objects.
+    # :nodoc:
+    # Base class for serializing and deserializing custom objects.
+    #
+    # Example:
+    #
+    #   class MoneySerializer < ActiveJob::Serializers::ObjectSerializer
+    #     def serialize(money)
+    #       super("amount" => money.amount, "currency" => money.currency)
+    #     end
+    #
+    #     def deserialize(hash)
+    #       Money.new(hash["amount"], hash["currency"])
+    #     end
+    #
+    #     private
+    #
+    #       def klass
+    #         Money
+    #       end
+    #   end
+    class ObjectSerializer
+      include Singleton
+
+      # Determines if an argument should be serialized by a serializer.
+      def serialize?: (untyped argument) -> untyped
+
+      # Serializes an argument to a JSON primitive type.
+      def serialize: (untyped hash) -> untyped
+
+      # Deserializes an argument from a JSON primitive type.
+      def deserialize: (untyped _argument) -> untyped
+
+      private
+
+      # The class of the object that will be serialized.
+      def klass: () -> untyped
+    end
+
+    class DurationSerializer < ObjectSerializer
+      # :nodoc:
+      def serialize: (untyped duration) -> untyped
+
+      def deserialize: (untyped hash) -> untyped
+
+      private
+
+      def klass: () -> untyped
+    end
+
+    class SymbolSerializer < ObjectSerializer
+      # :nodoc:
+      def serialize: (untyped argument) -> untyped
+
+      def deserialize: (untyped argument) -> untyped
+
+      private
+
+      def klass: () -> untyped
+    end
+
+    # Returns serialized representative of the passed object.
+    # Will look up through all known serializers.
+    # Raises <tt>ActiveJob::SerializationError</tt> if it can't find a proper serializer.
+    def self.serialize: (untyped argument) -> untyped
+
+    # Returns deserialized object.
+    # Will look up through all known serializers.
+    # If no serializer found will raise <tt>ArgumentError</tt>.
+    def self.deserialize: (untyped argument) -> untyped
+
+    # Returns list of known serializers.
+    def self.serializers: () -> untyped
+
+    # Adds new serializers to a list of known serializers.
+    def self.add_serializers: (*untyped new_serializers) -> untyped
+  end
+
+  module TestHelper
+    def perform_enqueued_jobs: (?only: untyped? only, ?except: untyped? except, ?queue: untyped? queue) -> untyped
+
+    private
+
+    def jobs_with: (untyped jobs, ?only: untyped? only, ?except: untyped? except, ?queue: untyped? queue) { (untyped) -> untyped } -> untyped
+
+    def enqueued_jobs_with: (?only: untyped? only, ?except: untyped? except, ?queue: untyped? queue) { () -> untyped } -> untyped
+
+    def flush_enqueued_jobs: (?only: untyped? only, ?except: untyped? except, ?queue: untyped? queue) -> untyped
+  end
+end
+
+# The following implements polyfills for Rails < 6.0
+module ActionCable
+  module SubscriptionAdapter
+  end
+end
