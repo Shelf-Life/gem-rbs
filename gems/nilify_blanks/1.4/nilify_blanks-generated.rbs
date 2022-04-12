@@ -1,0 +1,35 @@
+module NilifyBlanks
+  extend ActiveSupport::Concern
+
+  module ClassMethods
+    DEFAULT_TYPES: ::Array[untyped]
+
+    DEFAULT_CALLBACK: ::Symbol
+
+    # This overrides the underlying rails method that defines attribute methods.
+    # This must be thread safe, just like the underlying method.
+    #
+    def define_attribute_methods: () -> untyped
+
+    def nilify_blanks: (?::Hash[untyped, untyped] options) -> untyped
+
+    private
+
+    def define_nilify_blank_methods: () -> (nil | untyped)
+  end
+
+  def nilify_blanks: () -> untyped
+end
+
+module NilifyBlanks
+  class Railtie < Rails::Railtie
+  end
+
+  class Railtie
+    def self.insert: () -> untyped
+  end
+end
+
+module NilifyBlanks
+  VERSION: ::String
+end
