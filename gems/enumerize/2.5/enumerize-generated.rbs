@@ -46,7 +46,7 @@ module Enumerize
       def update_all: (untyped updates) -> untyped
     end
 
-    class Type < ActiveRecord::Type::Value
+    class Type
       def initialize: (untyped attr, untyped subtype) -> void
 
       def serialize: (untyped value) -> untyped
@@ -448,7 +448,6 @@ end
 
 module Enumerize
   class Set
-    include Enumerable
 
     include Predicatable
 
