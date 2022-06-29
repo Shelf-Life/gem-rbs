@@ -5538,9 +5538,9 @@ end
 #   include ActiveSupport::Tryable
 # end
 
-# class Delegator
-#   include ActiveSupport::Tryable
-# end
+class Delegator
+  # include ActiveSupport::Tryable
+end
 
 class NilClass
   # Calling +try+ on +nil+ always returns +nil+.
