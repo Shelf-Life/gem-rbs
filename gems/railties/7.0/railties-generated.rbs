@@ -723,7 +723,7 @@ end
 
 module Rails
   class Autoloaders
-    include Enumerable
+    include Enumerable[untyped]
 
     attr_reader main: untyped
 
@@ -2134,7 +2134,7 @@ end
 module Rails
   class Engine < Railtie
     class Railties
-      include Enumerable
+      include Enumerable[untyped]
 
       attr_reader _all: untyped
 
@@ -4361,7 +4361,7 @@ module Rails
     end
 
     class Path
-      include Enumerable
+      include Enumerable[untyped]
 
       attr_accessor glob: untyped
 
