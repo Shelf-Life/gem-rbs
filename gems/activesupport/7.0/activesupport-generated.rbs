@@ -1633,7 +1633,7 @@ module ActiveSupport
 
     class CallbackChain
       # :nodoc:
-      include Enumerable[untyped]
+      # include Enumerable[untyped]
 
       attr_reader name: untyped
 
@@ -2119,7 +2119,7 @@ module ActiveSupport
   module Configurable
     extend ActiveSupport::Concern
 
-    class Configuration < ActiveSupport::InheritableOptions
+    class Configuration[T, U] < ActiveSupport::InheritableOptions[T, U]
       def compile_methods!: () -> untyped
 
       # Compiles reader methods so we don't have to go through method_missing.
@@ -2403,7 +2403,7 @@ end
 class Array[unchecked out Elem]
   NOT_SET: untyped
 
-  def to_s: (?untyped format) -> untyped
+  # def to_s: (?untyped format) -> untyped
 end
 
 class Array[unchecked out Elem]
@@ -3808,13 +3808,13 @@ class Hash[unchecked out K, unchecked out V]
   #
   # This is useful for limiting a set of parameters to everything but a few known toggles:
   #   @person.update(params[:person].except(:admin))
-  def except: (*untyped keys) -> untyped
+  # def except: (*untyped keys) -> untyped
 
   # Removes the given keys from hash and returns it.
   #   hash = { a: true, b: false, c: nil }
   #   hash.except!(:c) # => { a: true, b: false }
   #   hash             # => { a: true, b: false }
-  def except!: (*untyped keys) -> untyped
+  # def except!: (*untyped keys) -> untyped
 end
 
 class Hash[unchecked out K, unchecked out V]
@@ -7714,7 +7714,7 @@ module ActiveSupport
 
       def <=>: (untyped other) -> untyped
 
-      def +: (untyped other) -> untyped
+      # def +: (untyped other) -> untyped
 
       def -: (untyped other) -> untyped
 
@@ -7803,7 +7803,7 @@ module ActiveSupport
 
     # Adds another Duration or a Numeric to this Duration. Numeric values
     # are treated as seconds.
-    def +: (untyped other) -> untyped
+    # def +: (untyped other) -> untyped
 
     # Subtracts another Duration or a Numeric from this Duration. Numeric
     # values are treated as seconds.
@@ -7821,7 +7821,7 @@ module ActiveSupport
 
     def -@: () -> untyped
 
-    def +@: () -> untyped
+    # def +@: () -> untyped
 
     def is_a?: (untyped klass) -> untyped
 
@@ -10864,7 +10864,7 @@ module ActiveSupport
 
       def now_cpu: () -> ::Float
 
-      def now_allocations: () -> untyped
+      # def now_allocations: () -> untyped
 
       # Likely on JRuby, TruffleRuby
       def now_allocations: () -> 0
@@ -11518,7 +11518,7 @@ module ActiveSupport
   #   h = ActiveSupport::InheritableOptions.new({ girl: 'Mary', boy: 'John' })
   #   h.girl # => 'Mary'
   #   h.boy  # => 'John'
-  class InheritableOptions < OrderedOptions
+  class InheritableOptions[T, U] < OrderedOptions[T, U]
     def initialize: (?untyped? parent) -> void
 
     def inheritable_copy: () -> untyped
@@ -13063,9 +13063,9 @@ module ActiveSupport
     #   now + 1.day         # => Mon, 03 Nov 2014 01:26:28.725182881 EST -05:00
     # def +: (untyped other) -> untyped
 
-    alias since +
+    # alias since +
 
-    alias in +
+    # alias in +
 
     # Subtracts an interval of time and returns a new TimeWithZone object unless
     # the other value +acts_like?+ time. Then it will return a Float of the difference
