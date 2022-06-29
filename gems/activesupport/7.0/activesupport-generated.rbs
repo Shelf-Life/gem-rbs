@@ -3571,12 +3571,12 @@ class Range[out Elem]
   # :nodoc:
   # Optimize range sum to use arithmetic progression if a block is not given and
   # we have a range of numeric values.
-  def sum: (?untyped? identity) -> untyped
+  # def sum: (?untyped? identity) -> untyped
 end
 
 class Array[unchecked out Elem]
   # :nodoc:
-  def sum: (?untyped? init) { () -> untyped } -> untyped
+  # def sum: (?untyped? init) { () -> untyped } -> untyped
 
   # Removes all blank elements from the +Array+ in place and returns self.
   # Uses Object#blank? for determining if an item is blank.
