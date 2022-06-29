@@ -832,7 +832,7 @@ module ActiveSupport
       prepend Strategy::LocalCache
 
       module DupLocalCache
-        class DupLocalStore < 
+        class DupLocalStore < Strategy::LocalCache::LocalStore
           def write_entry: (untyped _key, untyped entry) -> untyped
 
           def fetch_entry: (untyped key) { () -> untyped } -> untyped
