@@ -2652,7 +2652,7 @@ class Class
   #   class Baz < Bar; end
   #
   #   Foo.subclasses # => [Bar]
-  def subclasses: () -> untyped
+  # def subclasses: () -> untyped
 end
 
 class Date
@@ -7636,7 +7636,7 @@ module ActiveSupport
 
     def self.disable_clear!: () -> untyped
 
-    def self.subclasses: (untyped klass) -> untyped
+    # def self.subclasses: (untyped klass) -> untyped
 
     def self.descendants: (untyped klass) -> untyped
 
