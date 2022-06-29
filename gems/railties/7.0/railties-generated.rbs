@@ -4785,7 +4785,7 @@ module Rails
   # start with the tag optionally followed by a colon. Everything up to the end
   # of the line (or closing ERB comment tag) is considered to be their text.
   class SourceAnnotationExtractor
-    class Annotation <
+    class Annotation
       def self.directories: () -> untyped
 
       # Registers additional directories to be included
