@@ -8550,7 +8550,7 @@ module ActiveSupport
   #   require "active_support/core_ext/hash/indifferent_access"
   #
   # which will, in turn, require this file.
-  class HashWithIndifferentAccess < Hash
+  class HashWithIndifferentAccess[T, U] < Hash[T, U]
     # Returns +true+ so that <tt>Array#extract_options!</tt> finds members of
     # this class.
     def extractable_options?: () -> ::TrueClass
@@ -9746,8 +9746,6 @@ module ActiveSupport
       def teardown: () -> untyped
 
       class MockLogger
-        include ActiveSupport::Logger::Severity
-
         attr_reader flush_count: untyped
 
         attr_accessor level: untyped
@@ -12523,8 +12521,6 @@ module ActiveSupport
     class Parallelization
       # :nodoc:
       class Server
-        include DRb::DRbUndumped
-
         def initialize: () -> void
 
         def record: (untyped reporter, untyped result) -> untyped
@@ -13680,8 +13676,6 @@ module ActiveSupport
     # Class that will build the hash while the XML document
     # is being parsed using SAX events.
     class HashBuilder
-      include LibXML::XML::SaxParser::Callbacks
-
       CONTENT_KEY: ::String
 
       HASH_SIZE_KEY: ::String
@@ -13856,8 +13850,4 @@ class Object
   #   Benchmark.ms { User.all }
   #   # => 0.074
   def self.ms: () { () -> untyped } -> untyped
-
-  public
-
-  include Java
 end
