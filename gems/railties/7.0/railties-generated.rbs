@@ -896,7 +896,7 @@ module Rails
 
         def initialize: (untyped message, untyped key, untyped options) -> void
 
-        include DidYouMean::Correctable
+        # include DidYouMean::Correctable
 
         def corrections: () -> untyped
       end
@@ -4237,14 +4237,14 @@ module Rails
       def context_class: () -> untyped
     end
 
-    class Collection < Array
-      include TSort
+    class Collection[T] < Array[T]
+      include TSort[T]
 
       alias tsort_each_node each
 
-      def tsort_each_child: (untyped initializer) { () -> untyped } -> untyped
+      def tsort_each_child: (T initializer) { (T) -> void } -> void
 
-      def +: (untyped other) -> untyped
+      def +: (untyped other) -> Collection[untyped]
     end
 
     def run_initializers: (?::Symbol group, *untyped args) -> (nil | untyped)
