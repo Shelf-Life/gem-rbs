@@ -4803,7 +4803,7 @@ class Module
   def remove_possible_singleton_method: (untyped method) -> untyped
 end
 
-class NameError
+class NameError[T]
   # Extract the name of the missing constant from the exception message.
   #
   #   begin
