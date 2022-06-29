@@ -5371,7 +5371,7 @@ class Object
   def as_json: (?untyped? options) -> untyped
 end
 
-class Struct
+class Struct[T]
   # :nodoc:
   def as_json: (?untyped? options) -> untyped
 end
