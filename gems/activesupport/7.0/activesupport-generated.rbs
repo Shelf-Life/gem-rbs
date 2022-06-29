@@ -2831,6 +2831,8 @@ end
 class Date
   NOT_SET: untyped
 
+  def initialize: (?Integer year, ?Integer month, ?Integer mday, ?Integer start) -> void
+
   def to_s: (?untyped format) -> untyped
 end
 
