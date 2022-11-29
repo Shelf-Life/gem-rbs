@@ -1,3 +1,0 @@
-module Kaminari
-  VERSION: ::String
-end
